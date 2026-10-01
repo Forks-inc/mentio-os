@@ -1,0 +1,41 @@
+# Every push and pull request: typecheck, a production build, and a smoke
+# test that runs the app on demo data and opens its main pages.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Smoke test on demo data
+        env:
+          MENTIO_API_KEY: mk_demo
+          MENTIO_API_URL: http://localhost:4010
+        run: |
+          node scripts/demo-api.mjs 4010 &
+          npx next start -p 3000 &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:3000/login -w '' && break || sleep 1; done
+          status=0
+          for page in / /mentions /keywords /keywords/new /people /segments /views /alerts /channels /analytics /settings/company /settings/billing; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$page")
+            echo "$code $page"
+            [ "$code" = 200 ] || status=1
+          done
+          exit $status

@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+/* shadcn's variants (data-open, data-checked, ...), vendored from the shadcn package. */
+@import './shadcn.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * The shadcn theme (style base-nova, base color neutral), the same tokens the
+ * Mentio dashboard uses. `--brand-accent` comes from brand.config.ts through
+ * the root layout, so primary buttons, links, focus rings and charts follow
+ * your color. Components are added with `npx shadcn add <name>`.
+ */
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  /* The brand color and a pale tint of it, for selected chips and soft badges. */
+  --color-brand: var(--primary);
+  --color-brand-soft: var(--brand-soft);
+  /* Older name for the hairline border, kept so pages read naturally. */
+  --color-line: var(--border);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: var(--brand-accent, #1421b9);
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: var(--primary);
+  /* Corner softness for every component at once. */
+  --radius: 0.375rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-accent: oklch(0.93 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --brand-soft: color-mix(in oklab, var(--primary) 8%, white);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-ring: var(--primary);
+  /* Chart series, in rank order (the busiest first): the Mentio dashboard's palette. */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #8b5cf6;
+}
+
+/* Dark mode (the workspace menu's theme switch): the Mentio dashboard's dark tokens. */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: color-mix(in oklab, var(--brand-accent, #1421b9) 55%, white);
+  --primary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+}
+.dark {
+  --brand-soft: color-mix(in oklab, var(--primary) 14%, transparent);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 14px;
+  }
+}
+
+/* Numbers line up in every table and stat. */
+.tabular-nums,
+td {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Inside a drawer a page reads as one column of sections, the way the Mentio
+ * dashboard's drawers do: a card loses its frame and becomes a section with a
+ * hairline above it and a small uppercase title. Stat cards (size sm) keep theirs.
+ */
+[data-drawer] [data-slot='card']:not([data-size='sm']) {
+  @apply gap-3 rounded-none bg-transparent py-0 ring-0;
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+[data-drawer] [data-slot='card']:not([data-size='sm']) > [data-slot='card-header'],
+[data-drawer] [data-slot='card']:not([data-size='sm']) > [data-slot='card-content'],
+[data-drawer] [data-slot='card']:not([data-size='sm']) > [data-slot='card-footer'] {
+  @apply px-0;
+}
+[data-drawer] [data-slot='card']:not([data-size='sm']) > [data-slot='card-header'] [data-slot='card-title'] {
+  @apply text-xs font-medium tracking-wide text-muted-foreground uppercase;
+}
+[data-drawer] [data-slot='card']:not([data-size='sm']) > [data-slot='card-footer'] {
+  @apply border-t-0 bg-transparent pt-1 pb-0;
+}
+/* A form's Save row sticks to the drawer's foot, as a footer bar. */
+[data-drawer] [data-slot='form-actions'] {
+  @apply sticky bottom-0 z-10 -mx-6 -mb-10 justify-end border-t bg-popover px-6 py-3;
+}
+/* The drawer's close button sits top right: keep a page header's actions clear of it. */
+[data-drawer] header:first-child {
+  @apply pr-10;
+}
+/* A page opened in a drawer: its header becomes the drawer's sticky top bar (Dub's sheet header). */
+[data-drawer] > div > header:first-child {
+  @apply sticky top-0 z-10 -mx-6 -mt-6 mb-5 border-b bg-popover px-6 pt-4 pb-3;
+}
+[data-drawer] > div > header:first-child h1 {
+  @apply text-lg;
+}
+[data-drawer] > div > div:first-child > header:first-child {
+  @apply sticky top-0 z-10 -mx-6 -mt-6 mb-5 border-b bg-popover px-6 pt-4 pb-3;
+}
+/* The close button stays above the sticky header bar. */
+[data-drawer] > [data-slot='sheet-close'] {
+  @apply top-3.5 right-4 z-20;
+}
