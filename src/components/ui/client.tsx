@@ -101,7 +101,7 @@ export function SubmitButton({ children, variant = 'primary', size = 'md', name,
         setAsking(true);
       }}
     >
-      {pending ? 'Working…' : children}
+      {pending ? 'Guardando…' : children}
     </Button>
   );
   if (!confirm) return button;
@@ -111,11 +111,11 @@ export function SubmitButton({ children, variant = 'primary', size = 'md', name,
       <AlertDialog open={asking} onOpenChange={setAsking}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>¿Confirmas esta acción?</AlertDialogTitle>
             <AlertDialogDescription>{confirm}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <Button
               variant={variant === 'danger' ? 'destructive' : 'default'}
               onClick={() => {
@@ -178,7 +178,7 @@ export function LinkToggle({ current, items }: { current: string; items: Array<{
   );
 }
 
-export function CopyButton({ text, label = 'Copy' }: { text: string; label?: string }) {
+export function CopyButton({ text, label = 'Copiar' }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <Button
@@ -191,7 +191,7 @@ export function CopyButton({ text, label = 'Copy' }: { text: string; label?: str
         setTimeout(() => setCopied(false), 1500);
       }}
     >
-      {copied ? 'Copied' : label}
+      {copied ? 'Copiado' : label}
     </Button>
   );
 }
@@ -238,7 +238,7 @@ export function DrawerButton({ label, icon, title, description, children, varian
  * a line of description, the fields, and a footer with a short hint on the
  * left and Save on the right. The action's result replaces the hint.
  */
-export function FormCard({ action, title, description, hint, submit = 'Save', children, danger = false }: { action: Action; title: ReactNode; description?: ReactNode; hint?: ReactNode; submit?: ReactNode; children: ReactNode; danger?: boolean }) {
+export function FormCard({ action, title, description, hint, submit = 'Guardar', children, danger = false }: { action: Action; title: ReactNode; description?: ReactNode; hint?: ReactNode; submit?: ReactNode; children: ReactNode; danger?: boolean }) {
   const [state, formAction] = useActionState(action, null);
   const onSaved = useContext(DrawerSavedContext);
   useEffect(() => {
@@ -278,11 +278,11 @@ export function useDiscardGuard(close: () => void) {
     <AlertDialog open={asking} onOpenChange={setAsking}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Discard changes?</AlertDialogTitle>
-          <AlertDialogDescription>What you typed here is not saved yet.</AlertDialogDescription>
+          <AlertDialogTitle>¿Descartar los cambios?</AlertDialogTitle>
+          <AlertDialogDescription>Los cambios que escribiste aún no se han guardado.</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Continue editing</AlertDialogCancel>
+          <AlertDialogCancel>Seguir editando</AlertDialogCancel>
           <Button
             variant="destructive"
             onClick={() => {
@@ -291,7 +291,7 @@ export function useDiscardGuard(close: () => void) {
               close();
             }}
           >
-            Discard changes
+            Descartar cambios
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

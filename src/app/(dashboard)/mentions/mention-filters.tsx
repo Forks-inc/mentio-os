@@ -14,8 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { mentionFilterDefs } from './filter-defs';
 
 const SORTS: FilterOption[] = [
-  { value: 'newest', label: 'Newest first' },
-  { value: 'priority', label: 'Needs attention first' },
+  { value: 'newest', label: 'Más recientes primero' },
+  { value: 'priority', label: 'Prioridad de atención' },
 ];
 
 export function MentionFilters({
@@ -48,17 +48,17 @@ export function MentionFilters({
   return (
     <UrlFilters
         filters={mentionFilterDefs(keywords, groups, { window: true, person: params.has('personId'), alert: params.has('alertId') })}
-        search={{ placeholder: 'Search mention text' }}
+        search={{ placeholder: 'Buscar texto de la mención' }}
         sort={{ options: SORTS }}
         keep={['viewId']}
         leading={
-          <Select items={{ all: 'All mentions', ...Object.fromEntries(views.map((v) => [v.id, v.name])) }} value={viewId ?? 'all'} onValueChange={(value) => pickView(value ? String(value) : null)}>
+          <Select items={{ all: 'Todas las menciones', ...Object.fromEntries(views.map((v) => [v.id, v.name])) }} value={viewId ?? 'all'} onValueChange={(value) => pickView(value ? String(value) : null)}>
             <SelectTrigger className="w-full bg-background font-medium @2xl:w-auto @2xl:max-w-60">
               <Bookmark className="size-3.5 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false} align="start">
-              <SelectItem value="all">All mentions</SelectItem>
+              <SelectItem value="all">Todas las menciones</SelectItem>
               {views.map((v) => (
                 <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
               ))}
@@ -67,7 +67,7 @@ export function MentionFilters({
         }
         actions={
           filtered ? (
-            <DrawerButton size="sm" label="Save view" icon={<Bookmark />} title="Save as view" description="Saves the filters on this page under a name. Dates and order are not saved.">
+            <DrawerButton size="sm" label="Guardar vista" icon={<Bookmark />} title="Guardar como vista" description="Guarda estos filtros con un nombre. No guarda las fechas ni el orden.">
               {saveView}
             </DrawerButton>
           ) : null

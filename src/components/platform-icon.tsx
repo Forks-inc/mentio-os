@@ -1,5 +1,5 @@
 /**
- * The platform logos, as the Mentio dashboard draws them: official
+ * The platform logos used by the dashboard: official
  * simple-icons glyphs (CC0) on a 24x24 box, each in its brand color. News
  * and anything this build does not know get a generic glyph, so a mention
  * from a newer platform never breaks a page.

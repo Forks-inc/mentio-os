@@ -30,7 +30,7 @@ export async function updateGroupAction(_state: ActionState, form: FormData): Pr
     unwrap(await mentio().updateGroup({ path: { id }, body }));
     revalidatePath('/settings/groups');
     revalidatePath(`/settings/groups/${id}`);
-    return 'Saved';
+    return 'Guardado';
   });
 }
 

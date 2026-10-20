@@ -39,7 +39,7 @@ function matchingFrom(form: FormData): NonNullable<CreateBody['matching']> {
 function capFrom(form: FormData): { mentions: number } | null {
   const n = int(form, 'cap');
   if (n === null) return null;
-  if (n < 1) throw new Error('The monthly cap must be at least 1, or empty for none.');
+  if (n < 1) throw new Error('El límite mensual debe ser al menos 1; déjalo vacío para no fijar un límite.');
   return { mentions: n };
 }
 
@@ -52,7 +52,7 @@ function newSourceFrom(form: FormData): ReviewInput | null {
   const source: ReviewInput = {};
   if (url) source.url = url;
   else {
-    if (!isOneOf(REVIEW_PLATFORMS, platform)) throw new Error('Pick the review platform, or paste the page link.');
+    if (!isOneOf(REVIEW_PLATFORMS, platform)) throw new Error('Elige la plataforma de reseñas o pega el enlace de la página.');
     source.platform = platform;
     source.id = id;
   }
@@ -92,7 +92,7 @@ export async function createKeywordAction(_state: ActionState, form: FormData): 
     const kind = str(form, 'kind');
     const platforms = platformsFrom(form);
     const source = newSourceFrom(form);
-    if (platforms?.length === 0 && !source) throw new Error('A keyword searched on no platform needs a review page to collect.');
+    if (platforms?.length === 0 && !source) throw new Error('Para monitorear solo reseñas, agrega al menos una página de reseñas.');
     const cap = capFrom(form);
     const context = strOrNull(form, 'context');
     const groupId = str(form, 'groupId');
@@ -135,12 +135,12 @@ export async function updateKeywordAction(_state: ActionState, form: FormData): 
     if (JSON.stringify(next) !== JSON.stringify(current.reviewSources.map(asInput))) body.reviewSources = next;
 
     const reviews = body.reviewSources ?? current.reviewSources;
-    if (body.platforms?.length === 0 && reviews.length === 0) throw new Error('A keyword searched on no platform needs a review page to collect.');
+    if (body.platforms?.length === 0 && reviews.length === 0) throw new Error('Para monitorear solo reseñas, agrega al menos una página de reseñas.');
 
     unwrap(await mentio().updateKeyword({ path: { id }, body }));
     revalidatePath('/keywords');
     revalidatePath(`/keywords/${id}`);
-    return 'Saved';
+    return 'Guardado';
   });
 }
 
@@ -151,7 +151,7 @@ export async function setMutedAction(_state: ActionState, form: FormData): Promi
     unwrap(await mentio().updateKeyword({ path: { id }, body: { muted } }));
     revalidatePath('/keywords');
     revalidatePath(`/keywords/${id}`);
-    return muted ? 'Paused' : 'Resumed';
+    return muted ? 'Monitoreo en pausa' : 'Monitoreo reanudado';
   });
 }
 
@@ -162,6 +162,6 @@ export async function deleteKeywordAction(_state: ActionState, form: FormData): 
     if (result.error !== undefined) unwrap(result);
     revalidatePath('/keywords');
     if (bool(form, 'backToList')) redirect('/keywords');
-    return 'Deleted';
+    return 'Eliminado';
   });
 }

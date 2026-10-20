@@ -12,7 +12,7 @@ import { peopleFilterDefs } from './filter-defs';
 import { SORT_LABELS, SORTS, audienceFilter, describeFilter, peopleQuery, stageName } from './filters';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'People' };
+export const metadata = { title: 'Audiencia' };
 
 const LIMIT = 50;
 
@@ -38,30 +38,30 @@ export default async function People({ searchParams }: { searchParams: Promise<S
   return (
     <div className="space-y-4">
       <PageHeader
-        title="People"
-        description="Everyone who mentioned your keywords, one row per person across their accounts."
+        title="Audiencia"
+        description="Autores que mencionaron a tus candidatos o temas, con sus cuentas agrupadas para comparar el alcance y la conversación."
         actions={
           <>
             <a href={`/people/export${filterQuery ? `?${filterQuery}` : ''}`} className={buttonClass('secondary')} download>
-              <Download /> Export CSV
+              <Download /> Exportar CSV
             </a>
-            <LinkButton href="/segments">Segments</LinkButton>
+            <LinkButton href="/segments">Segmentos</LinkButton>
           </>
         }
       />
 
       <UrlFilters
-        search={{ placeholder: 'Name, handle or profile URL' }}
+        search={{ placeholder: 'Nombre, usuario o enlace al perfil' }}
         sort={{ options: SORTS.map((value) => ({ value, label: SORT_LABELS[value] })) }}
         filters={peopleFilterDefs(members.data, segments.data)}
         actions={
           conditions.length && !query.segmentId ? (
-            <DrawerButton label="Save as segment" icon={<UsersRound />} title="Save as segment" description="Keeps these filters under a name; the members are worked out again on every read. Search and the first-seen date are not saved.">
+            <DrawerButton label="Guardar como segmento" icon={<UsersRound />} title="Guardar como segmento" description="Guarda estos filtros con un nombre para consultar grupos de audiencia de campaña. La búsqueda y la fecha de primera actividad no se guardan.">
               <ActionForm action={saveAsSegment} className="grid gap-4">
                 <input type="hidden" name="query" value={filterQuery} />
-                <Field label="Name"><Input name="name" required maxLength={80} placeholder="Unhappy power users" /></Field>
-                <Field label="Description"><Input name="description" maxLength={500} /></Field>
-                <div data-slot="form-actions" className="flex justify-end"><SubmitButton>Save segment</SubmitButton></div>
+                <Field label="Nombre"><Input name="name" required maxLength={80} placeholder="Autores que mencionan la seguridad" /></Field>
+                <Field label="Descripción"><Input name="description" maxLength={500} /></Field>
+                <div data-slot="form-actions" className="flex justify-end"><SubmitButton>Guardar segmento</SubmitButton></div>
               </ActionForm>
             </DrawerButton>
           ) : null
@@ -74,16 +74,16 @@ export default async function People({ searchParams }: { searchParams: Promise<S
             Segment <span className="font-medium">{segment.name}</span>
             {segment.description ? <span className="text-muted-foreground">: {segment.description}</span> : null}
           </p>
-          <Link href={`/segments/${segment.id}`} className="text-primary hover:underline">Edit segment</Link>
+          <Link href={`/segments/${segment.id}`} className="text-primary hover:underline">Editar segmento</Link>
         </div>
       ) : null}
 
-      <p className="text-xs text-muted-foreground">{page.total} {page.total === 1 ? 'person' : 'people'}</p>
+      <p className="text-xs text-muted-foreground">{page.total} {page.total === 1 ? 'autor' : 'autores'}</p>
 
       {page.data.length === 0 ? (
-        <EmptyState icon={Users} title="Nobody matches these filters.">Loosen a filter, or wait for new mentions to come in.</EmptyState>
+        <EmptyState icon={Users} title="Ningún autor coincide con estos filtros.">Ajusta algún filtro o espera a que aparezcan nuevas menciones de campaña.</EmptyState>
       ) : (
-        <Table head={['Person', 'Followers', 'Mentions', 'Sentiment', 'Stage', 'Tags', 'Last seen']}>
+        <Table head={['Autor', 'Seguidores', 'Menciones', 'Sentimiento', 'Etapa', 'Etiquetas', 'Última actividad']}>
           {page.data.map((person) => (
             <TableRow key={person.id} className={person.annotations.muted ? 'text-muted-foreground' : ''}>
               <TableCell className={td}>
@@ -100,7 +100,7 @@ export default async function People({ searchParams }: { searchParams: Promise<S
               <TableCell className={`${td} tabular-nums`}>{person.reach.followers === null ? <span className="text-muted-foreground">?</span> : compact(person.reach.followers)}</TableCell>
               <TableCell className={`${td} tabular-nums whitespace-nowrap`}>
                 {person.stats.mentions}
-                <span className="ml-1 text-xs text-muted-foreground">{person.stats.relevant} relevant</span>
+                <span className="ml-1 text-xs text-muted-foreground">{person.stats.relevant} relevantes</span>
               </TableCell>
               <TableCell className={td}><SentimentBar sentiment={person.stats.sentiment} /></TableCell>
               <TableCell className={`${td} whitespace-nowrap`}>
@@ -109,7 +109,7 @@ export default async function People({ searchParams }: { searchParams: Promise<S
               </TableCell>
               <TableCell className={td}>
                 <div className="flex flex-wrap gap-1">
-                  {person.annotations.muted ? <Badge tone="warn">muted</Badge> : null}
+                  {person.annotations.muted ? <Badge tone="warn">silenciado</Badge> : null}
                   {person.annotations.tags.map((t, tIndex) => <Badge key={`${t}-${tIndex}`}>{t}</Badge>)}
                 </div>
               </TableCell>

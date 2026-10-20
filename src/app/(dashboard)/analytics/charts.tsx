@@ -11,18 +11,18 @@ export { ShareBar, Sparkline } from '@/components/charts';
 export function Delta({ current, previous, invert = false, short = false }: { current: number; previous: number | null | undefined; invert?: boolean; short?: boolean }) {
   const pct = change(current, previous);
   if (pct === null) return null;
-  if (pct === 0) return <span className="text-muted-foreground">No change</span>;
+  if (pct === 0) return <span className="text-muted-foreground">Sin cambios</span>;
   const up = pct > 0;
   const good = invert ? !up : up;
-  const text = pct === Infinity ? 'New' : `${up ? '+' : ''}${Math.round(pct)}%`;
+  const text = pct === Infinity ? 'Nuevo' : `${up ? '+' : ''}${Math.round(pct)}%`;
   return (
     <span className={good ? 'text-emerald-600' : 'text-red-600'}>
-      {text}{short ? null : <span className="text-muted-foreground"> vs previous</span>}
+      {text}{short ? null : <span className="text-muted-foreground"> frente al periodo anterior</span>}
     </span>
   );
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 const ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 /** by=hour as a weekday by hour grid; darker is busier. */
@@ -30,7 +30,7 @@ export function HourHeatmap({ rows }: { rows: AnalyticsBreakdown['data'] }) {
   const cells = new Map<string, number>();
   for (const row of rows) if (row.slot) cells.set(`${row.slot.weekday}-${row.slot.hour}`, row.matched);
   const max = Math.max(1, ...cells.values());
-  if (cells.size === 0) return <p className="text-sm text-muted-foreground">No data in this window.</p>;
+  if (cells.size === 0) return <p className="text-sm text-muted-foreground">Sin datos en este periodo.</p>;
   return (
     <div className="overflow-x-auto">
       <div className="inline-grid min-w-full gap-0.5 text-[10px] text-muted-foreground" style={{ gridTemplateColumns: 'auto repeat(24, minmax(12px, 1fr))' }}>
@@ -55,7 +55,7 @@ function HeatRow({ day, cells, max }: { day: number; cells: Map<string, number>;
         return (
           <Tooltip key={hour}>
             <TooltipTrigger render={<span className="h-4 rounded-sm bg-primary" style={{ opacity: n === 0 ? 0.06 : 0.15 + (n / max) * 0.85 }} />} />
-            <TooltipContent>{`${WEEKDAYS[day]} ${String(hour).padStart(2, '0')}:00, ${n} mentions`}</TooltipContent>
+            <TooltipContent>{`${WEEKDAYS[day]} ${String(hour).padStart(2, '0')}:00 · ${n} menciones`}</TooltipContent>
           </Tooltip>
         );
       })}

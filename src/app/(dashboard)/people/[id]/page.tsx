@@ -11,7 +11,7 @@ import { deleteActivity, logActivity, mergePeople, splitAccount, updatePerson } 
 import { ACTIVITY_CHANNELS, CHANNEL_NAMES } from './channels';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Person' };
+export const metadata = { title: 'Autor' };
 
 const excerpt = (text: string, max = 220) => (text.length > max ? `${text.slice(0, max).trimEnd()}…` : text);
 
@@ -34,7 +34,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
   return (
     <div className="space-y-6">
       <PageHeader
-        back={{ href: '/people', label: 'People' }}
+        back={{ href: '/people', label: 'Audiencia' }}
         title={
           <span className="flex items-center gap-3">
             <Avatar person={person} size="size-10" />
@@ -48,38 +48,38 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
         }
         actions={
           <>
-            {annotations.muted ? <Badge tone="warn">Muted</Badge> : null}
+            {annotations.muted ? <Badge tone="warn">Silenciado</Badge> : null}
             <Badge tone="accent">{stageName(outreach.stage)}</Badge>
-            {person.url ? <a href={person.url} target="_blank" rel="noreferrer" className={buttonClass('secondary')}>Profile ↗</a> : null}
+            {person.url ? <a href={person.url} target="_blank" rel="noreferrer" className={buttonClass('secondary')}>Ver perfil ↗</a> : null}
           </>
         }
       />
 
       <div className="grid gap-3 @lg:grid-cols-2 @4xl:grid-cols-5">
-        <Stat label="Followers" value={reach.followers === null ? '?' : compact(reach.followers)} hint={reach.posts !== null ? `${compact(reach.posts)} posts` : undefined} />
-        <Stat label="Mentions" value={stats.mentions} hint={`${stats.relevant} relevant`} />
-        <Stat label="First seen" value={<span className="text-base">{timeAgo(stats.firstSeenAt)}</span>} hint={date(stats.firstSeenAt)} />
-        <Stat label="Last seen" value={<span className="text-base">{timeAgo(stats.lastSeenAt)}</span>} hint={date(stats.lastSeenAt)} />
+        <Stat label="Seguidores" value={reach.followers === null ? '?' : compact(reach.followers)} hint={reach.posts !== null ? `${compact(reach.posts)} publicaciones` : undefined} />
+        <Stat label="Menciones" value={stats.mentions} hint={`${stats.relevant} relevantes`} />
+        <Stat label="Primera actividad" value={<span className="text-base">{timeAgo(stats.firstSeenAt)}</span>} hint={date(stats.firstSeenAt)} />
+        <Stat label="Última actividad" value={<span className="text-base">{timeAgo(stats.lastSeenAt)}</span>} hint={date(stats.lastSeenAt)} />
         <Stat
-          label="Last contacted"
-          value={<span className="text-base">{outreach.lastContactedAt ? timeAgo(outreach.lastContactedAt) : 'Never'}</span>}
-          hint={outreach.owner ? `Owner: ${outreach.owner.name ?? outreach.owner.email}` : 'No owner'}
+          label="Último contacto"
+          value={<span className="text-base">{outreach.lastContactedAt ? timeAgo(outreach.lastContactedAt) : 'Nunca'}</span>}
+          hint={outreach.owner ? `Responsable: ${outreach.owner.name ?? outreach.owner.email}` : 'Sin responsable'}
         />
       </div>
 
       <div className="grid gap-6 @4xl:grid-cols-[3fr_2fr]">
         <div className="min-w-0 space-y-6">
-          <Card title="Profile" description={profile ? `Read ${timeAgo(profile.fetchedAt)}` : 'Not looked up yet.'}>
+          <Card title="Perfil público" description={profile ? `Consultado ${timeAgo(profile.fetchedAt)}` : 'Aún no se ha consultado.'}>
             {profile ? (
               <dl className="grid gap-x-6 gap-y-3 text-sm @lg:grid-cols-2">
-                {profile.bio ? <div className="@lg:col-span-2"><dt className="text-xs text-muted-foreground">Bio</dt><dd className="whitespace-pre-line">{profile.bio}</dd></div> : null}
-                <Fact label="Company" value={profile.company} />
-                <Fact label="Location" value={profile.location} />
-                <Fact label="Website" value={profile.website} href={profile.website ? (profile.website.startsWith('http') ? profile.website : `https://${profile.website}`) : null} />
-                <Fact label="Email" value={profile.email} href={profile.email ? `mailto:${profile.email}` : null} />
+                {profile.bio ? <div className="@lg:col-span-2"><dt className="text-xs text-muted-foreground">Biografía</dt><dd className="whitespace-pre-line">{profile.bio}</dd></div> : null}
+                <Fact label="Organización" value={profile.company} />
+                <Fact label="Ubicación" value={profile.location} />
+                <Fact label="Sitio web" value={profile.website} href={profile.website ? (profile.website.startsWith('http') ? profile.website : `https://${profile.website}`) : null} />
+                <Fact label="Correo electrónico" value={profile.email} href={profile.email ? `mailto:${profile.email}` : null} />
                 {profile.links.length ? (
                   <div className="@lg:col-span-2">
-                    <dt className="text-xs text-muted-foreground">Linked accounts</dt>
+                    <dt className="text-xs text-muted-foreground">Cuentas vinculadas</dt>
                     <dd className="mt-1 flex flex-wrap gap-2">
                       {profile.links.map((l) => (
                         <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">{tagName(l.provider)}</a>
@@ -89,33 +89,33 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
                 ) : null}
               </dl>
             ) : (
-              <p className="text-sm text-muted-foreground">Profile facts appear once the person is looked up on their platform.</p>
+              <p className="text-sm text-muted-foreground">Los datos del perfil aparecen cuando se consulta al autor en su canal.</p>
             )}
             <div className="mt-4 border-t border-line pt-3">
-              <p className="mb-1.5 text-xs text-muted-foreground">Sentiment of their mentions</p>
+              <p className="mb-1.5 text-xs text-muted-foreground">Sentimiento de sus menciones</p>
               <SentimentBar sentiment={stats.sentiment} className="h-2 w-full" />
               <p className="mt-1.5 text-xs text-muted-foreground">
-                {stats.sentiment.positive} positive · {stats.sentiment.neutral} neutral · {stats.sentiment.negative} negative
+                {stats.sentiment.positive} positivo · {stats.sentiment.neutral} neutral · {stats.sentiment.negative} negativo
               </p>
             </div>
           </Card>
 
-          <Card title="Accounts" description="Every account treated as this person. The first is the main one.">
+          <Card title="Cuentas" description="Cuentas agrupadas bajo este autor. La primera es la principal.">
             <ul className="divide-y divide-line text-sm">
               {person.accounts.map((account, i) => (
                 <li key={account.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                   <span className="min-w-0">
                     <span className="font-medium">{account.name ?? account.handle ?? account.id}</span>
                     <span className="ml-2 text-xs text-muted-foreground">{[account.handle, platformName(account.platform)].filter(Boolean).join(' · ')}</span>
-                    {i === 0 ? <Badge className="ml-2">main</Badge> : null}
+                    {i === 0 ? <Badge className="ml-2">Principal</Badge> : null}
                   </span>
                   <span className="flex items-center gap-2">
-                    {account.url ? <a href={account.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">Open ↗</a> : null}
+                    {account.url ? <a href={account.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">Abrir ↗</a> : null}
                     {i > 0 ? (
                       <ActionForm action={splitAccount}>
                         <input type="hidden" name="id" value={person.id} />
                         <input type="hidden" name="accountId" value={account.id} />
-                        <SubmitButton variant="secondary" size="sm" confirm="Split this account back into its own person?">Split out</SubmitButton>
+                        <SubmitButton variant="secondary" size="sm" confirm="¿Separar esta cuenta para que vuelva a ser un registro independiente?">Separar cuenta</SubmitButton>
                       </ActionForm>
                     ) : null}
                   </span>
@@ -124,9 +124,9 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
             </ul>
           </Card>
 
-          <Card title="Recent mentions" actions={<Link href={`/mentions?personId=${person.id}`} className="text-xs text-primary hover:underline">All mentions</Link>}>
+          <Card title="Menciones recientes" actions={<Link href={`/mentions?personId=${person.id}`} className="text-xs text-primary hover:underline">Ver todas</Link>}>
             {mentions.data.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No mentions to show.</p>
+              <p className="text-sm text-muted-foreground">No hay menciones para mostrar.</p>
             ) : (
               <ul className="divide-y divide-line">
                 {mentions.data.map((m) => (
@@ -138,11 +138,11 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
                         <span>{m.keyword.term}</span>
                         <span>·</span>
                         <span>{timeAgo(m.post.publishedAt)}</span>
-                        {m.classification ? <Badge tone={sentimentTone(m.classification.sentiment)}>{m.classification.sentiment}</Badge> : null}
-                        {m.relevant ? <Badge tone="accent">relevant</Badge> : null}
+                        {m.classification ? <Badge tone={sentimentTone(m.classification.sentiment)}>{{ positive: 'Positivo', neutral: 'Neutral', negative: 'Negativo' }[m.classification.sentiment]}</Badge> : null}
+                        {m.relevant ? <Badge tone="accent">Relevante</Badge> : null}
                         {m.review ? <Badge>{'★'.repeat(m.review.rating)}</Badge> : null}
                       </div>
-                      <p className="mt-1 text-sm text-foreground">{excerpt(m.post.text) || <span className="text-muted-foreground">No text</span>}</p>
+                      <p className="mt-1 text-sm text-foreground">{excerpt(m.post.text) || <span className="text-muted-foreground">Sin texto</span>}</p>
                     </Link>
                   </li>
                 ))}
@@ -152,46 +152,46 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
         </div>
 
         <div className="min-w-0 space-y-6">
-          <Card title="Your notes">
+          <Card title="Notas del equipo">
             <ActionForm action={updatePerson} className="space-y-3">
               <input type="hidden" name="id" value={person.id} />
-              <Field label="Stage">
+              <Field label="Etapa de contacto">
                 <Select name="stage" defaultValue={outreach.stage} options={STAGE_OPTIONS} />
               </Field>
-              <Field label="Owner">
+              <Field label="Responsable">
                 <Select
                   name="ownerId"
                   defaultValue={outreach.owner?.id ?? ''}
-                  placeholder="Nobody"
+                  placeholder="Sin responsable"
                   options={members.data.map((m) => [m.userId, m.name ?? m.email] as const)}
                 />
               </Field>
-              <Field label="Tags" hint="Comma separated, up to 20.">
+              <Field label="Etiquetas" hint="Sepáralas con comas; máximo 20.">
                 <Input name="tags" defaultValue={annotations.tags.join(', ')} />
               </Field>
-              <Field label="Notes">
+              <Field label="Notas">
                 <Textarea name="notes" maxLength={2000} defaultValue={annotations.notes} />
               </Field>
-              <SwitchRow name="muted" defaultChecked={annotations.muted} label="Mute" hint="Keep their posts out of the feed and every channel." />
-              <SubmitButton>Save</SubmitButton>
+              <SwitchRow name="muted" defaultChecked={annotations.muted} label="Silenciar autor" hint="Oculta sus publicaciones del listado en todos los canales." />
+              <SubmitButton>Guardar</SubmitButton>
             </ActionForm>
           </Card>
 
-          <Card title="Outreach log" description="Logging the first contact claims an unowned person for you and moves them to contacted.">
+          <Card title="Bitácora de contacto" description="El primer contacto asigna el registro a quien lo realiza y cambia su etapa a contactado.">
             <ActionForm action={logActivity} className="space-y-3" resetOnSuccess>
               <input type="hidden" name="id" value={person.id} />
               <div className="grid gap-3 @lg:grid-cols-2">
-                <Field label="Channel">
+                <Field label="Canal">
                   <Select name="channel" defaultValue="email" options={ACTIVITY_CHANNELS.map((c) => [c, CHANNEL_NAMES[c]] as const)} />
                 </Field>
-                <Field label="When (UTC)" hint="Empty means now.">
-                  <DateTimePicker name="occurredAt" placeholder="Now" />
+                <Field label="Fecha y hora (UTC)" hint="Si queda vacío, se usa la hora actual.">
+                  <DateTimePicker name="occurredAt" placeholder="Ahora" />
                 </Field>
               </div>
-              <Field label="Note">
-                <Textarea name="note" rows={2} maxLength={2000} placeholder="What was sent or said" />
+              <Field label="Nota">
+                <Textarea name="note" rows={2} maxLength={2000} placeholder="Qué se envió o conversó" />
               </Field>
-              <SubmitButton>Log contact</SubmitButton>
+              <SubmitButton>Registrar contacto</SubmitButton>
             </ActionForm>
             {activities.data.length ? (
               <ul className="mt-4 divide-y divide-line border-t border-line text-sm">
@@ -207,24 +207,24 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
                     <ActionForm action={deleteActivity}>
                       <input type="hidden" name="id" value={person.id} />
                       <input type="hidden" name="activityId" value={a.id} />
-                      <SubmitButton variant="ghost" size="sm" confirm="Delete this entry?">Delete</SubmitButton>
+                      <SubmitButton variant="ghost" size="sm" confirm="¿Eliminar esta entrada?">Eliminar</SubmitButton>
                     </ActionForm>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-4 border-t border-line pt-3 text-sm text-muted-foreground">No contact logged yet.</p>
+              <p className="mt-4 border-t border-line pt-3 text-sm text-muted-foreground">Aún no hay contactos registrados.</p>
             )}
           </Card>
 
-          <Card title="Merge" description="Same human on another platform? Merge the accounts so their mentions, tags, notes and log add up. Only in your workspace, and you can split them again.">
+          <Card title="Combinar cuentas" description="Si dos cuentas pertenecen al mismo autor, combínalas para reunir sus menciones, etiquetas, notas y contactos. El cambio solo aplica en este espacio de trabajo y puedes separarlas después.">
             <form method="GET" className="flex gap-2">
-              <Input name="merge" defaultValue={mergeQ} placeholder="Search people by name or handle" />
-              <Button type="submit" variant="outline">Search</Button>
+              <Input name="merge" defaultValue={mergeQ} placeholder="Buscar autores por nombre o usuario" />
+              <Button type="submit" variant="outline">Buscar</Button>
             </form>
             {candidates ? (
               others.length === 0 ? (
-                <p className="mt-3 text-sm text-muted-foreground">Nobody else matches.</p>
+                <p className="mt-3 text-sm text-muted-foreground">No hay otros autores que coincidan.</p>
               ) : (
                 <ul className="mt-3 divide-y divide-line text-sm">
                   {others.map((p) => (
@@ -232,18 +232,18 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
                       <Link href={`/people/${p.id}`} className="flex min-w-0 items-center gap-2 hover:underline">
                         <Avatar person={p} size="size-6" />
                         <span className="truncate">{displayName(p)}</span>
-                        <span className="text-xs text-muted-foreground">{platformName(p.platform)} · {p.stats.mentions} mentions</span>
+                        <span className="text-xs text-muted-foreground">{platformName(p.platform)} · {p.stats.mentions} menciones</span>
                       </Link>
                       <span className="flex gap-1.5">
                         <ActionForm action={mergePeople}>
                           <input type="hidden" name="from" value={p.id} />
                           <input type="hidden" name="into" value={person.id} />
-                          <SubmitButton size="sm" confirm={`Merge ${displayName(p)} into ${displayName(person)}?`}>Merge here</SubmitButton>
+                          <SubmitButton size="sm" confirm={`¿Combinar ${displayName(p)} con ${displayName(person)}?`}>Combinar aquí</SubmitButton>
                         </ActionForm>
                         <ActionForm action={mergePeople}>
                           <input type="hidden" name="from" value={person.id} />
                           <input type="hidden" name="into" value={p.id} />
-                          <SubmitButton variant="secondary" size="sm" confirm={`Merge ${displayName(person)} into ${displayName(p)}?`}>Merge into them</SubmitButton>
+                          <SubmitButton variant="secondary" size="sm" confirm={`¿Combinar ${displayName(person)} con ${displayName(p)}?`}>Combinar con este autor</SubmitButton>
                         </ActionForm>
                       </span>
                     </li>

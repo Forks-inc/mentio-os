@@ -19,7 +19,7 @@ type MentionPatch = Omit<UpdateMentionData['body'], 'snoozedUntil' | 'sentiment'
 };
 
 async function patchMention(id: string, body: MentionPatch) {
-  if (!id) throw new Error('Missing mention id.');
+  if (!id) throw new Error('Falta el identificador de la mención.');
   unwrap(await mentio().updateMention({ path: { id }, body: body as UpdateMentionData['body'] }));
   revalidatePath('/mentions');
   revalidatePath(`/mentions/${id}`);
@@ -30,9 +30,9 @@ async function patchMention(id: string, body: MentionPatch) {
 export async function setMentionStatus(_state: ActionState, form: FormData): Promise<ActionState> {
   return run(async () => {
     const status = str(form, 'status');
-    if (!isOneOf(STATUSES, status)) throw new Error('Pick open, done or ignored.');
+    if (!isOneOf(STATUSES, status)) throw new Error('Elige abierto, resuelto o ignorado.');
     await patchMention(str(form, 'id'), { status });
-    return status === 'open' ? 'Reopened' : status === 'done' ? 'Marked done' : 'Ignored';
+    return status === 'open' ? 'Mención reabierta' : status === 'done' ? 'Mención resuelta' : 'Mención ignorada';
   });
 }
 
@@ -42,7 +42,7 @@ export async function setMentionStatus(_state: ActionState, form: FormData): Pro
  */
 export async function setStatusMany(ids: string[], status: string): Promise<ActionState> {
   return run(async () => {
-    if (!isOneOf(STATUSES, status)) throw new Error('Pick open, done or ignored.');
+    if (!isOneOf(STATUSES, status)) throw new Error('Elige abierto, resuelto o ignorado.');
     const todo = [...new Set(ids)].slice(0, 100);
     const api = mentio();
     for (let i = 0; i < todo.length; i += 5) {
@@ -50,8 +50,12 @@ export async function setStatusMany(ids: string[], status: string): Promise<Acti
     }
     revalidatePath('/mentions');
     revalidatePath('/');
-    const what = status === 'open' ? 'reopened' : status === 'done' ? 'marked done' : 'ignored';
-    return `${todo.length} ${todo.length === 1 ? 'mention' : 'mentions'} ${what}`;
+    const what = status === 'open'
+      ? todo.length === 1 ? 'reabierta' : 'reabiertas'
+      : status === 'done'
+        ? todo.length === 1 ? 'resuelta' : 'resueltas'
+        : todo.length === 1 ? 'ignorada' : 'ignoradas';
+    return `${todo.length} ${todo.length === 1 ? 'mención' : 'menciones'} ${what}`;
   });
 }
 
@@ -74,20 +78,20 @@ export async function snoozeMention(_state: ActionState, form: FormData): Promis
     const choice = str(form, 'snooze');
     if (choice === 'clear') {
       await patchMention(id, { snoozedUntil: null });
-      return 'Back in the feed';
+      return 'La mención volvió a la lista';
     }
     let until: Date;
     if (choice in PRESETS) {
       until = new Date(Date.now() + PRESETS[choice]!);
     } else {
       const raw = str(form, 'until');
-      if (!raw) throw new Error('Pick a date and time.');
+      if (!raw) throw new Error('Elige una fecha y una hora.');
       until = new Date(`${raw}Z`);
-      if (Number.isNaN(until.getTime())) throw new Error('That date is not valid.');
-      if (until.getTime() <= Date.now()) throw new Error('Pick a time in the future.');
+      if (Number.isNaN(until.getTime())) throw new Error('La fecha no es válida.');
+      if (until.getTime() <= Date.now()) throw new Error('Elige una hora futura.');
     }
     await patchMention(id, { snoozedUntil: until.toISOString() });
-    return 'Snoozed';
+    return 'Mención pospuesta';
   });
 }
 
@@ -102,9 +106,9 @@ export async function setVerdict(_state: ActionState, form: FormData): Promise<A
     else if (relevant === 'reset') body.relevant = null;
     if (isOneOf(SENTIMENTS, sentiment)) body.sentiment = sentiment;
     else if (sentiment === 'reset') body.sentiment = null;
-    if (Object.keys(body).length === 0) throw new Error('Nothing to change.');
+    if (Object.keys(body).length === 0) throw new Error('No hay cambios que guardar.');
     await patchMention(id, body);
-    return 'Thanks, verdict saved';
+    return 'Clasificación corregida';
   });
 }
 
@@ -113,12 +117,12 @@ export async function muteAuthorInAlert(_state: ActionState, form: FormData): Pr
   return run(async () => {
     const alertId = str(form, 'alertId');
     const author = str(form, 'author');
-    if (!alertId) throw new Error('Pick an alert.');
-    if (!author) throw new Error('This mention has no author to mute.');
+    if (!alertId) throw new Error('Elige una alerta.');
+    if (!author) throw new Error('Esta mención no tiene un autor para silenciar.');
     const alert = unwrap(await mentio().muteAlertAuthors({ path: { id: alertId }, body: { authors: [author] } }));
     revalidatePath('/alerts');
     revalidatePath(`/alerts/${alertId}`);
-    return `Muted in ${alert.name}`;
+    return `Autor silenciado en ${alert.name}`;
   });
 }
 
@@ -130,7 +134,7 @@ export async function muteAuthorInAlert(_state: ActionState, form: FormData): Pr
 export async function saveFeedAsView(_state: ActionState, form: FormData): Promise<ActionState> {
   return run(async () => {
     const name = str(form, 'name');
-    if (!name) throw new Error('Give the view a name.');
+    if (!name) throw new Error('Escribe un nombre para la vista.');
     let values = parseFilters(getterFromForm(form));
     const baseId = str(form, 'viewId');
     if (baseId) {

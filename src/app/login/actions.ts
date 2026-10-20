@@ -15,7 +15,7 @@ export async function signIn(_state: ActionState, form: FormData): Promise<Actio
   if (!passwordProtected()) redirect('/');
   const given = await sessionToken(String(form.get('password') ?? ''));
   const expected = await sessionToken();
-  if (!sameDigest(given, expected)) return { error: 'That password is not right.', at: Date.now() };
+  if (!sameDigest(given, expected)) return { error: 'La contraseña no es correcta.', at: Date.now() };
   (await cookies()).set(SESSION_COOKIE, expected, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: SESSION_MAX_AGE });
   redirect(safeNext(form.get('next')));
 }

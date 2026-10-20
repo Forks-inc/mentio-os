@@ -14,15 +14,15 @@ import { CHART_COLORS } from '@/lib/chart-colors';
 import { cn } from '@/lib/utils';
 
 
-const compact = (n: number) => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(Math.round(n));
+const compact = (n: number) => new Intl.NumberFormat('es-MX', { notation: 'compact', maximumFractionDigits: 1 }).format(Math.round(n));
 
-/** "Sep 22", from "2026-09-22" or an ISO time. */
+/** Fecha corta para una fecha o una hora ISO. */
 const shortDay = (value: string) => {
   const d = new Date(value.length === 10 ? `${value}T00:00:00Z` : value);
-  return Number.isNaN(d.getTime()) ? value : new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(d);
+  return Number.isNaN(d.getTime()) ? value : new Intl.DateTimeFormat('es-MX', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(d);
 };
 
-const empty = <p className="text-sm text-muted-foreground">No data in this window.</p>;
+const empty = <p className="text-sm text-muted-foreground">No hay datos en este periodo.</p>;
 
 type Series = { name: string; color: string; values: number[]; dashed?: boolean };
 
@@ -45,7 +45,7 @@ const tooltip = <ChartTooltip content={<ChartTooltipContent labelFormatter={(val
 
 /**
  * Stacked daily bars (say, matches split by platform) with lines drawn over
- * them (relevant, the previous period): the Mentio dashboard's main chart.
+ * them (relevant, the previous period): the main dashboard chart.
  */
 export function StackedBars({ labels, stacks, lines = [], height = 240 }: { labels: string[]; stacks: Series[]; lines?: Series[]; height?: number }) {
   if (labels.length === 0) return empty;
@@ -89,7 +89,7 @@ export function LineChart({ labels, series, height = 220 }: { labels: string[]; 
 /** A tiny trend with a soft fill, for stat cards and table rows. */
 export function Sparkline({ values, tone = 'accent', className }: { values: number[]; tone?: 'accent' | 'bad'; className?: string }) {
   if (values.length < 2) return null;
-  const config: ChartConfig = { v: { label: 'Value', color: tone === 'bad' ? 'var(--destructive)' : 'var(--primary)' } };
+  const config: ChartConfig = { v: { label: 'Valor', color: tone === 'bad' ? 'var(--destructive)' : 'var(--primary)' } };
   const data = values.map((v, i) => ({ i, v }));
   return (
     <ChartContainer config={config} className={cn('aspect-auto h-6 w-16 shrink-0', className)} aria-hidden>
@@ -103,7 +103,7 @@ export function Sparkline({ values, tone = 'accent', className }: { values: numb
 /** One bar split into shares (share of voice), with the shadcn legend. */
 export function ShareBar({ items }: { items: Array<{ label: string; value: number; color: string; href?: string }> }) {
   const total = items.reduce((sum, i) => sum + i.value, 0);
-  if (total === 0) return <p className="text-sm text-muted-foreground">No brand or competitor mentions in this window.</p>;
+  if (total === 0) return <p className="text-sm text-muted-foreground">No hay menciones de candidatos o adversarios en este periodo.</p>;
   const config: ChartConfig = {};
   items.forEach((item, i) => (config[`s${i}`] = { label: item.label, color: item.color }));
   const data = [Object.fromEntries(items.map((item, i) => [`s${i}`, item.value]))];
@@ -151,9 +151,9 @@ export function BarList({ items, format = 'compact' }: { items: Array<{ label: R
               {item.icon}
               {item.href ? <Link href={item.href} className="truncate hover:underline">{item.label}</Link> : <span className="truncate">{item.label}</span>}
             </span>
-            <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{format === 'plain' ? item.value.toLocaleString('en') : compact(item.value)}</span>
+            <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{format === 'plain' ? item.value.toLocaleString('es-MX') : compact(item.value)}</span>
           </div>
-          <Progress value={(item.value / max) * 100} locale="en-US" className="mt-1.5" aria-label={typeof item.label === 'string' ? item.label : undefined} />
+          <Progress value={(item.value / max) * 100} locale="es-MX" className="mt-1.5" aria-label={typeof item.label === 'string' ? item.label : undefined} />
         </li>
       ))}
     </ul>

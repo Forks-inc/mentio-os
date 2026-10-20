@@ -24,35 +24,35 @@ export function MentionRowMenu({ id, status, url, platform }: { id: string; stat
       if (result?.error) {
         announceStatus([id], null);
         toast.error(result.error);
-      } else toast.success(next === 'open' ? 'Reopened' : next === 'done' ? 'Marked done' : 'Ignored');
+      } else toast.success(next === 'open' ? 'Se reabrió la mención.' : next === 'done' ? 'La mención se marcó como resuelta.' : 'La mención se ignoró.');
       router.refresh();
     });
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Mention actions" disabled={pending} />}>
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" aria-label="Acciones de la mención" disabled={pending} />}>
         <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem render={<Link href={`/mentions/${id}`} />}>
-          <SquareArrowOutUpRight /> Open
+          <SquareArrowOutUpRight /> Abrir mención
         </DropdownMenuItem>
         <DropdownMenuItem render={<a href={url} target="_blank" rel="noopener noreferrer" />}>
-          <ExternalLink /> View on {platform}
+          <ExternalLink /> Ver en {platform}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {status !== 'done' ? (
           <DropdownMenuItem onClick={() => setStatus('done')}>
-            <Check /> Mark done
+            <Check /> Marcar como resuelta
           </DropdownMenuItem>
         ) : null}
         {status !== 'ignored' ? (
           <DropdownMenuItem onClick={() => setStatus('ignored')}>
-            <CircleSlash /> Ignore
+            <CircleSlash /> Ignorar
           </DropdownMenuItem>
         ) : null}
         {status !== 'open' ? (
           <DropdownMenuItem onClick={() => setStatus('open')}>
-            <RotateCcw /> Reopen
+            <RotateCcw /> Reabrir
           </DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>

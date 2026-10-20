@@ -11,7 +11,7 @@ import { KeywordActions } from './keyword-actions';
 import { KeywordBadges, KIND_LABELS, KINDS, PlatformIcons, SORTS, STATUSES } from './shared';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Keywords' };
+export const metadata = { title: 'Candidatos y temas' };
 
 type Query = NonNullable<ListKeywordsData['query']>;
 const LIMIT = 25;
@@ -19,7 +19,7 @@ const ALL_PLATFORMS = [...SEARCH_PLATFORMS, ...REVIEW_PLATFORMS];
 const STATUS_IDS = STATUSES.map(([id]) => id);
 const SORT_IDS = SORTS.map(([id]) => id);
 
-/** What you listen for: every keyword with its state, its numbers and what it cost this month. */
+/** Candidates and topics tracked in the campaign, with activity and cost. */
 export default async function Keywords({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const offset = Math.max(0, Number(one(params, 'offset')) || 0);
@@ -47,39 +47,39 @@ export default async function Keywords({ searchParams }: { searchParams: Promise
   return (
     <div>
       <PageHeader
-        title="Keywords"
-        description="Each keyword is searched on every platform unless you narrow it. A new one reads back 30 days at once."
-        actions={<LinkButton href="/keywords/new" variant="primary" create><Plus /> New keyword</LinkButton>}
+        title="Candidatos y temas"
+        description="Monitorea a tus candidatos, adversarios y temas de agenda en las plataformas seleccionadas. Cada término nuevo recupera 30 días de conversación."
+        actions={<LinkButton href="/keywords/new" variant="primary" create><Plus /> Agregar candidato o tema</LinkButton>}
       />
 
       <UrlFilters
-        search={{ placeholder: 'Search term or context' }}
+        search={{ placeholder: 'Buscar candidato, tema o contexto' }}
         sort={{ options: SORTS.map(([value, label]) => ({ value, label })) }}
         filters={[
-          ...(showGroups ? [{ param: 'groupId', label: 'Group', icon: 'folder', kind: 'multi', options: groups.data.map((g) => ({ value: g.id, label: g.name })) } as const] : []),
-          { param: 'kind', label: 'Kind', icon: 'tag', kind: 'multi', options: KINDS.map((k) => ({ value: k, label: KIND_LABELS[k] })) },
-          { param: 'status', label: 'Status', icon: 'status', kind: 'multi', options: STATUSES.map(([value, label]) => ({ value, label })) },
-          { param: 'platform', label: 'Platform', icon: 'platform', kind: 'multi', options: Object.entries(PLATFORM_NAMES).map(([value, label]) => ({ value, label, platform: value })) },
+          ...(showGroups ? [{ param: 'groupId', label: 'Campaña', icon: 'folder', kind: 'multi', options: groups.data.map((g) => ({ value: g.id, label: g.name })) } as const] : []),
+          { param: 'kind', label: 'Tipo', icon: 'tag', kind: 'multi', options: KINDS.map((k) => ({ value: k, label: KIND_LABELS[k] })) },
+          { param: 'status', label: 'Estado', icon: 'status', kind: 'multi', options: STATUSES.map(([value, label]) => ({ value, label })) },
+          { param: 'platform', label: 'Plataforma', icon: 'platform', kind: 'multi', options: Object.entries(PLATFORM_NAMES).map(([value, label]) => ({ value, label, platform: value })) },
         ]}
-        actions={<span className="ml-2 text-xs text-muted-foreground">{page.total} {page.total === 1 ? 'keyword' : 'keywords'}</span>}
+        actions={<span className="ml-2 text-xs text-muted-foreground">{page.total} {page.total === 1 ? 'término monitoreado' : 'términos monitoreados'}</span>}
       />
 
       {page.data.length === 0 ? (
-        <EmptyState icon={Tag} title={filtered ? 'No keywords match these filters.' : 'No keywords yet.'}>
-          {filtered ? null : <Link href="/keywords/new" className="text-primary hover:underline">Track your first keyword</Link>}
+        <EmptyState icon={Tag} title={filtered ? 'Ningún candidato o tema coincide con estos filtros.' : 'Aún no hay candidatos ni temas monitoreados.'}>
+          {filtered ? null : <Link href="/keywords/new" className="text-primary hover:underline">Agrega tu primer candidato o tema</Link>}
         </EmptyState>
       ) : (
-        <Table head={['Keyword', 'Platforms', 'Last 7 days', 'This month', 'Relevant', 'Cost this month', '']}>
+        <Table head={['Candidato o tema', 'Plataformas', 'Últimos 7 días', 'Este mes', 'Relevantes', 'Costo del mes', '']}>
           {page.data.map((keyword) => (
             <TableRow key={keyword.id} className={keyword.muted ? 'text-muted-foreground' : ''}>
               <TableCell className={td}>
                 <Link href={`/keywords/${keyword.id}`} data-row-link className={`font-medium text-foreground hover:underline ${rowLink}`}>{keyword.term}</Link>
                 <span className="ml-2 text-xs text-muted-foreground">{KIND_LABELS[keyword.kind]}</span>
-                {showGroups && !keyword.group.isDefault ? <span className="ml-2 text-xs text-muted-foreground">in {keyword.group.name}</span> : null}
+                {showGroups && !keyword.group.isDefault ? <span className="ml-2 text-xs text-muted-foreground">en {keyword.group.name}</span> : null}
                 <div className="mt-1"><KeywordBadges keyword={keyword} /></div>
                 {keyword.stats.noise.noisy ? (
                   <p className="mt-1 max-w-xs text-xs text-red-600">
-                    Mostly irrelevant lately: {keyword.stats.noise.relevant} of {keyword.stats.noise.scored} relevant. Tighten it with required or excluded terms.
+                    Poca relevancia reciente: {keyword.stats.noise.relevant} de {keyword.stats.noise.scored} menciones fueron relevantes. Ajusta los términos requeridos o excluidos.
                   </p>
                 ) : null}
               </TableCell>
@@ -88,7 +88,7 @@ export default async function Keywords({ searchParams }: { searchParams: Promise
               </TableCell>
               <TableCell className={`${td} tabular-nums`}>
                 {compact(keyword.stats.last7d)}
-                <div className="text-xs text-muted-foreground">{keyword.stats.lastMentionAt ? `last ${timeAgo(keyword.stats.lastMentionAt)}` : 'none yet'}</div>
+                <div className="text-xs text-muted-foreground">{keyword.stats.lastMentionAt ? `última ${timeAgo(keyword.stats.lastMentionAt)}` : 'sin menciones'}</div>
               </TableCell>
               <TableCell className={`${td} tabular-nums`}>
                 {compact(keyword.stats.thisMonth)}

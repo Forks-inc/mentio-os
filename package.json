@@ -1,8 +1,8 @@
 {
-  "name": "mentio-os",
+  "name": "agora",
   "version": "0.1.0",
   "private": true,
-  "description": "An open-source social listening dashboard on the Mentio API. Fork it, rebrand it, ship it.",
+  "description": "Inteligencia política para medir y priorizar la conversación sobre tus candidatos.",
   "license": "MIT",
   "type": "module",
   "scripts": {

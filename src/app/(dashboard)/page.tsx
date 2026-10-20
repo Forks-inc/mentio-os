@@ -10,7 +10,7 @@ import { mentio, unwrap } from '@/lib/mentio';
 import { many, one, withParams, type SearchParams } from '@/lib/params';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Overview' };
+export const metadata = { title: 'Resumen' };
 
 const RANGES = ['7d', '30d', '90d'] as const;
 type Range = (typeof RANGES)[number];
@@ -47,15 +47,15 @@ export default async function Overview({ searchParams }: { searchParams: Promise
   const ranked = [...byPlatform.data].sort((a, b) => sum(b.points.map((p) => p.matched)) - sum(a.points.map((p) => p.matched)));
   const stacks = ranked.slice(0, 5).map((s, i) => ({ name: platformName(s.key), color: CHART_COLORS[i], values: s.points.map((p) => p.matched) }));
   const rest = ranked.slice(5);
-  if (rest.length) stacks.push({ name: 'Other', color: '#d4d4d8', values: labels.map((_, i) => sum(rest.map((s) => s.points[i]?.matched ?? 0))) });
+  if (rest.length) stacks.push({ name: 'Otras plataformas', color: '#d4d4d8', values: labels.map((_, i) => sum(rest.map((s) => s.points[i]?.matched ?? 0))) });
 
   const href = (changes: Record<string, string | undefined>) => withParams('/', params, changes);
 
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Overview"
-        description="What the market said about your keywords, and what needs an answer."
+        title="Resumen"
+        description="Consulta qué dice el electorado sobre tus candidatos, los temas de agenda y sus adversarios; prioriza la conversación con datos."
         actions={<RangeLinks current={range} options={RANGES} href={(r) => href({ range: r })} />}
       />
 
@@ -64,36 +64,36 @@ export default async function Overview({ searchParams }: { searchParams: Promise
       </div>
 
       <section className="grid grid-cols-2 gap-3 @2xl:grid-cols-3 @6xl:grid-cols-6">
-        <Stat label="Matched" value={compact(summary.matched)} delta={pct(summary.matched, prev?.matched)} spark={points.map((p) => p.matched)} hint={`${compact(summary.posts)} posts`} href="/mentions" />
+        <Stat label="Menciones" value={compact(summary.matched)} delta={pct(summary.matched, prev?.matched)} spark={points.map((p) => p.matched)} hint={`${compact(summary.posts)} publicaciones`} href="/mentions" />
         <Stat
-          label="Relevant"
+          label="Relevantes"
           value={compact(summary.relevant)}
           delta={pct(summary.relevant, prev?.relevant)}
           spark={points.map((p) => p.relevant)}
-          hint={summary.matched ? `${Math.round((summary.relevant / summary.matched) * 100)}% of matched` : undefined}
+          hint={summary.matched ? `${Math.round((summary.relevant / summary.matched) * 100)}% del total` : undefined}
           href="/mentions?relevant=true"
         />
-        <Stat label="Net sentiment" value={`${net > 0 ? '+' : ''}${net}`} hint={`${compact(summary.sentiment.positive)} positive · ${compact(summary.sentiment.negative)} negative`} href="/analytics" />
+        <Stat label="Sentimiento neto" value={`${net > 0 ? '+' : ''}${net}`} hint={`${compact(summary.sentiment.positive)} positivas · ${compact(summary.sentiment.negative)} negativas`} href="/analytics" />
         <Stat
-          label="Negative"
+          label="Negativas"
           value={compact(summary.sentiment.negative)}
           delta={pct(summary.sentiment.negative, prev?.sentiment.negative)}
           invert
           spark={points.map((p) => p.negative)}
-          hint={scored ? `${Math.round((summary.sentiment.negative / scored) * 100)}% of classified` : undefined}
+          hint={scored ? `${Math.round((summary.sentiment.negative / scored) * 100)}% de las clasificadas` : undefined}
           href="/mentions?sentiments=negative"
         />
-        <Stat label="Buying intent" value={compact(summary.buyIntent)} delta={pct(summary.buyIntent, prev?.buyIntent)} hint={`${compact(summary.questions)} questions`} href="/mentions?intents=buy_intent" />
-        <Stat label="Est. reach" value={compact(summary.reach.followers)} delta={pct(summary.reach.followers, prev?.reach.followers)} hint={`${compact(summary.reach.people)} authors known`} href="/people" />
+        <Stat label="Intención de compra" value={compact(summary.buyIntent)} delta={pct(summary.buyIntent, prev?.buyIntent)} hint={`${compact(summary.questions)} preguntas`} href="/mentions?intents=buy_intent" />
+        <Stat label="Alcance estimado" value={compact(summary.reach.followers)} delta={pct(summary.reach.followers, prev?.reach.followers)} hint={`${compact(summary.reach.people)} autores identificados`} href="/people" />
       </section>
 
-      <Card title="Mentions over time" description="Bars are matched mentions split by platform. The dark line is relevant ones; the dashed line is the previous period.">
+      <Card title="Menciones a lo largo del tiempo" description="Las barras muestran menciones por plataforma. La línea oscura representa las relevantes y la punteada, el periodo anterior.">
         <StackedBars
           labels={labels}
           stacks={stacks}
           lines={[
-            { name: 'Relevant', color: '#18181b', values: points.map((p) => p.relevant) },
-            ...(previous.length === points.length ? [{ name: 'Previous period', color: '#a1a1aa', values: previous.map((p) => p.matched), dashed: true }] : []),
+            { name: 'Relevantes', color: '#18181b', values: points.map((p) => p.relevant) },
+            ...(previous.length === points.length ? [{ name: 'Periodo anterior', color: '#a1a1aa', values: previous.map((p) => p.matched), dashed: true }] : []),
           ]}
         />
       </Card>
@@ -103,31 +103,31 @@ export default async function Overview({ searchParams }: { searchParams: Promise
           <div className="overflow-x-auto rounded-lg border border-line bg-card">
             <div className="flex items-start justify-between gap-2 px-4 pt-3.5 pb-3">
               <div>
-                <h2 className="text-[13px] font-semibold">Keywords</h2>
-                <p className="mt-0.5 text-xs text-muted-foreground">Share of voice is your brand against competitors; topics stay out of the split.</p>
+                <h2 className="text-[13px] font-semibold">Candidatos y temas</h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">Compara la participación de voz de tus candidatos y adversarios; los temas de agenda se muestran aparte.</p>
               </div>
-              <Link href="/keywords" className="text-xs text-primary hover:underline">All keywords ›</Link>
+              <Link href="/keywords" className="text-xs text-primary hover:underline">Ver todos ›</Link>
             </div>
             <Table className="min-w-[620px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="h-9 px-4 font-medium">Keyword</TableHead>
-                  <TableHead className="px-3 text-right font-medium">Matched</TableHead>
-                  <TableHead className="px-3 text-right font-medium">Relevant</TableHead>
-                  <TableHead className="px-3 text-right font-medium">Negative</TableHead>
-                  <TableHead className="px-3 text-right font-medium">Buying</TableHead>
-                  <TableHead className="px-4 font-medium">Share of voice</TableHead>
+                  <TableHead className="h-9 px-4 font-medium">Candidato o tema</TableHead>
+                  <TableHead className="px-3 text-right font-medium">Menciones</TableHead>
+                  <TableHead className="px-3 text-right font-medium">Relevantes</TableHead>
+                  <TableHead className="px-3 text-right font-medium">Negativas</TableHead>
+                  <TableHead className="px-3 text-right font-medium">Intención de compra</TableHead>
+                  <TableHead className="px-4 font-medium">Participación de voz</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {voice.data.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No keyword matched in this window.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No hay menciones de candidatos o temas en este periodo.</TableCell></TableRow>
                 ) : (
                   voice.data.slice(0, 8).map((row) => (
                     <TableRow key={row.keyword.id} className="hover:bg-muted/50">
                       <TableCell className="px-4 py-2.5">
                         <Link href={`/keywords/${row.keyword.id}`} className="font-mono text-foreground hover:underline">{row.keyword.term}</Link>
-                        <Badge tone="outline" className="ml-2 font-normal text-muted-foreground">{row.keyword.kind}</Badge>
+                        <Badge tone="outline" className="ml-2 font-normal text-muted-foreground">{tagName(row.keyword.kind)}</Badge>
                       </TableCell>
                       <TableCell className="px-3 py-2.5 text-right font-mono">{compact(row.matched)}</TableCell>
                       <TableCell className="px-3 py-2.5 text-right font-mono">
@@ -137,7 +137,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
                       <TableCell className="px-3 py-2.5 text-right font-mono">{compact(row.buyIntent)}</TableCell>
                       <TableCell className="px-4 py-2.5">
                         {row.keyword.kind === 'topic' ? (
-                          <span className="text-xs text-muted-foreground">Topic</span>
+                          <span className="text-xs text-muted-foreground">Tema</span>
                         ) : (
                           <span className="flex items-center gap-2">
                             <span className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
@@ -154,7 +154,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
             </Table>
           </div>
         </div>
-        <Card title="Intents" description="What people want, across every mention." actions={<Link href="/analytics" className="text-primary hover:underline">Analytics ›</Link>}>
+        <Card title="Intenciones" description="Lo que busca el electorado en la conversación." actions={<Link href="/analytics" className="text-primary hover:underline">Ver análisis ›</Link>}>
           <BarList
             items={intents.data.slice(0, 7).map((row) => ({ label: tagName(row.key), value: row.matched, href: `/mentions?intents=${encodeURIComponent(row.key)}` }))}
           />
@@ -164,14 +164,14 @@ export default async function Overview({ searchParams }: { searchParams: Promise
       <section>
         <div className="mb-2.5 flex items-end justify-between gap-2">
           <div>
-            <h2 className="text-[13px] font-semibold">Needs an answer</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">Relevant and still open, most urgent first.</p>
+            <h2 className="text-[13px] font-semibold">Prioridad de respuesta</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">Menciones relevantes aún abiertas, ordenadas por urgencia.</p>
           </div>
-          <LinkButton href="/mentions?relevant=true&status=open&sort=priority" size="sm">All open mentions</LinkButton>
+          <LinkButton href="/mentions?relevant=true&status=open&sort=priority" size="sm">Ver menciones abiertas</LinkButton>
         </div>
         {open.data.length === 0 ? (
-          <EmptyState icon={CircleCheck} title="Nothing waiting.">
-            New relevant mentions land here. <Link href="/keywords/new" className="text-primary hover:underline">Track another keyword</Link>
+          <EmptyState icon={CircleCheck} title="Todo al día.">
+            Las nuevas menciones relevantes de la campaña aparecerán aquí. <Link href="/keywords/new" className="text-primary hover:underline">Monitorear otro candidato o tema</Link>
           </EmptyState>
         ) : (
           <MentionTable mentions={open.data} />

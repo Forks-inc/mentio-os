@@ -8,7 +8,7 @@ import { mentio, unwrap } from '@/lib/mentio';
 import { deleteView, updateView } from '../actions';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Edit view' };
+export const metadata = { title: 'Editar vista' };
 
 export default async function ViewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,32 +21,32 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="space-y-6">
       <PageHeader
-        back={{ href: '/views', label: 'Views' }}
+        back={{ href: '/views', label: 'Vistas' }}
         title={view.name}
-        description={conditions.length ? conditions.join(' · ') : 'No conditions: every mention.'}
-        actions={<LinkButton href={`/mentions?viewId=${encodeURIComponent(view.id)}`} variant="primary">Open mentions</LinkButton>}
+        description={conditions.length ? conditions.join(' · ') : 'Sin condiciones: todas las menciones.'}
+        actions={<LinkButton href={`/mentions?viewId=${encodeURIComponent(view.id)}`} variant="primary">Abrir menciones</LinkButton>}
       />
 
-      <Card title="Edit view" description="Saving replaces the whole filter with what this form holds.">
+      <Card title="Editar vista" description="Al guardar, se reemplazan todos los filtros por los de este formulario.">
         <ActionForm action={updateView} className="space-y-5">
           <input type="hidden" name="id" value={view.id} />
           <div className="grid gap-4 @lg:grid-cols-2">
-            <Field label="Name">
+            <Field label="Nombre">
               <Input name="name" required maxLength={80} defaultValue={view.name} />
             </Field>
-            <Field label="Description">
+            <Field label="Descripción">
               <Input name="description" maxLength={500} defaultValue={view.description} />
             </Field>
           </div>
           <ViewFilterFields values={values} options={options} />
-          <SubmitButton>Save view</SubmitButton>
+          <SubmitButton>Guardar vista</SubmitButton>
         </ActionForm>
       </Card>
 
-      <Card title="Delete view" description="The mentions stay; only the saved filter goes.">
+      <Card title="Eliminar vista" description="Las menciones se conservan; solo se elimina el filtro guardado.">
         <ActionForm action={deleteView}>
           <input type="hidden" name="id" value={view.id} />
-          <SubmitButton variant="danger" confirm={`Delete the view "${view.name}"?`}>Delete view</SubmitButton>
+          <SubmitButton variant="danger" confirm={`¿Eliminar la vista "${view.name}"?`}>Eliminar vista</SubmitButton>
         </ActionForm>
       </Card>
     </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { es } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import {
   DayPicker,
@@ -18,7 +19,7 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
-  locale,
+  locale = es,
   formatters,
   components,
   ...props

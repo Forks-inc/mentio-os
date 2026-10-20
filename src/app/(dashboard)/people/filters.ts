@@ -20,17 +20,17 @@ export const STAGES: readonly Stage[] = ['not_contacted', 'contacted', 'replied'
 export const KEYWORD_KINDS: readonly KeywordKind[] = ['brand', 'competitor', 'topic'];
 export const SORTS = ['mentions', 'recent', 'reach', 'new'] as const;
 export const SORT_LABELS: Record<(typeof SORTS)[number], string> = {
-  mentions: 'Most mentions',
-  recent: 'Last seen',
-  reach: 'Most followers',
-  new: 'First seen',
+  mentions: 'Más menciones',
+  recent: 'Última actividad',
+  reach: 'Mayor audiencia',
+  new: 'Actividad más reciente',
 };
 
-export const stageName = (stage: string) => tagName(stage);
+export const stageName = (stage: string) => ({ not_contacted: 'Sin contacto', contacted: 'Contactado', replied: 'Respondió', in_talks: 'En conversación', customer: 'Aliado', not_a_fit: 'No prioritario' } as Record<string, string>)[stage] ?? tagName(stage);
 export const PLATFORM_OPTIONS = PLATFORMS.map((p) => [p, PLATFORM_NAMES[p] ?? p] as const);
 export const STAGE_OPTIONS = STAGES.map((s) => [s, stageName(s)] as const);
-export const INTENT_OPTIONS = INTENTS.map((i) => [i, tagName(i)] as const);
-export const KIND_OPTIONS = KEYWORD_KINDS.map((k) => [k, tagName(k)] as const);
+export const INTENT_OPTIONS = INTENTS.map((i) => [i, ({ buy_intent: 'Intención de apoyo', question: 'Pregunta', complaint: 'Queja', praise: 'Reconocimiento', comparison: 'Comparación', churn_intent: 'Intención de cambio', bug_report: 'Reporte de error', pricing: 'Costo', hiring: 'Contratación', event: 'Evento', promotional: 'Promoción' } as Record<string, string>)[i] ?? tagName(i)] as const);
+export const KIND_OPTIONS = KEYWORD_KINDS.map((k) => [k, ({ brand: 'Candidato', competitor: 'Adversario', topic: 'Tema' } as Record<string, string>)[k] ?? tagName(k)] as const);
 
 const pickAll = <T extends string>(options: readonly T[], values: string[]) => values.filter((v): v is T => isOneOf(options, v));
 
@@ -118,23 +118,23 @@ export function formToParams(form: FormData): SearchParams {
 export function describeFilter(filter: AudienceFilter, members: Map<string, string> = new Map()): string[] {
   const names = (list: string[] | undefined, label: (v: string) => string = (v) => v) => (list ?? []).map(label).join(', ');
   const out: string[] = [];
-  if (filter.platforms?.length) out.push(`On ${names(filter.platforms, (p) => PLATFORM_NAMES[p] ?? p)}`);
-  if (filter.notPlatforms?.length) out.push(`Not on ${names(filter.notPlatforms, (p) => PLATFORM_NAMES[p] ?? p)}`);
-  if (filter.tags?.length) out.push(`Tagged ${names(filter.tags)}`);
-  if (filter.notTags?.length) out.push(`Not tagged ${names(filter.notTags)}`);
-  if (filter.intents?.length) out.push(`Intent ${names(filter.intents, tagName)}`);
-  if (filter.notIntents?.length) out.push(`No intent ${names(filter.notIntents, tagName)}`);
-  if (filter.keywordKinds?.length) out.push(`Mentioned a ${names(filter.keywordKinds)} keyword`);
-  if (filter.neverKeywordKinds?.length) out.push(`Never mentioned a ${names(filter.neverKeywordKinds)} keyword`);
-  if (filter.stages?.length) out.push(`Stage ${names(filter.stages, stageName)}`);
-  if (filter.ownerIds?.length) out.push(`Owner ${names(filter.ownerIds, (id) => (id === 'none' ? 'nobody' : members.get(id) ?? id))}`);
-  if (filter.linkHosts?.length) out.push(`Links to ${names(filter.linkHosts)}`);
-  if (filter.minFollowers !== undefined) out.push(`At least ${filter.minFollowers} followers`);
-  if (filter.maxFollowers !== undefined) out.push(`At most ${filter.maxFollowers} followers`);
-  if (filter.minMentions !== undefined) out.push(`At least ${filter.minMentions} mentions`);
-  if (filter.minNegative !== undefined) out.push(`At least ${filter.minNegative} negative mentions`);
-  if (filter.newSinceDays !== undefined) out.push(`First seen in the last ${filter.newSinceDays} days`);
-  if (filter.muted !== undefined) out.push(filter.muted ? 'Muted' : 'Not muted');
-  if (filter.automated !== undefined) out.push(filter.automated ? 'Bots' : 'Not bots');
+  if (filter.platforms?.length) out.push(`En ${names(filter.platforms, (p) => PLATFORM_NAMES[p] ?? p)}`);
+  if (filter.notPlatforms?.length) out.push(`No está en ${names(filter.notPlatforms, (p) => PLATFORM_NAMES[p] ?? p)}`);
+  if (filter.tags?.length) out.push(`Con etiquetas: ${names(filter.tags)}`);
+  if (filter.notTags?.length) out.push(`Sin etiquetas: ${names(filter.notTags)}`);
+  if (filter.intents?.length) out.push(`Intención: ${names(filter.intents, (i) => ({ buy_intent: 'intención de apoyo', question: 'pregunta', complaint: 'queja', praise: 'reconocimiento', comparison: 'comparación', churn_intent: 'intención de cambio', bug_report: 'reporte de error', pricing: 'costo', hiring: 'contratación', event: 'evento', promotional: 'promoción' } as Record<string, string>)[i] ?? tagName(i))}`);
+  if (filter.notIntents?.length) out.push(`Sin intención de ${names(filter.notIntents, (i) => ({ buy_intent: 'apoyo', question: 'pregunta', complaint: 'queja', praise: 'reconocimiento', comparison: 'comparación', churn_intent: 'cambio', bug_report: 'reporte de error', pricing: 'costo', hiring: 'contratación', event: 'evento', promotional: 'promoción' } as Record<string, string>)[i] ?? tagName(i))}`);
+  if (filter.keywordKinds?.length) out.push(`Mencionó términos de tipo ${names(filter.keywordKinds, (k) => ({ brand: 'candidato', competitor: 'adversario', topic: 'tema' } as Record<string, string>)[k] ?? k)}`);
+  if (filter.neverKeywordKinds?.length) out.push(`No mencionó términos de tipo ${names(filter.neverKeywordKinds, (k) => ({ brand: 'candidato', competitor: 'adversario', topic: 'tema' } as Record<string, string>)[k] ?? k)}`);
+  if (filter.stages?.length) out.push(`Etapa: ${names(filter.stages, stageName)}`);
+  if (filter.ownerIds?.length) out.push(`Responsable: ${names(filter.ownerIds, (id) => (id === 'none' ? 'nadie' : members.get(id) ?? id))}`);
+  if (filter.linkHosts?.length) out.push(`Enlaces a ${names(filter.linkHosts)}`);
+  if (filter.minFollowers !== undefined) out.push(`Al menos ${filter.minFollowers} seguidores`);
+  if (filter.maxFollowers !== undefined) out.push(`Como máximo ${filter.maxFollowers} seguidores`);
+  if (filter.minMentions !== undefined) out.push(`Al menos ${filter.minMentions} menciones`);
+  if (filter.minNegative !== undefined) out.push(`Al menos ${filter.minNegative} menciones negativas`);
+  if (filter.newSinceDays !== undefined) out.push(`Actividad en los últimos ${filter.newSinceDays} días`);
+  if (filter.muted !== undefined) out.push(filter.muted ? 'Autor silenciado' : 'Autor no silenciado');
+  if (filter.automated !== undefined) out.push(filter.automated ? 'Cuentas automatizadas' : 'Cuentas no automatizadas');
   return out;
 }

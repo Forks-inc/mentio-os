@@ -9,15 +9,15 @@ import { readFilter, readMode, readSchedule } from './rule';
 
 type Outcome = { channelId: string; ok: boolean; error: string | null };
 
-/** "Sent to #alerts and Team email." or, when one failed, an error naming it. */
+/** Resumen de canales con envío correcto o fallido. */
 async function reportOutcomes(id: string, outcomes: Outcome[], verb: string) {
-  if (outcomes.length === 0) throw new Error('This alert has no channels. Add one, then try again.');
+  if (outcomes.length === 0) throw new Error('Esta alerta no tiene canales. Agrega uno e inténtalo de nuevo.');
   const alert = unwrap(await mentio().getAlert({ path: { id } }));
   const label = (channelId: string) => alert.channels.find((c) => c.id === channelId)?.label ?? channelId;
   const sent = outcomes.filter((o) => o.ok).map((o) => label(o.channelId));
-  const failed = outcomes.filter((o) => !o.ok).map((o) => `${label(o.channelId)} (${o.error ?? 'failed'})`);
-  if (failed.length) throw new Error(`${sent.length ? `${verb} to ${sent.join(', ')}. ` : ''}Failed: ${failed.join('; ')}.`);
-  return `${verb} to ${sent.join(', ')}.`;
+  const failed = outcomes.filter((o) => !o.ok).map((o) => `${label(o.channelId)} (${o.error ?? 'falló'})`);
+  if (failed.length) throw new Error(`${sent.length ? `${verb} en ${sent.join(', ')}. ` : ''}Falló el envío: ${failed.join('; ')}.`);
+  return `${verb} en ${sent.join(', ')}.`;
 }
 
 export async function createAlertAction(_: ActionState, form: FormData): Promise<ActionState> {
@@ -64,7 +64,7 @@ export async function updateAlertAction(_: ActionState, form: FormData): Promise
     );
     revalidatePath('/alerts');
     revalidatePath(`/alerts/${id}`);
-    return 'Alert saved';
+    return 'Alerta guardada';
   });
 }
 
@@ -75,7 +75,7 @@ export async function setAlertEnabled(_: ActionState, form: FormData): Promise<A
     unwrap(await mentio().updateAlert({ path: { id }, body: { enabled } }));
     revalidatePath('/alerts');
     revalidatePath(`/alerts/${id}`);
-    return enabled ? 'Enabled' : 'Disabled';
+    return enabled ? 'Alerta activada' : 'Alerta desactivada';
   });
 }
 
@@ -91,7 +91,7 @@ export async function testAlertAction(_: ActionState, form: FormData): Promise<A
   return run(async () => {
     const id = str(form, 'id');
     const { outcomes } = unwrap(await mentio().testAlert({ path: { id } }));
-    return reportOutcomes(id, outcomes, 'Test sent');
+    return reportOutcomes(id, outcomes, 'Prueba enviada');
   });
 }
 
@@ -100,9 +100,9 @@ export async function runDigestAction(_: ActionState, form: FormData): Promise<A
     const id = str(form, 'id');
     const result = unwrap(await mentio().runAlertDigest({ path: { id } }));
     revalidatePath(`/alerts/${id}`);
-    if (result.skipped === 'empty') return 'Nothing matched in the last 24 hours, so nothing was sent.';
-    if (result.skipped === 'already_sent') return 'This digest was already sent.';
-    return reportOutcomes(id, result.outcomes, `Digest of ${result.matched} mentions (${result.relevant} relevant) sent`);
+    if (result.skipped === 'empty') return 'No hubo coincidencias en las últimas 24 horas, así que no se envió nada.';
+    if (result.skipped === 'already_sent') return 'Este resumen ya se había enviado.';
+    return reportOutcomes(id, result.outcomes, `Resumen de ${result.matched} menciones (${result.relevant} relevantes) enviado`);
   });
 }
 
@@ -110,10 +110,10 @@ export async function muteAuthorsAction(_: ActionState, form: FormData): Promise
   return run(async () => {
     const id = str(form, 'id');
     const authors = lines(form, 'authors');
-    if (authors.length === 0) throw new Error('Paste at least one author.');
+    if (authors.length === 0) throw new Error('Agrega al menos un autor.');
     unwrap(await mentio().muteAlertAuthors({ path: { id }, body: { authors } }));
     revalidatePath(`/alerts/${id}`);
-    return authors.length === 1 ? 'Author muted' : `${authors.length} authors muted`;
+    return authors.length === 1 ? 'Autor silenciado' : `${authors.length} autores silenciados`;
   });
 }
 
@@ -122,6 +122,6 @@ export async function unmuteAuthorAction(_: ActionState, form: FormData): Promis
     const id = str(form, 'id');
     unwrap(await mentio().unmuteAlertAuthors({ path: { id }, body: { authors: [str(form, 'author')] } }));
     revalidatePath(`/alerts/${id}`);
-    return 'Unmuted';
+    return 'Autor sin silenciar';
   });
 }

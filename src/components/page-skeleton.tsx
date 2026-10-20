@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function PageSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading">
+    <div aria-busy="true" aria-label="Cargando">
       <div className="mb-6 grid gap-2">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-4 w-80 max-w-full" />
@@ -33,7 +33,7 @@ export function PageSkeleton() {
 /** A drawer's body while the record loads: the header, a block of text, a few detail rows. */
 export function DrawerSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading" className="grid gap-5">
+    <div aria-busy="true" aria-label="Cargando" className="grid gap-5">
       <div className="flex items-center gap-3 border-b pb-4">
         <Skeleton className="size-9 rounded-full" />
         <div className="grid gap-1.5">

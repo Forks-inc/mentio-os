@@ -112,7 +112,7 @@ export function Badge({ tone = 'neutral', children, className }: { tone?: Tone; 
  * A filter in a list row, kept to one line: the first `max` conditions as
  * badges, then "+N more" with every condition in a tooltip.
  */
-export function Conditions({ conditions, max = 2, empty = 'Everything' }: { conditions: string[]; max?: number; empty?: string }) {
+export function Conditions({ conditions, max = 2, empty = 'Todo' }: { conditions: string[]; max?: number; empty?: string }) {
   if (conditions.length === 0) return <span className="text-xs text-muted-foreground">{empty}</span>;
   const rest = conditions.length - max;
   return (
@@ -123,7 +123,7 @@ export function Conditions({ conditions, max = 2, empty = 'Everything' }: { cond
       {rest > 0 ? (
         <Tooltip>
           <TooltipTrigger render={<span className="cursor-default" />}>
-            <Badge tone="neutral" className="font-normal">+{rest} more</Badge>
+            <Badge tone="neutral" className="font-normal">+{rest} más</Badge>
           </TooltipTrigger>
           <TooltipContent className="max-w-xs">
             <ul className="space-y-0.5">
@@ -262,10 +262,10 @@ export function OffsetPager({ total, limit, offset, href }: { total: number; lim
   if (total <= limit) return null;
   return (
     <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-      <span>{offset + 1} to {Math.min(offset + limit, total)} of {total}</span>
+      <span>{offset + 1} a {Math.min(offset + limit, total)} de {total}</span>
       <div className="flex gap-2">
-        {offset > 0 ? <LinkButton href={href(Math.max(0, offset - limit))} size="sm">‹ Previous</LinkButton> : null}
-        {offset + limit < total ? <LinkButton href={href(offset + limit)} size="sm">Next ›</LinkButton> : null}
+        {offset > 0 ? <LinkButton href={href(Math.max(0, offset - limit))} size="sm">‹ Anterior</LinkButton> : null}
+        {offset + limit < total ? <LinkButton href={href(offset + limit)} size="sm">Siguiente ›</LinkButton> : null}
       </div>
     </div>
   );

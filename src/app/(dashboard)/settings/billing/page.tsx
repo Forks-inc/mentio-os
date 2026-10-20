@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { topUpAction } from './actions';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Billing' };
+export const metadata = { title: 'Facturación' };
 
 const PATH = '/settings/billing';
 const DIMENSIONS = ['keyword', 'group', 'platform', 'day'] as const satisfies readonly UsageBreakdown['by'][];
@@ -23,13 +23,15 @@ const PAGE = 50;
 const RAIL_TITLE = 'text-sm font-semibold';
 
 const LEDGER_LABEL: Record<LedgerList['data'][number]['kind'], string> = {
-  signup_credit: 'Welcome credit',
-  topup: 'Funds added',
-  refund: 'Refund',
-  debit_keyword_days: 'Keywords',
-  debit_mentions: 'Mentions',
-  adjustment: 'Adjustment',
+  signup_credit: 'Saldo de bienvenida',
+  topup: 'Recarga',
+  refund: 'Reembolso',
+  debit_keyword_days: 'Términos monitoreados',
+  debit_mentions: 'Menciones',
+  adjustment: 'Ajuste',
 };
+
+const invoiceStatus = (status: string) => ({ paid: 'Pagada', refunded: 'Reembolsada', open: 'Pendiente', pending: 'Pendiente', failed: 'Fallida', void: 'Anulada' })[status as 'paid' | 'refunded' | 'open' | 'pending' | 'failed' | 'void'] ?? 'Otro estado';
 
 const signed = (cents: number) => `${cents > 0 ? '+' : cents < 0 ? '−' : ''}${money(Math.abs(cents))}`;
 
@@ -38,7 +40,7 @@ function lastMonths(n: number) {
   const now = new Date();
   return Array.from({ length: n }, (_, i) => {
     const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-    return [d.toISOString().slice(0, 7), new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d)] as const;
+    return [d.toISOString().slice(0, 7), new Intl.DateTimeFormat('es-MX', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(d)] as const;
   });
 }
 
@@ -53,7 +55,7 @@ function runningBalances(entries: LedgerList['data'], balanceCents: number) {
 }
 
 /**
- * The prepaid wallet, laid out like the Mentio dashboard's billing page: the
+ * The prepaid wallet: the
  * balance and what burns it, the ledger under it, a rail to add funds with
  * auto recharge and receipts, and the cost per keyword at the foot.
  */
@@ -74,7 +76,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
     api
       .getUsageBreakdown({ query: { by, ...(month ? { month } : { range }), limit: PAGE, offset } })
       .then((r) => ({ report: unwrap(r), error: null }))
-      .catch((error: unknown) => ({ report: null, error: error instanceof Error ? error.message : 'Could not load the breakdown.' })),
+      .catch((error: unknown) => ({ report: null, error: error instanceof Error ? error.message : 'No se pudo cargar el desglose.' })),
     api.listLedger({ query: { limit: 25, ...(cursor ? { cursor } : {}) } }).then(unwrap),
     // Receipts live with the payment provider; the rest of the page works without them.
     api.listInvoices().then(unwrap).catch(() => ({ data: [] })),
@@ -82,7 +84,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
 
   return (
     <div>
-      <PageHeader title="Billing" description="A prepaid balance, deducted daily. No plans, no subscription." />
+      <PageHeader title="Facturación" description="Saldo prepagado con cargos diarios. Sin planes ni suscripción." />
 
       <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1fr)_22rem] @4xl:grid-rows-[auto_1fr] @4xl:items-start">
         <BalanceCard wallet={wallet} />
@@ -90,41 +92,41 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
         <div className="grid gap-4 @4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-1">
           <Card>
             <CardHeader>
-              <CardTitle className={RAIL_TITLE}>Add funds</CardTitle>
+              <CardTitle className={RAIL_TITLE}>Recargar saldo</CardTitle>
             </CardHeader>
             <CardContent>
               {wallet.billingConfigured ? (
                 <ActionForm action={topUpAction} className="grid gap-4">
-                  <Field label="Amount in USD" hint={`Any amount from ${money(wallet.minTopUpCents)} to ${money(wallet.maxTopUpCents)}. You can still change it at checkout.`}>
+                  <Field label="Monto en USD" hint={`Desde ${money(wallet.minTopUpCents)} hasta ${money(wallet.maxTopUpCents)}. Podrás cambiarlo al completar el pago.`}>
                     <Input type="number" name="amount" inputMode="decimal" required min={wallet.minTopUpCents / 100} max={wallet.maxTopUpCents / 100} step="any" defaultValue={wallet.defaultTopUpCents / 100} className="max-w-40 tabular-nums" />
                   </Field>
                   <div>
-                    <SubmitButton>Add funds</SubmitButton>
+                    <SubmitButton>Agregar saldo</SubmitButton>
                   </div>
                 </ActionForm>
               ) : (
-                <p className="text-sm text-muted-foreground">Billing is not configured on this deployment, so funds cannot be added here.</p>
+                <p className="text-sm text-muted-foreground">La facturación no está configurada en esta instalación, así que no puedes agregar saldo aquí.</p>
               )}
             </CardContent>
-            <CardFooter className="text-xs text-muted-foreground">$5 per keyword per month and $0.008 per matched mention, deducted daily.</CardFooter>
+            <CardFooter className="text-xs text-muted-foreground">USD 5 por término monitoreado al mes y USD 0.008 por mención coincidente; se cobra a diario.</CardFooter>
           </Card>
 
           {wallet.autoRecharge.available ? (
             <Card>
               <CardHeader>
-                <CardTitle className={RAIL_TITLE}>Auto recharge</CardTitle>
-                <CardDescription className="text-xs">Tops the balance up from a saved card. Only an owner changes it, in the Mentio dashboard.</CardDescription>
+                  <CardTitle className={RAIL_TITLE}>Recarga automática</CardTitle>
+                  <CardDescription className="text-xs">Agrega saldo desde una tarjeta guardada. Solo una persona propietaria puede cambiar este ajuste desde el panel de administración.</CardDescription>
                 <CardAction>
-                  <Badge tone={wallet.autoRecharge.enabled ? 'good' : 'neutral'}>{wallet.autoRecharge.enabled ? 'On' : 'Off'}</Badge>
+                  <Badge tone={wallet.autoRecharge.enabled ? 'good' : 'neutral'}>{wallet.autoRecharge.enabled ? 'Activada' : 'Desactivada'}</Badge>
                 </CardAction>
               </CardHeader>
               {wallet.autoRecharge.enabled ? (
                 <CardContent className="grid gap-1 text-sm">
                   <p>
-                    Adds {money(wallet.autoRecharge.amountCents)} when the balance drops under {money(wallet.autoRecharge.thresholdCents)}.
+                    Agrega {money(wallet.autoRecharge.amountCents)} cuando el saldo baja de {money(wallet.autoRecharge.thresholdCents)}.
                   </p>
-                  {wallet.autoRecharge.lastRunAt ? <p className="text-xs text-muted-foreground">Last charge {date(wallet.autoRecharge.lastRunAt)}</p> : null}
-                  {wallet.autoRecharge.lastError ? <p className="text-xs text-destructive">Last attempt failed: {wallet.autoRecharge.lastError}</p> : null}
+                  {wallet.autoRecharge.lastRunAt ? <p className="text-xs text-muted-foreground">Último cargo: {date(wallet.autoRecharge.lastRunAt)}</p> : null}
+                  {wallet.autoRecharge.lastError ? <p className="text-xs text-destructive">Falló el último intento: {wallet.autoRecharge.lastError}</p> : null}
                 </CardContent>
               ) : null}
             </Card>
@@ -133,16 +135,16 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
           {invoices.data.length ? (
             <Card className="overflow-hidden py-0">
               <CardHeader className="pt-4">
-                <CardTitle className={RAIL_TITLE}>Receipts</CardTitle>
-                <CardDescription className="text-xs">One per paid top-up, tax included.</CardDescription>
+                  <CardTitle className={RAIL_TITLE}>Facturas</CardTitle>
+                  <CardDescription className="text-xs">Una por cada recarga pagada; impuestos incluidos.</CardDescription>
               </CardHeader>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="pl-4">Date</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="pl-4">Fecha</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
                     <TableHead className="pr-4 text-right">
-                      <span className="sr-only">Receipt</span>
+                      <span className="sr-only">Factura</span>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -152,16 +154,16 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
                       <TableCell className="pl-4">
                         <div className="grid justify-items-start gap-1">
                           <span>{date(inv.createdAt)}</span>
-                          <Badge tone={inv.paid ? 'good' : 'warn'} className="capitalize">{inv.status}</Badge>
+                          <Badge tone={inv.paid ? 'good' : 'warn'}>{invoiceStatus(inv.status)}</Badge>
                         </div>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {new Intl.NumberFormat('en', { style: 'currency', currency: inv.currency.toUpperCase() }).format(inv.totalAmount / 100)}
+                        {new Intl.NumberFormat('es-MX', { style: 'currency', currency: inv.currency.toUpperCase() }).format(inv.totalAmount / 100)}
                       </TableCell>
                       <TableCell className="pr-4 text-right">
                         {inv.paid ? (
                           <Button variant="ghost" size="sm" nativeButton={false} render={<a href={`${PATH}/invoices/${encodeURIComponent(inv.id)}`} target="_blank" rel="noreferrer" />}>
-                            Receipt
+                            Ver factura
                           </Button>
                         ) : null}
                       </TableCell>
@@ -178,17 +180,17 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
 
       <Card className="mt-4 overflow-hidden pb-0">
         <CardHeader>
-          <CardTitle>Cost breakdown</CardTitle>
+          <CardTitle>Desglose de costos</CardTitle>
           <CardDescription className="text-xs">
-            {breakdown.report ? `${day(breakdown.report.window.from)} to ${day(breakdown.report.window.to)}, at list price.` : 'What each keyword, group or platform cost.'}
+            {breakdown.report ? `${day(breakdown.report.window.from)} al ${day(breakdown.report.window.to)}, a precio de lista.` : 'Costo por término monitoreado, campaña o plataforma.'}
           </CardDescription>
           <CardAction className="flex flex-wrap items-center justify-end gap-2">
             <RangeLinks current={by} options={DIMENSIONS} href={(v) => withParams(PATH, params, { by: v, offset: undefined })} />
             <RangeLinks current={month ? '' : range} options={RANGES} href={(v) => withParams(PATH, params, { range: v, month: undefined, offset: undefined })} />
             <form method="get" action={PATH} className="flex items-center gap-1">
               <input type="hidden" name="by" value={by} />
-              <Select name="month" defaultValue={month} placeholder="Month" options={lastMonths(12)} className="h-7 w-32" aria-label="Month" />
-              <Button type="submit" variant="outline" size="sm">Show</Button>
+              <Select name="month" defaultValue={month} placeholder="Mes" options={lastMonths(12)} className="h-7 w-32" aria-label="Mes" />
+              <Button type="submit" variant="outline" size="sm">Mostrar</Button>
             </form>
           </CardAction>
         </CardHeader>
@@ -196,7 +198,7 @@ export default async function Billing({ searchParams }: { searchParams: Promise<
           <Breakdown report={breakdown.report} params={params} offset={offset} />
         ) : (
           <CardContent className="pb-4">
-            <Notice tone="bad" title="The breakdown could not be read.">{breakdown.error}</Notice>
+          <Notice tone="bad" title="No se pudo cargar el desglose.">{breakdown.error}</Notice>
           </CardContent>
         )}
       </Card>
@@ -209,36 +211,36 @@ function BalanceCard({ wallet }: { wallet: Wallet }) {
   return (
     <Card className="@container">
       <CardHeader>
-        <CardTitle>Balance</CardTitle>
+        <CardTitle>Saldo</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">{money(wallet.effectiveBalanceCents)}</p>
         <p className="mt-2 text-sm text-muted-foreground">
           {wallet.pendingCents > 0
-            ? `${money(wallet.balanceCents)} settled, ${money(wallet.pendingCents)} pending for mentions matched since the last daily settlement.`
-            : 'Keywords and mentions are deducted once a day.'}
+          ? `${money(wallet.balanceCents)} confirmado; ${money(wallet.pendingCents)} pendiente por menciones coincidentes desde el último corte diario.`
+            : 'Los términos monitoreados y las menciones se cobran una vez al día.'}
         </p>
 
         {wallet.stopped ? (
-          <Notice tone="bad" title="Tracking is paused: the balance ran out." className="mt-4">
-            {wallet.autoMutedKeywords} keywords are waiting. Adding funds that bring the balance to {money(wallet.resumeCostCents)} resumes them at once.
+          <Notice tone="bad" title="El monitoreo está en pausa: se agotó el saldo." className="mt-4">
+            Hay {wallet.autoMutedKeywords} términos esperando. Al agregar saldo hasta llegar a {money(wallet.resumeCostCents)}, se reanudarán de inmediato.
           </Notice>
         ) : wallet.lowBalance ? (
-          <Notice tone="warn" title="The balance is running low." className="mt-4">
-            Tracking stops when it drops under a day of keywords ({money(wallet.nextDayCents)}).
+          <Notice tone="warn" title="El saldo está por agotarse." className="mt-4">
+            El monitoreo se detendrá cuando el saldo baje del costo de un día de términos ({money(wallet.nextDayCents)}).
           </Notice>
         ) : null}
 
         <dl className="mt-6 grid grid-cols-2 gap-y-4 border-t pt-4 @md:grid-cols-4 @md:gap-y-0">
-          <Figure className="pl-0" label="Burn per day" value={money(wallet.burnPerDayCents)} />
-          <Figure className="border-l" label="Days left" value={wallet.daysLeft === null ? 'No spend' : `${wallet.daysLeft} days`} />
-          <Figure className="@max-md:pl-0 @md:border-l" label="Keywords" value={`${wallet.activeKeywords} running`} sub={wallet.autoMutedKeywords > 0 ? `${wallet.autoMutedKeywords} paused` : undefined} />
-          <Figure className="border-l pr-0" label="Next day costs" value={money(wallet.nextDayCents)} />
+          <Figure className="pl-0" label="Gasto diario" value={money(wallet.burnPerDayCents)} />
+          <Figure className="border-l" label="Días restantes" value={wallet.daysLeft === null ? 'Sin gasto' : `${wallet.daysLeft} días`} />
+          <Figure className="@max-md:pl-0 @md:border-l" label="Términos monitoreados" value={`${wallet.activeKeywords} activos`} sub={wallet.autoMutedKeywords > 0 ? `${wallet.autoMutedKeywords} en pausa` : undefined} />
+          <Figure className="border-l pr-0" label="Costo del próximo día" value={money(wallet.nextDayCents)} />
         </dl>
 
         {wallet.signupCredit ? (
           <p className="mt-4 text-xs text-muted-foreground">
-            Includes the {money(wallet.signupCredit.amountCents)} welcome credit from {date(wallet.signupCredit.grantedAt)}.
+            Incluye el saldo de bienvenida de {money(wallet.signupCredit.amountCents)}, otorgado el {date(wallet.signupCredit.grantedAt)}.
           </p>
         ) : null}
       </CardContent>
@@ -261,19 +263,19 @@ function LedgerCard({ ledger, balances, params, cursor }: { ledger: LedgerList; 
   return (
     <Card className="@container overflow-hidden py-0 @4xl:col-start-1 @4xl:row-start-2">
       <CardHeader className="pt-4">
-        <CardTitle>Ledger</CardTitle>
-        <CardDescription className="text-xs">Every credit and daily deduction, newest first.</CardDescription>
+        <CardTitle>Movimientos</CardTitle>
+        <CardDescription className="text-xs">Cada recarga y cargo diario, del más reciente al más antiguo.</CardDescription>
       </CardHeader>
       {ledger.data.length === 0 ? (
-        <p className="px-4 pb-4 text-sm text-muted-foreground">Nothing in the ledger yet.</p>
+        <p className="px-4 pb-4 text-sm text-muted-foreground">Aún no hay movimientos.</p>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-28">Date</TableHead>
-              <TableHead>Entry</TableHead>
-              <TableHead className="w-28 text-right">Amount</TableHead>
-              {balances ? <TableHead className="hidden w-28 text-right @lg:table-cell">Balance</TableHead> : null}
+              <TableHead className="w-28">Fecha</TableHead>
+              <TableHead>Movimiento</TableHead>
+              <TableHead className="w-28 text-right">Monto</TableHead>
+              {balances ? <TableHead className="hidden w-28 text-right @lg:table-cell">Saldo</TableHead> : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -284,7 +286,7 @@ function LedgerCard({ ledger, balances, params, cursor }: { ledger: LedgerList; 
                   <p className="font-medium">{LEDGER_LABEL[entry.kind]}</p>
                   {entry.units !== null ? (
                     <p className="text-xs text-muted-foreground">
-                      {compact(entry.units)} {entry.kind === 'debit_mentions' ? 'mentions' : 'keyword days'} settled so far
+                      {compact(entry.units)} {entry.kind === 'debit_mentions' ? 'menciones' : 'días de monitoreo'} cobrados hasta ahora
                     </p>
                   ) : entry.note ? (
                     <p className="text-xs text-muted-foreground">{entry.note}</p>
@@ -299,8 +301,8 @@ function LedgerCard({ ledger, balances, params, cursor }: { ledger: LedgerList; 
       )}
       {cursor || ledger.nextCursor ? (
         <div className="flex gap-2 border-t px-4 py-3">
-          {cursor ? <LinkButton href={withParams(PATH, params, { ledger: undefined })} variant="ghost" size="sm">‹ Newest</LinkButton> : null}
-          {ledger.nextCursor ? <LinkButton href={withParams(PATH, params, { ledger: ledger.nextCursor })} variant="ghost" size="sm">Load older</LinkButton> : null}
+          {cursor ? <LinkButton href={withParams(PATH, params, { ledger: undefined })} variant="ghost" size="sm">‹ Más recientes</LinkButton> : null}
+          {ledger.nextCursor ? <LinkButton href={withParams(PATH, params, { ledger: ledger.nextCursor })} variant="ghost" size="sm">Cargar anteriores</LinkButton> : null}
         </div>
       ) : null}
     </Card>
@@ -315,7 +317,7 @@ function Breakdown({ report, params, offset }: { report: UsageBreakdown; params:
     return (
       <>
         {row.label}
-        {removed ? <Badge className="ml-2">Deleted</Badge> : null}
+        {removed ? <Badge className="ml-2">Eliminado</Badge> : null}
       </>
     );
   };
@@ -323,23 +325,23 @@ function Breakdown({ report, params, offset }: { report: UsageBreakdown; params:
     <>
       <CardContent>
         <dl className="grid grid-cols-2 gap-y-4 border-y py-4 @lg:grid-cols-4 sm:gap-y-0">
-          <Figure className="pl-0" label="Total" value={money(t.totalCents)} sub={`${money(t.ledgerDebitCents)} deducted so far`} />
-          <Figure className="border-l" label="Keywords" value={money(t.keywordCents)} sub={`${compact(t.keywordDays)} keyword days`} />
-          <Figure className="max-sm:pl-0 sm:border-l" label="Mentions" value={money(t.mentionCents)} sub={`${compact(t.billableMentions)} billed`} />
-          <Figure className="border-l pr-0" label="Matched" value={compact(t.matchedMentions)} sub={t.unclassifiedMentions ? `${compact(t.unclassifiedMentions)} unscored, free` : 'Relevant or not'} />
+          <Figure className="pl-0" label="Total" value={money(t.totalCents)} sub={`${money(t.ledgerDebitCents)} cobrados hasta ahora`} />
+          <Figure className="border-l" label="Términos monitoreados" value={money(t.keywordCents)} sub={`${compact(t.keywordDays)} días de monitoreo`} />
+          <Figure className="max-sm:pl-0 sm:border-l" label="Menciones" value={money(t.mentionCents)} sub={`${compact(t.billableMentions)} cobradas`} />
+          <Figure className="border-l pr-0" label="Coincidencias" value={compact(t.matchedMentions)} sub={t.unclassifiedMentions ? `${compact(t.unclassifiedMentions)} sin clasificar, gratis` : 'Relevantes o no'} />
         </dl>
       </CardContent>
       {report.data.length === 0 ? (
-        <p className="px-4 pb-4 text-sm text-muted-foreground">Nothing was charged in this window.</p>
+        <p className="px-4 pb-4 text-sm text-muted-foreground">No hubo cargos en este periodo.</p>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{report.by === 'day' ? 'Day' : report.by.charAt(0).toUpperCase() + report.by.slice(1)}</TableHead>
-              <TableHead className="text-right">Keyword days</TableHead>
-              <TableHead className="text-right">Billed mentions</TableHead>
-              <TableHead className="text-right">Keywords</TableHead>
-              <TableHead className="text-right">Mentions</TableHead>
+              <TableHead>{report.by === 'day' ? 'Día' : report.by === 'keyword' ? 'Término monitoreado' : report.by === 'group' ? 'Campaña' : 'Plataforma'}</TableHead>
+              <TableHead className="text-right">Días de monitoreo</TableHead>
+              <TableHead className="text-right">Menciones cobradas</TableHead>
+              <TableHead className="text-right">Términos monitoreados</TableHead>
+              <TableHead className="text-right">Menciones</TableHead>
               <TableHead className="text-right">Total</TableHead>
             </TableRow>
           </TableHeader>

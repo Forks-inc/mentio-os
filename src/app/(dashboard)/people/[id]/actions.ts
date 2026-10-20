@@ -32,7 +32,7 @@ export async function updatePerson(_: ActionState, form: FormData): Promise<Acti
       }),
     );
     refresh(id);
-    return 'Saved';
+    return 'Cambios guardados';
   });
 }
 
@@ -40,10 +40,10 @@ export async function logActivity(_: ActionState, form: FormData): Promise<Actio
   return run(async () => {
     const id = str(form, 'id');
     const channel = str(form, 'channel');
-    if (!isOneOf(ACTIVITY_CHANNELS, channel)) throw new Error('Pick how you reached them.');
+    if (!isOneOf(ACTIVITY_CHANNELS, channel)) throw new Error('Elige cómo se realizó el contacto.');
     const when = str(form, 'occurredAt');
     const occurredAt = when ? new Date(`${when}Z`) : null;
-    if (occurredAt && Number.isNaN(occurredAt.getTime())) throw new Error('That date is not valid.');
+    if (occurredAt && Number.isNaN(occurredAt.getTime())) throw new Error('La fecha no es válida.');
     unwrap(
       await mentio().logPersonActivity({
         path: { id },
@@ -51,7 +51,7 @@ export async function logActivity(_: ActionState, form: FormData): Promise<Actio
       }),
     );
     refresh(id);
-    return 'Logged';
+    return 'Contacto registrado';
   });
 }
 
@@ -60,7 +60,7 @@ export async function deleteActivity(_: ActionState, form: FormData): Promise<Ac
     const id = str(form, 'id');
     unwrap(await mentio().deletePersonActivity({ path: { id, activityId: str(form, 'activityId') } }));
     refresh(id);
-    return 'Deleted';
+    return 'Entrada eliminada';
   });
 }
 
@@ -69,8 +69,8 @@ export async function mergePeople(_: ActionState, form: FormData): Promise<Actio
   return run(async () => {
     const from = str(form, 'from');
     const into = str(form, 'into');
-    if (!from || !into) throw new Error('Pick a person to merge with.');
-    if (from === into) throw new Error('That is the same person.');
+    if (!from || !into) throw new Error('Elige el autor con quien quieres combinar este registro.');
+    if (from === into) throw new Error('Elegiste el mismo autor.');
     const person = unwrap(await mentio().mergePeople({ path: { id: from }, body: { into } }));
     refresh(from);
     refresh(person.id);
@@ -84,6 +84,6 @@ export async function splitAccount(_: ActionState, form: FormData): Promise<Acti
     const id = str(form, 'id');
     unwrap(await mentio().splitPerson({ path: { id: str(form, 'accountId') } }));
     refresh(id);
-    return 'Split out';
+    return 'Cuenta separada';
   });
 }

@@ -8,7 +8,7 @@ import { passwordProtected } from '@/lib/session';
 import { one, type SearchParams } from '@/lib/params';
 import { signIn } from './actions';
 
-export const metadata = { title: 'Sign in' };
+export const metadata = { title: 'Entrar' };
 // Reads DASHBOARD_PASSWORD per request, never at build time.
 export const dynamic = 'force-dynamic';
 
@@ -21,16 +21,16 @@ export default async function Login({ searchParams }: { searchParams: Promise<Se
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <BrandMark className="mx-auto mb-2 size-9 text-base" />
-          <CardTitle className="text-lg">Sign in to {brand.name}</CardTitle>
-          <CardDescription>Enter the dashboard password.</CardDescription>
+          <CardTitle className="text-lg">Entrar a {brand.name}</CardTitle>
+          <CardDescription>Escribe la contraseña del panel.</CardDescription>
         </CardHeader>
         <CardContent>
           <ActionForm action={signIn} className="grid gap-4">
             <input type="hidden" name="next" value={next} />
-            <Field label="Password">
+            <Field label="Contraseña">
               <Input type="password" name="password" required autoFocus autoComplete="current-password" />
             </Field>
-            <SubmitButton>Sign in</SubmitButton>
+            <SubmitButton>Entrar</SubmitButton>
           </ActionForm>
         </CardContent>
       </Card>

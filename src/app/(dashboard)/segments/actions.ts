@@ -11,7 +11,7 @@ import { audienceFilter, formToParams } from '../people/filters';
 export async function createSegment(_: ActionState, form: FormData): Promise<ActionState> {
   return run(async () => {
     const name = str(form, 'name');
-    if (!name) throw new Error('Give the segment a name.');
+    if (!name) throw new Error('Escribe un nombre para el segmento.');
     const segment = unwrap(
       await mentio().createSegment({ body: { name, description: str(form, 'description'), filter: audienceFilter(formToParams(form)) } }),
     );
@@ -25,10 +25,10 @@ export async function savePreset(_: ActionState, form: FormData): Promise<Action
   return run(async () => {
     const { presets } = unwrap(await mentio().listSegments());
     const preset = presets.find((p) => p.key === str(form, 'key'));
-    if (!preset) throw new Error('That preset no longer exists.');
+    if (!preset) throw new Error('Esta plantilla ya no existe.');
     unwrap(await mentio().createSegment({ body: { name: preset.name, description: preset.description, filter: preset.filter } }));
     revalidatePath('/segments');
-    return `Saved ${preset.name}`;
+    return `Plantilla guardada: ${preset.name}`;
   });
 }
 
@@ -37,7 +37,7 @@ export async function updateSegment(_: ActionState, form: FormData): Promise<Act
   return run(async () => {
     const id = str(form, 'id');
     const name = str(form, 'name');
-    if (!name) throw new Error('A segment needs a name.');
+    if (!name) throw new Error('El segmento necesita un nombre.');
     unwrap(
       await mentio().updateSegment({
         path: { id },
@@ -46,7 +46,7 @@ export async function updateSegment(_: ActionState, form: FormData): Promise<Act
     );
     revalidatePath('/segments');
     revalidatePath(`/segments/${id}`);
-    return 'Saved';
+    return 'Cambios guardados';
   });
 }
 

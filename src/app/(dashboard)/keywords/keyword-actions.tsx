@@ -9,13 +9,13 @@ export function KeywordActions({ keyword, backToList = false, size = 'sm' }: { k
       <ActionForm action={setMutedAction}>
         <input type="hidden" name="id" value={keyword.id} />
         <input type="hidden" name="muted" value={keyword.muted ? 'false' : 'true'} />
-        <SubmitButton variant="secondary" size={size}>{keyword.muted ? 'Resume' : 'Pause'}</SubmitButton>
+        <SubmitButton variant="secondary" size={size}>{keyword.muted ? 'Reanudar' : 'Pausar'}</SubmitButton>
       </ActionForm>
       <ActionForm action={deleteKeywordAction}>
         <input type="hidden" name="id" value={keyword.id} />
         {backToList ? <input type="hidden" name="backToList" value="true" /> : null}
-        <SubmitButton variant="danger" size={size} confirm={`Delete "${keyword.term}"? It stops tracking and its mentions are removed from this workspace.`}>
-          Delete
+        <SubmitButton variant="danger" size={size} confirm={`¿Eliminar "${keyword.term}"? Se detendrá el monitoreo y se quitarán sus menciones de este espacio de trabajo.`}>
+          Eliminar
         </SubmitButton>
       </ActionForm>
     </div>

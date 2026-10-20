@@ -11,9 +11,9 @@ import { ShareOfVoice } from './voice';
 import { RANGES, keywordName, readWindow } from './window';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Analytics' };
+export const metadata = { title: 'Análisis' };
 
-/** One window, four reports: overview, breakdowns, share of voice and reviews. */
+  /** One window, four reports: overview, breakdowns, share of voice and reviews. */
 export default async function Analytics({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const { query, tab: asked, range } = readWindow(params);
@@ -27,17 +27,17 @@ export default async function Analytics({ searchParams }: { searchParams: Promis
   const tab = asked === 'reviews' && !hasReviews ? 'overview' : asked;
   const tabHref = (value: string) => withParams('/analytics', params, { tab: value === 'overview' ? undefined : value });
   const tabs = [
-    { value: 'overview', label: 'Overview', href: tabHref('overview') },
-    { value: 'breakdowns', label: 'Breakdowns', href: tabHref('breakdowns') },
-    { value: 'voice', label: 'Share of voice', href: tabHref('voice') },
-    ...(hasReviews ? [{ value: 'reviews', label: 'Reviews', href: tabHref('reviews') }] : []),
+    { value: 'overview', label: 'Resumen', href: tabHref('overview') },
+    { value: 'breakdowns', label: 'Desgloses', href: tabHref('breakdowns') },
+    { value: 'voice', label: 'Participación de voz', href: tabHref('voice') },
+    ...(hasReviews ? [{ value: 'reviews', label: 'Reseñas', href: tabHref('reviews') }] : []),
   ];
 
   return (
     <div>
       <PageHeader
-        title="Analytics"
-        description={`${day(summary.window.from)} to ${day(summary.window.to)}, ${summary.window.days} days, compared with the ${summary.window.days} days before.`}
+        title="Análisis"
+        description={`Del ${day(summary.window.from)} al ${day(summary.window.to)} · ${summary.window.days} días, comparados con los ${summary.window.days} días anteriores.`}
         actions={<RangeLinks current={range} options={RANGES} href={(value) => withParams('/analytics', params, { range: value, from: undefined, to: undefined })} />}
       />
 
@@ -45,9 +45,9 @@ export default async function Analytics({ searchParams }: { searchParams: Promis
         keep={['tab', 'range']}
         reset={[]}
         filters={[
-          { param: 'keywordIds', label: 'Keyword', icon: 'tag', kind: 'multi', options: keywords.data.map((k) => ({ value: k.id, label: `${keywordName(k)} (${k.kind})` })) },
-          { param: 'platforms', label: 'Platform', icon: 'platform', kind: 'multi', options: Object.entries(PLATFORM_NAMES).map(([value, label]) => ({ value, label, platform: value })) },
-          { param: 'from', label: 'Dates', icon: 'calendar', kind: 'dates', untilParam: 'to' },
+          { param: 'keywordIds', label: 'Término monitoreado', icon: 'tag', kind: 'multi', options: keywords.data.map((k) => ({ value: k.id, label: `${keywordName(k)} (${({ brand: 'candidato', competitor: 'adversario', topic: 'tema' } as Record<string, string>)[k.kind] ?? k.kind})` })) },
+          { param: 'platforms', label: 'Canal', icon: 'platform', kind: 'multi', options: Object.entries(PLATFORM_NAMES).map(([value, label]) => ({ value, label, platform: value })) },
+          { param: 'from', label: 'Fechas', icon: 'calendar', kind: 'dates', untilParam: 'to' },
         ]}
       />
 

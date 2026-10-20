@@ -23,21 +23,21 @@ export function MentionCard({ mention, actions = true }: { mention: Mention; act
   const { post, author, classification: verdict } = mention;
   const views = post.engagement?.views;
   const href = `/mentions/${encodeURIComponent(mention.id)}`;
-  const title = post.text || mention.review?.title || '(no text)';
+  const title = post.text || mention.review?.title || '(sin texto)';
   return (
     <article className="rounded-lg border border-line bg-card p-4 transition hover:border-border">
       <Link href={href} className="block">
         <header className="flex items-center gap-2 text-sm">
           <Avatar name={author?.name} url={author?.avatarUrl} />
-          <span className="min-w-0 truncate font-medium">{author?.name ?? author?.handle ?? 'Unknown'}</span>
-          {author?.followers ? <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{compact(author.followers)} followers</span> : null}
+          <span className="min-w-0 truncate font-medium">{author?.name ?? author?.handle ?? 'Desconocido'}</span>
+          {author?.followers ? <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{compact(author.followers)} seguidores</span> : null}
           <span className="ml-auto shrink-0 text-xs text-muted-foreground">
             {platformName(post.platform)} · {timeAgo(post.publishedAt)}
           </span>
         </header>
 
         {mention.review ? (
-          <p className="mt-3 text-sm text-amber-500" aria-label={`${mention.review.rating} of ${mention.review.ratingMax} stars`}>
+          <p className="mt-3 text-sm text-amber-500" aria-label={`${mention.review.rating} de ${mention.review.ratingMax} estrellas`}>
             {'★'.repeat(Math.max(0, Math.min(mention.review.rating, mention.review.ratingMax)))}
             <span className="text-zinc-300">{'★'.repeat(Math.max(0, mention.review.ratingMax - mention.review.rating))}</span>
           </p>
@@ -49,14 +49,14 @@ export function MentionCard({ mention, actions = true }: { mention: Mention; act
         {verdict?.relevance !== undefined && verdict?.relevance !== null ? (
           <Badge tone={mention.relevant ? 'solid' : 'neutral'} className="font-mono">{verdict.relevance}</Badge>
         ) : null}
-        {verdict?.sentiment ? <Badge tone={sentimentTone(verdict.sentiment)}>{verdict.sentiment}</Badge> : null}
+        {verdict?.sentiment ? <Badge tone={sentimentTone(verdict.sentiment)}>{sentimentName(verdict.sentiment)}</Badge> : null}
         {(verdict?.intents ?? []).map((intent, intentIndex) => (
           <Badge key={`${intent}-${intentIndex}`} tone="accent">{tagName(intent)}</Badge>
         ))}
-        {verdict?.uncertain ? <Badge tone="warn">uncertain</Badge> : null}
+        {verdict?.uncertain ? <Badge tone="warn">Incierta</Badge> : null}
         <Badge tone="outline">{keywordLabel(mention.keyword)}</Badge>
-        {views ? <span className="text-muted-foreground">{compact(views)} views</span> : null}
-        {mention.status !== 'open' ? <Badge tone="neutral">{mention.status}</Badge> : null}
+        {views ? <span className="text-muted-foreground">{compact(views)} vistas</span> : null}
+        {mention.status !== 'open' ? <Badge tone="neutral">{statusName(mention.status)}</Badge> : null}
         {mention.triage.assignee ? <span className="text-muted-foreground">→ {mention.triage.assignee.name ?? mention.triage.assignee.email}</span> : null}
       </div>
 
@@ -64,18 +64,21 @@ export function MentionCard({ mention, actions = true }: { mention: Mention; act
 
       <footer className="mt-3 flex flex-wrap items-center gap-3 text-xs">
         <a href={post.url} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
-          Open on {platformName(post.platform)} ↗
+          Ver en {platformName(post.platform)} ↗
         </a>
-        <Link href={href} className="text-muted-foreground hover:text-foreground">Details</Link>
+        <Link href={href} className="text-muted-foreground hover:text-foreground">Detalles</Link>
         {actions ? (
           <ActionForm action={setMentionStatus} className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
             <input type="hidden" name="id" value={mention.id} />
-            {mention.status !== 'done' ? <SubmitButton variant="secondary" size="sm" name="status" value="done">Done</SubmitButton> : null}
-            {mention.status !== 'ignored' ? <SubmitButton variant="secondary" size="sm" name="status" value="ignored">Ignore</SubmitButton> : null}
-            {mention.status !== 'open' ? <SubmitButton variant="secondary" size="sm" name="status" value="open">Reopen</SubmitButton> : null}
+            {mention.status !== 'done' ? <SubmitButton variant="secondary" size="sm" name="status" value="done">Resolver</SubmitButton> : null}
+            {mention.status !== 'ignored' ? <SubmitButton variant="secondary" size="sm" name="status" value="ignored">Ignorar</SubmitButton> : null}
+            {mention.status !== 'open' ? <SubmitButton variant="secondary" size="sm" name="status" value="open">Reabrir</SubmitButton> : null}
           </ActionForm>
         ) : null}
       </footer>
     </article>
   );
 }
+
+const sentimentName = (value: string) => ({ positive: 'Positivo', neutral: 'Neutral', negative: 'Negativo' })[value] ?? value;
+const statusName = (value: string) => ({ new: 'Nuevo', open: 'Abierto', done: 'Resuelto', snoozed: 'Pospuesto', ignored: 'Ignorado' })[value] ?? value;

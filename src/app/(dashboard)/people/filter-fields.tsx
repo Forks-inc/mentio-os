@@ -10,5 +10,5 @@ import { audienceFilterDefs } from './filter-defs';
 import type { AudienceFilter } from './filters';
 
 export function FilterFields({ filter, members }: { filter: AudienceFilter; members: Member[] }) {
-  return <FormFilters filters={audienceFilterDefs(members)} defaults={filterDefaults(filter)} empty="No conditions: everyone." />;
+  return <FormFilters filters={audienceFilterDefs(members)} defaults={filterDefaults(filter)} empty="Sin condiciones: toda la audiencia." />;
 }

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const headers: Record<string, string> = { 'content-type': 'text/plain; charset=utf-8' };
     const retry = result.response?.headers.get('retry-after');
     if (retry) headers['retry-after'] = retry;
-    return new Response(body?.error?.message ?? 'The export failed.', { status, headers });
+    return new Response(body?.error?.message ?? 'No se pudo exportar el archivo.', { status, headers });
   }
   const day = new Date().toISOString().slice(0, 10);
   return new Response(result.data, {

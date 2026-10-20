@@ -24,7 +24,7 @@ export async function createApiKeyAction(_: SecretState, form: FormData): Promis
       }),
     );
     revalidatePath('/settings/api-keys');
-    return { ok: `Key "${key.name}" created`, secret: key.key };
+    return { ok: `Clave "${key.name}" creada`, secret: key.key };
   });
 }
 
@@ -32,6 +32,6 @@ export async function revokeApiKeyAction(_: ActionState, form: FormData): Promis
   return run(async () => {
     unwrap(await mentio().revokeApiKey({ path: { id: str(form, 'id') } }));
     revalidatePath('/settings/api-keys');
-    return 'Key revoked';
+    return 'Clave revocada';
   });
 }

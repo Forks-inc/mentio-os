@@ -50,41 +50,41 @@ export function AlertForm({
 
       <Section title="Rule">
         <div className="grid gap-4 @lg:grid-cols-2">
-          <Field label="Name">
-            <Input name="name" required maxLength={80} defaultValue={alert?.name} placeholder="Negative mentions of our brand" />
+          <Field label="Nombre">
+            <Input name="name" required maxLength={80} defaultValue={alert?.name} placeholder="Menciones negativas de la candidatura" />
           </Field>
-          <Field label="Webhook event name" hint="Carried in webhook payloads. Empty uses the default (mention.matched, or digest).">
-            <Input name="event" maxLength={60} defaultValue={alert?.event ?? ''} placeholder="mention.negative" />
+          <Field label="Nombre del evento de webhook" hint="Se incluye en los datos del webhook. Si lo dejas vacío, se usa el evento predeterminado o el resumen periódico.">
+            <Input name="event" maxLength={60} defaultValue={alert?.event ?? ''} placeholder="candidato.mencion.negativa" />
           </Field>
         </div>
-        <SwitchRow name="enabled" defaultChecked={alert?.enabled ?? true} label="Enabled" hint="A disabled rule keeps its settings and sends nothing." />
+        <SwitchRow name="enabled" defaultChecked={alert?.enabled ?? true} label="Activa" hint="Una regla desactivada conserva sus ajustes, pero no envía avisos." />
       </Section>
 
-      <Section title="When it sends" description="Instant sends each mention as it arrives. A digest sends one summary at a set local time.">
+      <Section title="Cuándo se envía" description="El envío inmediato avisa cuando llega cada mención. El resumen periódico reúne las menciones y se envía a la hora local indicada.">
         <div className="grid gap-4 @lg:grid-cols-2">
-          <Field group label="Mode" className="@lg:col-span-2">
+          <Field group label="Frecuencia" className="@lg:col-span-2">
             <Segmented
               name="mode"
               defaultValue={alert?.mode ?? 'instant'}
-              options={MODES.map((m) => ({ value: m, label: MODE_LABELS[m], description: m === 'instant' ? 'Each mention as it arrives.' : m === 'daily' ? 'One summary a day, at the time below.' : 'One summary a week, on the day below.' }))}
+              options={MODES.map((m) => ({ value: m, label: MODE_LABELS[m], description: m === 'instant' ? 'Cada mención se envía al momento.' : m === 'daily' ? 'Un resumen al día, a la hora indicada.' : 'Un resumen a la semana, el día y la hora indicados.' }))}
             />
           </Field>
-          <Field label="Weekday" hint="Weekly digests only.">
+          <Field label="Día de la semana" hint="Solo para resúmenes semanales.">
             <Select name="weekday" defaultValue={String(s?.weekday ?? 1)} options={WEEKDAYS.map((d, i) => [String(i), d] as const)} />
           </Field>
-          <Field label="Time" hint="Daily and weekly digests.">
+          <Field label="Hora" hint="Para resúmenes diarios y semanales.">
             <Input type="time" name="time" defaultValue={s ? timeOf(s) : '09:00'} />
           </Field>
-          <Field label="Timezone" hint="An IANA zone, like Europe/Madrid.">
-            <Combobox name="timezone" options={timezones()} defaultValue={s?.timezone ?? 'UTC'} placeholder="Search a zone" />
+          <Field label="Zona horaria" hint="Una zona IANA, como America/Mexico_City.">
+            <Combobox name="timezone" options={timezones()} defaultValue={s?.timezone ?? 'UTC'} placeholder="Buscar una zona" />
           </Field>
         </div>
-        <SwitchRow name="skipEmpty" defaultChecked={s?.skipEmpty ?? true} label="Skip the digest when nothing matched" />
+        <SwitchRow name="skipEmpty" defaultChecked={s?.skipEmpty ?? true} label="Omitir el resumen si no hay coincidencias" />
       </Section>
 
-      <Section title="Where it sends" description={<>Pick one or more channels. <Link href="/channels/new" className="text-primary hover:underline">Add a channel</Link></>}>
+      <Section title="Canales de envío" description={<>Elige uno o más canales. <Link href="/channels/new" className="text-primary hover:underline">Agregar un canal</Link></>}>
         {channels.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No channels yet. The rule can be saved and connected later.</p>
+          <p className="text-sm text-muted-foreground">Aún no hay canales. Puedes guardar la regla y conectarle canales después.</p>
         ) : (
           <CheckboxGroup
             name="channelIds"
@@ -94,34 +94,34 @@ export function AlertForm({
         )}
       </Section>
 
-      <Section title="What it watches" description="Every condition you set must hold. Leave a field empty to accept anything.">
+      <Section title="Qué monitorea" description="Deben cumplirse todas las condiciones que configures. Deja un campo vacío para aceptar cualquier valor.">
         <Field
-          label="Minimum relevance"
-          hint={`0 to 100. Empty sends relevant mentions only (scored ${RELEVANCE_LINE} and up). Under ${RELEVANCE_LINE} also sends what the classifier scored as noise; 0 sends every match. Email channels always keep the ${RELEVANCE_LINE} line.`}
+          label="Relevancia mínima"
+          hint={`De 0 a 100. Si lo dejas vacío, se envían solo menciones relevantes (con puntuación de ${RELEVANCE_LINE} o más). Por debajo de ${RELEVANCE_LINE} también se incluye contenido clasificado como ruido; 0 envía todas las coincidencias. Los canales de correo siempre conservan el mínimo de ${RELEVANCE_LINE}.`}
         >
           <Input type="number" name="minRelevance" min={0} max={100} step={1} defaultValue={f.minRelevance ?? ''} placeholder={String(RELEVANCE_LINE)} className="@lg:max-w-40" />
         </Field>
 
-        <Field group label="Conditions" hint="Every condition must hold. No conditions sends every relevant mention.">
+        <Field group label="Condiciones" hint="Deben cumplirse todas. Sin condiciones, se envían todas las menciones relevantes.">
           <FormFilters
             filters={alertFilterDefs(
               keywords.map((k) => ({ value: k.id, label: k.group.isDefault ? k.term : `${k.term} (${k.group.name})` })),
               groups.length > 1 ? groups.map((g) => ({ value: g.id, label: g.name })) : [],
             )}
             defaults={filterDefaults({ ...f, minRelevance: undefined, excludeAuthors: undefined })}
-            empty="No conditions yet."
+            empty="Aún no hay condiciones."
           />
         </Field>
 
         {alert ? null : (
-          <Field label="Muted authors" hint="One per line: profile or post links, @handles or names. Never sent.">
+          <Field label="Autores silenciados" hint="Uno por línea: enlaces a perfiles o publicaciones, @usuarios o nombres. Nunca se envían sus menciones.">
             <Textarea name="excludeAuthors" rows={3} placeholder={'x.com/somebot\n@spammer'} />
           </Field>
         )}
       </Section>
 
       <div data-slot="form-actions" className="flex justify-end">
-        <SubmitButton>{alert ? 'Save alert' : 'Create alert'}</SubmitButton>
+        <SubmitButton>{alert ? 'Guardar alerta' : 'Crear alerta'}</SubmitButton>
       </div>
     </ActionForm>
   );

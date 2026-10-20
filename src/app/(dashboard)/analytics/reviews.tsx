@@ -16,26 +16,26 @@ export function Reviews({ report, query }: { report: ReviewsReport; query: Windo
   return (
     <div className="space-y-6">
       <div className="grid gap-3 @lg:grid-cols-2 @4xl:grid-cols-4">
-        <Stat label="Reviews" value={compact(totals.reviews)} hint={<Delta current={totals.reviews} previous={previous?.reviews} />} href={link({})} />
+        <Stat label="Reseñas" value={compact(totals.reviews)} hint={<Delta current={totals.reviews} previous={previous?.reviews} />} href={link({})} />
         <Stat
-          label="Average rating"
+          label="Calificación promedio"
           value={stars(totals.averageRating)}
-          hint={previous?.averageRating != null && totals.averageRating !== null ? `${previous.averageRating.toFixed(1)} ★ before` : undefined}
+          hint={previous?.averageRating != null && totals.averageRating !== null ? `${previous.averageRating.toFixed(1)} ★ en el periodo anterior` : undefined}
         />
-        <Stat label="Replied to" value={compact(totals.responded)} hint={totals.reviews ? `${Math.round((totals.responded / totals.reviews) * 100)}% of reviews` : undefined} />
-        <Stat label="Open 1 and 2 star" value={compact(totals.openNegative)} hint="Not marked done or ignored" href={link({ ratings: '1,2', status: 'open' })} />
+        <Stat label="Con respuesta" value={compact(totals.responded)} hint={totals.reviews ? `${Math.round((totals.responded / totals.reviews) * 100)}% de las reseñas` : undefined} />
+        <Stat label="Abiertas con 1 o 2 estrellas" value={compact(totals.openNegative)} hint="Sin resolver ni ignorar" href={link({ ratings: '1,2', status: 'open' })} />
       </div>
 
       <div className="grid gap-6 @4xl:grid-cols-2">
-        <Card title="Stars">
+        <Card title="Calificaciones">
           <BarList items={STARS.map((s) => ({ label: `${s} ★`, value: totals.distribution[s], href: link({ ratings: String(s) }) }))} />
         </Card>
-        <Card title="What unhappy reviews are about" description="Tags on the 1 and 2 star reviews.">
+        <Card title="Temas de las reseñas negativas" description="Etiquetas de las reseñas con 1 o 2 estrellas.">
           <BarList items={report.tags.slice(0, 10).map((t) => ({ label: tagName(t.tag), value: t.count, href: link({ ratings: '1,2', intents: t.tag }) }))} />
         </Card>
       </div>
 
-      <Table head={['Page', 'Reviews', 'Trend', 'Average', '1 to 5 stars', 'Replied', 'Open negative']}>
+      <Table head={['Página', 'Reseñas', 'Tendencia', 'Promedio', 'De 1 a 5 estrellas', 'Con respuesta', 'Negativas abiertas']}>
         {report.pages.map((page) => (
           <TableRow key={`${page.platform}:${page.id}`}>
             <TableCell className={td}>

@@ -14,7 +14,7 @@ async function teamWrite<T>(result: Promise<{ data?: T; error?: unknown }>) {
     return unwrap(await result);
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('forbidden')) {
-      throw new Error(`${error.message} Team changes need a signed-in owner or admin: make them in the Mentio dashboard (app.mentio.dev).`);
+      throw new Error('Para cambiar el equipo, inicia sesión como propietario o administrador desde el panel de administración.');
     }
     throw error;
   }
@@ -25,7 +25,7 @@ export async function inviteAction(_: ActionState, form: FormData): Promise<Acti
     const role = str(form, 'role') === 'admin' ? 'admin' : 'member';
     const invitation = await teamWrite(mentio().createInvitation({ body: { email: str(form, 'email'), role } }));
     revalidatePath('/settings/team');
-    return `Invitation sent to ${invitation.email}`;
+    return `Invitación enviada a ${invitation.email}`;
   });
 }
 
@@ -33,7 +33,7 @@ export async function revokeInvitationAction(_: ActionState, form: FormData): Pr
   return run(async () => {
     await teamWrite(mentio().revokeInvitation({ path: { id: str(form, 'id') } }));
     revalidatePath('/settings/team');
-    return 'Invitation revoked';
+    return 'Invitación cancelada';
   });
 }
 
@@ -41,6 +41,6 @@ export async function removeMemberAction(_: ActionState, form: FormData): Promis
   return run(async () => {
     await teamWrite(mentio().removeMember({ path: { id: str(form, 'id') } }));
     revalidatePath('/settings/team');
-    return 'Member removed';
+    return 'Miembro eliminado';
   });
 }

@@ -10,7 +10,7 @@ import { getterFromForm, parseFilters, toViewFilter } from '@/app/(dashboard)/me
 export async function createView(_state: ActionState, form: FormData): Promise<ActionState> {
   return run(async () => {
     const name = str(form, 'name');
-    if (!name) throw new Error('Give the view a name.');
+    if (!name) throw new Error('Escribe un nombre para la vista.');
     const view = unwrap(
       await mentio().createView({ body: { name, description: str(form, 'description'), filter: toViewFilter(parseFilters(getterFromForm(form))) } }),
     );
@@ -24,7 +24,7 @@ export async function updateView(_state: ActionState, form: FormData): Promise<A
   return run(async () => {
     const id = str(form, 'id');
     const name = str(form, 'name');
-    if (!name) throw new Error('Give the view a name.');
+    if (!name) throw new Error('Escribe un nombre para la vista.');
     unwrap(
       await mentio().updateView({ path: { id }, body: { name, description: str(form, 'description'), filter: toViewFilter(parseFilters(getterFromForm(form))) } }),
     );

@@ -3,5 +3,5 @@ import { RouteDrawer } from '@/components/route-drawer';
 
 /** The drawer itself, kept open while the record loads and when it arrives. */
 export default function DrawerLayout({ children }: { children: ReactNode }) {
-  return <RouteDrawer title="Segment">{children}</RouteDrawer>;
+  return <RouteDrawer title="Segmento">{children}</RouteDrawer>;
 }

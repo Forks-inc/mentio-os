@@ -9,10 +9,10 @@ export type ActionState = { ok?: string; error?: string; at?: number } | null;
 export async function run(work: () => Promise<string | void>): Promise<ActionState> {
   try {
     const message = await work();
-    return { ok: message || 'Saved', at: Date.now() };
+    return { ok: message || 'Guardado', at: Date.now() };
   } catch (error) {
     // redirect() and notFound() work by throwing; let them through.
     if (error && typeof error === 'object' && 'digest' in error && String((error as { digest: unknown }).digest).startsWith('NEXT_')) throw error;
-    return { error: error instanceof Error ? error.message : 'Something went wrong.', at: Date.now() };
+    return { error: error instanceof Error ? error.message : 'Ocurrió un error inesperado.', at: Date.now() };
   }
 }

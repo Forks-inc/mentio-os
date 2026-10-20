@@ -42,7 +42,7 @@ export function MentionSelection({ ids, children }: { ids: string[]; children: R
         announceStatus(chosen, null);
         toast.error(result.error);
       } else {
-        toast.success(result?.ok ?? 'Done');
+        toast.success(result?.ok ?? 'Resuelto');
         setSelected(new Set());
       }
       router.refresh();
@@ -53,18 +53,18 @@ export function MentionSelection({ ids, children }: { ids: string[]; children: R
       {children}
       {selected.size > 0 ? (
         <div className="fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
-          <div role="toolbar" aria-label="Selected mentions" className="flex h-12 min-w-0 items-center gap-1 rounded-xl border bg-popover/85 px-2 pl-4 shadow-lg backdrop-blur-lg">
-            <span className="mr-2 text-sm font-medium tabular-nums">{selected.size} selected</span>
+          <div role="toolbar" aria-label="Menciones seleccionadas" className="flex h-12 min-w-0 items-center gap-1 rounded-xl border bg-popover/85 px-2 pl-4 shadow-lg backdrop-blur-lg">
+            <span className="mr-2 text-sm font-medium tabular-nums">{selected.size} seleccionadas</span>
             <Button size="sm" disabled={pending} onClick={() => act('done')}>
-              <Check /> Mark done
+              <Check /> Marcar como resueltas
             </Button>
             <Button size="sm" variant="outline" disabled={pending} onClick={() => act('ignored')}>
-              <CircleSlash /> Ignore
+              <CircleSlash /> Ignorar
             </Button>
             <Button size="sm" variant="ghost" disabled={pending} onClick={() => act('open')}>
-              <RotateCcw /> Reopen
+              <RotateCcw /> Reabrir
             </Button>
-            <Button size="icon-sm" variant="ghost" aria-label="Clear selection" onClick={() => value.setAll(false)}>
+            <Button size="icon-sm" variant="ghost" aria-label="Limpiar selección" onClick={() => value.setAll(false)}>
               <X />
             </Button>
           </div>
@@ -78,11 +78,11 @@ export function SelectAll() {
   const s = useContext(SelectionContext);
   if (!s) return null;
   const all = s.ids.length > 0 && s.selected.size === s.ids.length;
-  return <Checkbox aria-label="Select all" checked={all} indeterminate={s.selected.size > 0 && !all} onCheckedChange={(on: boolean) => s.setAll(on)} className="relative z-10" />;
+  return <Checkbox aria-label="Seleccionar todo" checked={all} indeterminate={s.selected.size > 0 && !all} onCheckedChange={(on: boolean) => s.setAll(on)} className="relative z-10" />;
 }
 
 export function SelectRow({ id }: { id: string }) {
   const s = useContext(SelectionContext);
   if (!s) return null;
-  return <Checkbox aria-label="Select" checked={s.selected.has(id)} onCheckedChange={() => s.toggle(id)} className="relative z-10" />;
+  return <Checkbox aria-label="Seleccionar" checked={s.selected.has(id)} onCheckedChange={() => s.toggle(id)} className="relative z-10" />;
 }

@@ -5,8 +5,8 @@ import { EmptyState, LinkButton } from '@/components/ui';
 export default function NotFound() {
   return (
     <div className="pt-16">
-      <EmptyState icon={FileQuestion} title="Not found" action={<LinkButton href="/" variant="primary">Back to the overview</LinkButton>}>
-        This page or record does not exist, or it was deleted.
+      <EmptyState icon={FileQuestion} title="No encontramos el registro" action={<LinkButton href="/" variant="primary">Volver al resumen</LinkButton>}>
+        Esta página o registro no existe o se eliminó.
       </EmptyState>
     </div>
   );

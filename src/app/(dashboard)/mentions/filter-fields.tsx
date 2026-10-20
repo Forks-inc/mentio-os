@@ -19,13 +19,13 @@ export function ViewFilterFields({ values, options }: { values: FilterValues; op
   const opts = (list: FilterOptions['keywords']) => list.map(([value, label]) => ({ value, label }));
   return (
     <div className="space-y-5">
-      <Field label="Text contains" hint="Matches the post text or the author's name.">
+      <Field label="El texto contiene" hint="Busca en la publicación o en el nombre del autor.">
         <Input name="q" defaultValue={values.q ?? ''} maxLength={200} />
       </Field>
-      <Field group label="Conditions" hint="Every condition must hold.">
-        <FormFilters filters={mentionFilterDefs(opts(options.keywords), opts(options.groups))} defaults={defaults} empty="No conditions: every mention." />
+      <Field group label="Condiciones" hint="Deben cumplirse todas las condiciones.">
+        <FormFilters filters={mentionFilterDefs(opts(options.keywords), opts(options.groups))} defaults={defaults} empty="Sin condiciones: todas las menciones." />
       </Field>
-      <Field label="Hide these authors" hint="One per line: names, handles or profile links.">
+      <Field label="Ocultar estos autores" hint="Uno por línea: nombres, usuarios o enlaces a perfiles.">
         <Textarea name="excludeAuthors" rows={3} defaultValue={values.excludeAuthors.join('\n')} />
       </Field>
     </div>

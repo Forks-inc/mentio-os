@@ -251,35 +251,42 @@ export function describeFilter(f: FilterValues, names: { keywords: Map<string, s
   const keyword = (id: string) => names.keywords.get(id) ?? id;
   const group = (id: string) => names.groups.get(id) ?? id;
   const platform = (id: string) => PLATFORM_NAMES[id] ?? id;
-  const tag = (t: string) => t.charAt(0).toUpperCase() + t.slice(1).replace(/_/g, ' ');
+  const tag = (t: string) => ({
+    positive: 'positivo', neutral: 'neutral', negative: 'negativo',
+    brand: 'candidato', competitor: 'adversario', topic: 'tema',
+    open: 'abierto', done: 'resuelto', ignored: 'ignorado',
+    buy_intent: 'intención de apoyo', question: 'pregunta', complaint: 'queja', praise: 'reconocimiento',
+    comparison: 'comparación', churn_intent: 'intención de cambio', bug_report: 'reporte de error',
+    pricing: 'costo', hiring: 'contratación', event: 'evento', promotional: 'promoción',
+  } as Record<string, string>)[t] ?? t.replace(/_/g, ' ');
   const yesNo = (value: boolean | undefined, yes: string, no: string) => (value === undefined ? [] : [value ? yes : no]);
   const out: string[] = [];
-  if (f.q) out.push(`Text contains "${f.q}"`);
-  if (f.personId) out.push('One person');
-  if (f.alertId) out.push('What an alert rule sends');
-  if (f.keywordIds.length) out.push(`Keyword is ${or(f.keywordIds.map(keyword))}`);
-  if (f.notKeywordIds.length) out.push(`Keyword is not ${nor(f.notKeywordIds.map(keyword))}`);
-  if (f.keywordKinds.length) out.push(`Keyword kind is ${or(f.keywordKinds)}`);
-  if (f.groupIds.length) out.push(`Group is ${or(f.groupIds.map(group))}`);
-  if (f.platforms.length) out.push(`Platform is ${or(f.platforms.map(platform))}`);
-  if (f.notPlatforms.length) out.push(`Platform is not ${nor(f.notPlatforms.map(platform))}`);
-  if (f.sentiments.length) out.push(`Sentiment is ${or(f.sentiments)}`);
-  if (f.notSentiments.length) out.push(`Sentiment is not ${nor(f.notSentiments)}`);
-  if (f.intents.length) out.push(`Tagged ${or(f.intents.map(tag))}`);
-  if (f.notIntents.length) out.push(`Not tagged ${nor(f.notIntents.map(tag))}`);
-  if (f.status) out.push(`Status is ${f.status}`);
-  out.push(...yesNo(f.relevant, 'Relevant only', 'Not relevant only'));
-  if (f.minRelevance !== undefined) out.push(`Relevance at least ${f.minRelevance}`);
-  if (f.minConfidence !== undefined) out.push(`Confidence at least ${Math.round(f.minConfidence * 100)}%`);
-  out.push(...yesNo(f.isReply, 'Replies only', 'Top-level posts only'));
-  out.push(...yesNo(f.automated, 'Automated only', 'No automated posts'));
-  if (f.languages.length) out.push(`Language is ${or(f.languages)}`);
-  if (f.linkHosts.length) out.push(`Links to ${or(f.linkHosts)}`);
-  if (f.excludeAuthors.length) out.push(`Hides ${f.excludeAuthors.length} author${f.excludeAuthors.length === 1 ? '' : 's'}`);
-  if (f.ratings.length) out.push(`Rated ${or(f.ratings.map(String))} stars`);
-  if (f.minFollowers !== undefined) out.push(`At least ${f.minFollowers} followers`);
-  if (f.maxFollowers !== undefined) out.push(`At most ${f.maxFollowers} followers`);
-  if (f.since) out.push(`Since ${f.since}`);
-  if (f.until) out.push(`Until ${f.until}`);
+  if (f.q) out.push(`El texto contiene "${f.q}"`);
+  if (f.personId) out.push('Una persona');
+  if (f.alertId) out.push('Contenido que envía una regla de alerta');
+  if (f.keywordIds.length) out.push(`Término monitoreado: ${or(f.keywordIds.map(keyword))}`);
+  if (f.notKeywordIds.length) out.push(`Término monitoreado distinto de ${nor(f.notKeywordIds.map(keyword))}`);
+  if (f.keywordKinds.length) out.push(`Tipo de término: ${or(f.keywordKinds.map(tag))}`);
+  if (f.groupIds.length) out.push(`Campaña: ${or(f.groupIds.map(group))}`);
+  if (f.platforms.length) out.push(`Canal: ${or(f.platforms.map(platform))}`);
+  if (f.notPlatforms.length) out.push(`Canal distinto de ${nor(f.notPlatforms.map(platform))}`);
+  if (f.sentiments.length) out.push(`Sentimiento: ${or(f.sentiments.map(tag))}`);
+  if (f.notSentiments.length) out.push(`Sentimiento distinto de ${nor(f.notSentiments.map(tag))}`);
+  if (f.intents.length) out.push(`Intención: ${or(f.intents.map(tag))}`);
+  if (f.notIntents.length) out.push(`Intención distinta de ${nor(f.notIntents.map(tag))}`);
+  if (f.status) out.push(`Estado: ${tag(f.status)}`);
+  out.push(...yesNo(f.relevant, 'Solo relevantes', 'Solo no relevantes'));
+  if (f.minRelevance !== undefined) out.push(`Relevancia de al menos ${f.minRelevance}`);
+  if (f.minConfidence !== undefined) out.push(`Confianza de al menos ${Math.round(f.minConfidence * 100)}%`);
+  out.push(...yesNo(f.isReply, 'Solo respuestas', 'Solo publicaciones principales'));
+  out.push(...yesNo(f.automated, 'Solo automatizadas', 'Sin publicaciones automatizadas'));
+  if (f.languages.length) out.push(`Idioma: ${or(f.languages)}`);
+  if (f.linkHosts.length) out.push(`Enlaces a ${or(f.linkHosts)}`);
+  if (f.excludeAuthors.length) out.push(`${f.excludeAuthors.length === 1 ? 'Oculta' : 'Oculta'} ${f.excludeAuthors.length} ${f.excludeAuthors.length === 1 ? 'autor' : 'autores'}`);
+  if (f.ratings.length) out.push(`Calificación de ${or(f.ratings.map(String))} estrellas`);
+  if (f.minFollowers !== undefined) out.push(`Al menos ${f.minFollowers} seguidores`);
+  if (f.maxFollowers !== undefined) out.push(`Como máximo ${f.maxFollowers} seguidores`);
+  if (f.since) out.push(`Desde ${f.since}`);
+  if (f.until) out.push(`Hasta ${f.until}`);
   return out;
 }

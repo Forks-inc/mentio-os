@@ -31,7 +31,7 @@ export async function updateProfileAction(_state: ActionState, form: FormData): 
     };
     unwrap(await mentio().updateCompany({ body }));
     revalidatePath('/settings/company');
-    return 'Saved. New mentions are judged with it.';
+    return 'Guardado. Las menciones nuevas se evaluarán con este contexto.';
   });
 }
 
@@ -39,6 +39,6 @@ export async function updateContextAction(_state: ActionState, form: FormData): 
   return run(async () => {
     unwrap(await mentio().updateCompany({ body: { context: str(form, 'context') } }));
     revalidatePath('/settings/company');
-    return 'Saved';
+    return 'Guardado';
   });
 }

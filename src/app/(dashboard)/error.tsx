@@ -5,17 +5,17 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
-export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
+export default function ErrorPage({ reset }: { error: Error; reset: () => void }) {
   return (
     <Alert variant="destructive">
       <AlertCircle />
-      <AlertTitle>Something went wrong talking to Mentio.</AlertTitle>
+          <AlertTitle>No pudimos cargar los datos de la campaña.</AlertTitle>
       <AlertDescription>
-        <p>{error.message || 'The request failed.'}</p>
-        <p>Check that MENTIO_API_KEY is set on the server and that the key is still active.</p>
+        <p>La solicitud no se completó. Inténtalo de nuevo en unos momentos.</p>
+        <p>Revisa que la clave de API esté configurada en el servidor y siga activa.</p>
       </AlertDescription>
       <AlertAction>
-        <Button variant="outline" size="sm" onClick={reset}>Try again</Button>
+        <Button variant="outline" size="sm" onClick={reset}>Intentar de nuevo</Button>
       </AlertAction>
     </Alert>
   );

@@ -23,7 +23,7 @@ export async function createSlackChannel(_: ActionState, form: FormData): Promis
 export async function createEmailChannel(_: ActionState, form: FormData): Promise<ActionState> {
   return run(async () => {
     const emails = list(form, 'emails');
-    if (emails.length === 0) throw new Error('Add at least one address.');
+    if (emails.length === 0) throw new Error('Agrega al menos una dirección.');
     const channel = unwrap(await mentio().createChannel({ body: { kind: 'email', emails } }));
     revalidatePath('/channels');
     redirect(`/channels/${channel.id}`);
@@ -50,7 +50,7 @@ export async function createWebhookChannel(_: SecretState, form: FormData): Prom
     revalidatePath('/channels');
     const secret = channel.kind === 'webhook' ? channel.config.secret : undefined;
     if (!secret) redirect(`/channels/${channel.id}`);
-    return { ok: 'Webhook created', secret, href: `/channels/${channel.id}` };
+    return { ok: 'Webhook creado', secret, href: `/channels/${channel.id}` };
   });
 }
 
@@ -69,7 +69,7 @@ export async function updateChannelAction(_: ActionState, form: FormData): Promi
     );
     revalidatePath('/channels');
     revalidatePath(`/channels/${id}`);
-    return 'Channel saved';
+    return 'Canal guardado';
   });
 }
 
@@ -79,8 +79,8 @@ export async function testChannelAction(_: ActionState, form: FormData): Promise
     const { outcomes } = unwrap(await mentio().testChannel({ path: { id } }));
     revalidatePath(`/channels/${id}`);
     const failed = outcomes.filter((o) => !o.ok);
-    if (failed.length) throw new Error(`The test failed: ${failed.map((o) => o.error ?? 'no reason given').join('; ')}`);
-    return 'Test sent. Check the channel.';
+    if (failed.length) throw new Error(`La prueba falló: ${failed.map((o) => o.error ?? 'sin motivo indicado').join('; ')}`);
+    return 'Prueba enviada. Revisa el canal.';
   });
 }
 
@@ -89,8 +89,8 @@ export async function rotateSecretAction(_: SecretState, form: FormData): Promis
     const id = str(form, 'id');
     const channel = unwrap(await mentio().rotateWebhookSecret({ path: { id } }));
     const secret = channel.kind === 'webhook' ? channel.config.secret : undefined;
-    if (!secret) throw new Error('The API did not return a new secret.');
-    return { ok: 'Secret rotated. The old one stopped working.', secret };
+    if (!secret) throw new Error('La API no devolvió una clave nueva.');
+    return { ok: 'Clave rotada. La anterior dejó de funcionar.', secret };
   });
 }
 

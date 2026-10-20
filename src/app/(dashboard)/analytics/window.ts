@@ -56,7 +56,7 @@ export function pointLabel(date: string) {
   const [day, hour] = date.split('T');
   const d = new Date(`${day}T00:00:00Z`);
   if (Number.isNaN(d.getTime())) return date;
-  const text = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(d);
+  const text = new Intl.DateTimeFormat('es-MX', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(d);
   return hour ? `${text} ${hour.slice(0, 5)}` : text;
 }
 

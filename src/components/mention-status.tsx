@@ -29,7 +29,7 @@ export function MentionStatus({ id, status }: { id: string; status: string }) {
   }, [id, status]);
   return (
     <Badge variant="outline" className="capitalize">
-      {shown}
+      {({ new: 'Nuevo', open: 'Abierto', done: 'Resuelto', snoozed: 'Pospuesto', ignored: 'Ignorado' } as Record<string, string>)[shown] ?? shown}
     </Badge>
   );
 }

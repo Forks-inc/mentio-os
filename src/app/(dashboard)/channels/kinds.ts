@@ -7,15 +7,15 @@ export type AccountEvent = NonNullable<CreateWebhookChannel['events']>[number];
 
 export const KINDS = ['slack', 'email', 'webhook', 'telegram'] as const satisfies readonly ChannelKind[];
 
-export const KIND_LABELS: Record<ChannelKind, string> = { slack: 'Slack', email: 'Email', webhook: 'Webhook', telegram: 'Telegram' };
+export const KIND_LABELS: Record<ChannelKind, string> = { slack: 'Slack', email: 'Correo electrónico', webhook: 'Webhook', telegram: 'Telegram' };
 
 export const ACCOUNT_EVENTS: ReadonlyArray<readonly [AccountEvent, string]> = [
-  ['keyword.capped', 'A keyword reached its monthly mention cap'],
-  ['keyword.paused_for_balance', 'A keyword was paused for lack of balance'],
-  ['keyword.resumed', 'A paused or capped keyword resumed'],
-  ['wallet.low', 'The balance is running low'],
-  ['wallet.paused', 'The wallet paused tracking'],
-  ['wallet.resumed', 'Tracking resumed after a top-up'],
+  ['keyword.capped', 'Un término monitoreado alcanzó su límite mensual de menciones'],
+  ['keyword.paused_for_balance', 'Un término se pausó por falta de saldo'],
+  ['keyword.resumed', 'Se reanudó el monitoreo de un término pausado o al límite'],
+  ['wallet.low', 'El saldo está por agotarse'],
+  ['wallet.paused', 'El saldo pausó el monitoreo'],
+  ['wallet.resumed', 'El monitoreo se reanudó después de una recarga'],
 ];
 const EVENT_IDS = ACCOUNT_EVENTS.map(([id]) => id);
 
@@ -28,9 +28,17 @@ export function targetText(channel: Channel): string {
       return channel.config.recipients.map((r) => r.email).join(', ');
     case 'webhook':
       return channel.config.url;
-    case 'telegram':
-      return `${channel.config.chatType} chat ${channel.config.chatId}`;
+    case 'telegram': {
+      const chatType = { private: 'privado', group: 'grupo', supergroup: 'supergrupo', channel: 'canal' }[channel.config.chatType];
+      return `Chat ${chatType} ${channel.config.chatId}`;
+    }
   }
+}
+
+export function eventLabel(event: string): string {
+  if (event === 'mention.matched') return 'Mención coincidente';
+  if (event === 'digest') return 'Resumen periódico';
+  return ACCOUNT_EVENTS.find(([id]) => id === event)?.[1] ?? event;
 }
 
 export function readEvents(form: FormData): AccountEvent[] {
@@ -43,7 +51,7 @@ export function readHeaders(form: FormData): Record<string, string> {
   for (const line of str(form, 'headers').split('\n')) {
     if (!line.trim()) continue;
     const at = line.indexOf(':');
-    if (at < 1) throw new Error(`Write each header as "Name: value" ("${line.trim()}" has no colon).`);
+    if (at < 1) throw new Error(`Escribe cada encabezado con el formato "Nombre: valor" ("${line.trim()}" no tiene dos puntos).`);
     headers[line.slice(0, at).trim()] = line.slice(at + 1).trim();
   }
   return headers;

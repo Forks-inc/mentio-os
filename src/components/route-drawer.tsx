@@ -2,7 +2,7 @@
 
 /**
  * A page opened over the list it was clicked from, in a side drawer (the
- * Mentio dashboard's way to open anything). The routes under app/@drawer
+ * dashboard's way to open anything). The routes under app/@drawer
  * intercept a soft navigation to a detail or "new" page and render that same
  * page in here, where it reads as one narrow column: the content is a
  * container (pages lay out by container queries) and cards turn into

@@ -12,7 +12,7 @@ import { MentionFilters } from './mention-filters';
 import { loadFilterOptions } from './options';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Mentions' };
+export const metadata = { title: 'Menciones' };
 
 const PAGE_SIZE = 25;
 
@@ -43,13 +43,13 @@ export default async function MentionsPage({ searchParams }: { searchParams: Pro
   return (
     <div>
       <PageHeader
-        title={view ? view.name : 'Mentions'}
-        description={view ? view.description || 'A saved view. The filters below narrow it.' : 'Everything your keywords found, newest first.'}
+        title={view ? view.name : 'Menciones'}
+        description={view ? view.description || 'Vista guardada. Los filtros siguientes acotan los resultados.' : 'Conversación pública que coincide con los términos monitoreados, de la más reciente a la más antigua.'}
         actions={
           <>
-            {view ? <LinkButton href={`/views/${encodeURIComponent(view.id)}`}>Edit view</LinkButton> : null}
+            {view ? <LinkButton href={`/views/${encodeURIComponent(view.id)}`}>Editar vista</LinkButton> : null}
             <a href={exportHref} className={buttonClass('secondary')} download>
-              <Download /> Export CSV
+              <Download /> Exportar CSV
             </a>
           </>
         }
@@ -66,38 +66,38 @@ export default async function MentionsPage({ searchParams }: { searchParams: Pro
               <input key={`${key}-${i}`} type="hidden" name={key} value={value} />
             ))}
             {viewId ? <input type="hidden" name="viewId" value={viewId} /> : null}
-            <Field label="Name">
-              <Input name="name" required maxLength={80} placeholder="Unhappy customers" />
+            <Field label="Nombre">
+              <Input name="name" required maxLength={80} placeholder="Ej. críticas a la propuesta de seguridad" />
             </Field>
-            <Field label="Description">
-              <Input name="description" maxLength={500} placeholder="What this view is for" />
+            <Field label="Descripción">
+              <Input name="description" maxLength={500} placeholder="Qué conversación de campaña quieres seguir" />
             </Field>
             <div data-slot="form-actions" className="flex justify-end">
-              <SubmitButton>Save view</SubmitButton>
+              <SubmitButton>Guardar vista</SubmitButton>
             </div>
           </ActionForm>
         }
       />
 
-      {requestedViewId && !view ? <p className="text-sm text-amber-700">That view no longer exists, so this is the whole feed.</p> : null}
+      {requestedViewId && !view ? <p className="text-sm text-amber-700">Esta vista ya no existe; se muestran todas las menciones.</p> : null}
 
       {view ? (
         <p className="-mt-2 mb-4 text-xs text-muted-foreground">
-          View <span className="font-medium text-foreground">{view.name}</span>: {viewConditions.length ? viewConditions.join(' · ') : 'every mention'}
+          Vista <span className="font-medium text-foreground">{view.name}</span>: {viewConditions.length ? viewConditions.join(' · ') : 'todas las menciones'}
         </p>
       ) : null}
 
       {page.data.length === 0 ? (
-        <EmptyState icon={Radio} title={cursor ? 'No older mentions.' : 'No mentions match these filters.'}>
-          {cursor ? <Link href={firstHref} className="text-primary hover:underline">Back to the newest</Link> : 'Try fewer filters or a wider date range.'}
+        <EmptyState icon={Radio} title={cursor ? 'No hay menciones anteriores.' : 'Ninguna mención coincide con estos filtros.'}>
+          {cursor ? <Link href={firstHref} className="text-primary hover:underline">Volver a las más recientes</Link> : 'Prueba con menos filtros o amplía el periodo.'}
         </EmptyState>
       ) : (
         <MentionTable mentions={page.data} />
       )}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        {cursor ? <LinkButton href={firstHref} size="sm">‹ Newest</LinkButton> : <span />}
-        {olderHref ? <LinkButton href={olderHref}>Older mentions ›</LinkButton> : null}
+        {cursor ? <LinkButton href={firstHref} size="sm">‹ Más recientes</LinkButton> : <span />}
+        {olderHref ? <LinkButton href={olderHref}>Menciones anteriores ›</LinkButton> : null}
       </div>
 
     </div>

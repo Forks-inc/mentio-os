@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const file = result.response?.body;
   if (result.error !== undefined || !file) {
     const body = result.error as { error?: { message?: string } } | undefined;
-    const message = body?.error?.message ?? 'The export failed.';
+    const message = body?.error?.message ?? 'No se pudo exportar el archivo.';
     return new Response(message, { status: status >= 400 ? status : 502, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
 
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   return new Response(file, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="mentions-${day}.csv"`,
+      'Content-Disposition': `attachment; filename="menciones-${day}.csv"`,
       'Cache-Control': 'no-store',
     },
   });

@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * The toolbar every list page shares, as the Mentio dashboard draws it: a
+ * The toolbar every list page shares: a
  * search that applies as you type, a dashed "Filter" button that adds a
  * condition chip ("Platform is Reddit") to a strip underneath, and a sort.
  * Every change lands in the URL at once (no Apply button), under the API's
@@ -175,7 +175,7 @@ function useFilterChips({ filters, read, write, onClear }: { filters: FilterDef[
                     values={listOf(f, not)}
                     autoOpen={autoOpen}
                     name={f.label}
-                    empty={`Any ${f.label.toLowerCase()}`}
+                empty={`Cualquier ${f.label.toLowerCase()}`}
                     onChange={(next) => writeList(f, next, not)}
                     onOpenChange={closed(param)}
                   />,
@@ -201,8 +201,8 @@ function useFilterChips({ filters, read, write, onClear }: { filters: FilterDef[
                 const until = f.untilParam === null ? null : (f.untilParam ?? 'until');
                 if (!until) {
                   return chip(
-                    <DatePicker variant="ghost" placeholder="Pick a day" defaultValue={read(f.param)} onChange={(value) => write({ [f.param]: value })} className="h-full rounded-none px-2 font-normal" />,
-                    plain('since'),
+                    <DatePicker variant="ghost" placeholder="Elegir una fecha" defaultValue={read(f.param)} onChange={(value) => write({ [f.param]: value })} className="h-full rounded-none px-2 font-normal" />,
+                    plain('desde'),
                   );
                 }
                 return chip(
@@ -212,7 +212,7 @@ function useFilterChips({ filters, read, write, onClear }: { filters: FilterDef[
                     onChange={({ from, to }) => write({ [f.param]: from, [until]: to })}
                     className="h-full rounded-none px-2"
                   />,
-                  plain('between'),
+                  plain('entre'),
                 );
               }
               case 'fixed':
@@ -329,7 +329,7 @@ export function UrlFilters({
  * live in the form and submit as hidden fields under each param, comma
  * separated, which the server action reads like the list pages read the URL.
  */
-export function FormFilters({ filters, defaults, empty = 'No conditions yet.' }: { filters: FilterDef[]; defaults: Record<string, string>; empty?: string }) {
+export function FormFilters({ filters, defaults, empty = 'Aún no hay condiciones.' }: { filters: FilterDef[]; defaults: Record<string, string>; empty?: string }) {
   const [values, setValues] = useState<Record<string, string>>(defaults);
   const { button, strip } = useFilterChips({
     filters,

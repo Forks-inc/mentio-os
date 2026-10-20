@@ -6,7 +6,7 @@ import { mentio, unwrap } from '@/lib/mentio';
 import { KINDS, KIND_LABELS, targetText } from './kinds';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Channels' };
+export const metadata = { title: 'Canales' };
 
 /** Where alerts go, by type, with how each one has been doing this week. */
 export default async function Channels() {
@@ -15,14 +15,14 @@ export default async function Channels() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Channels"
-        description="Slack channels, email lists, webhooks and Telegram chats your alerts send to."
-        actions={<LinkButton href="/channels/new" variant="primary" create><Plus /> New channel</LinkButton>}
+        title="Canales"
+        description="Canales de Slack, listas de correo, webhooks y chats de Telegram donde se envían las alertas de campaña."
+        actions={<LinkButton href="/channels/new" variant="primary" create><Plus /> Crear canal</LinkButton>}
       />
 
       {channels.length === 0 ? (
-        <EmptyState icon={Webhook} title="No channels yet">
-          <Link href="/channels/new" className="text-primary hover:underline">Add one</Link>, then point an alert at it.
+        <EmptyState icon={Webhook} title="Aún no hay canales">
+          <Link href="/channels/new" className="text-primary hover:underline">Agrega uno</Link> y selecciónalo en una alerta.
         </EmptyState>
       ) : (
         KINDS.map((kind) => {
@@ -31,7 +31,7 @@ export default async function Channels() {
           return (
             <section key={kind}>
               <h2 className="mb-2 text-sm font-semibold">{KIND_LABELS[kind]}</h2>
-              <Table head={['Channel', 'Delivers to', 'Alerts', 'Last 7 days', 'Last delivery']}>
+              <Table head={['Canal', 'Destino', 'Alertas', 'Últimos 7 días', 'Último envío']}>
                 {rows.map((channel) => (
                   <TableRow key={channel.id}>
                     <TableCell className={td}>
@@ -40,18 +40,18 @@ export default async function Channels() {
                     <TableCell className={`${td} max-w-72 truncate text-xs text-muted-foreground`} title={targetText(channel)}>
                       {targetText(channel)}
                       {channel.kind === 'email' && channel.config.recipients.some((r) => !r.confirmedAt) ? (
-                        <Badge tone="warn" className="ml-2">Awaiting confirmation</Badge>
+                        <Badge tone="warn" className="ml-2">Falta confirmar</Badge>
                       ) : null}
                     </TableCell>
                     <TableCell className={`${td} text-xs whitespace-nowrap`}>
-                      {channel.stats.activeAlerts} active of {channel.stats.alerts}
-                      {channel.stats.activeAlerts === 0 ? <p className="text-amber-700">Receives nothing now</p> : null}
+                      {channel.stats.activeAlerts} activas de {channel.stats.alerts}
+                      {channel.stats.activeAlerts === 0 ? <p className="text-amber-700">No recibe avisos</p> : null}
                     </TableCell>
                     <TableCell className={`${td} text-xs whitespace-nowrap`}>
-                      {channel.stats.last7d.total} sent
-                      {channel.stats.last7d.failed ? <Badge tone="bad" className="ml-2">{channel.stats.last7d.failed} failed</Badge> : null}
+                      {channel.stats.last7d.total} envíos
+                      {channel.stats.last7d.failed ? <Badge tone="bad" className="ml-2">{channel.stats.last7d.failed} fallidos</Badge> : null}
                     </TableCell>
-                    <TableCell className={`${td} text-xs whitespace-nowrap text-muted-foreground`}>{timeAgo(channel.stats.lastDeliveryAt) || 'Never'}</TableCell>
+                    <TableCell className={`${td} text-xs whitespace-nowrap text-muted-foreground`}>{timeAgo(channel.stats.lastDeliveryAt) || 'Nunca'}</TableCell>
                   </TableRow>
                 ))}
               </Table>

@@ -11,10 +11,10 @@ import { audienceFilter, type AudienceFilter } from './filters';
 export async function saveAsSegment(_: ActionState, form: FormData): Promise<ActionState> {
   return run(async () => {
     const name = str(form, 'name');
-    if (!name) throw new Error('Give the segment a name.');
+    if (!name) throw new Error('Escribe un nombre para el segmento.');
     const query = new URLSearchParams(str(form, 'query'));
     const filter: AudienceFilter = audienceFilter(Object.fromEntries([...query.keys()].map((key) => [key, query.getAll(key)])));
-    if (Object.keys(filter).length === 0) throw new Error('Set at least one filter first.');
+    if (Object.keys(filter).length === 0) throw new Error('Agrega al menos un filtro.');
     const segment = unwrap(await mentio().createSegment({ body: { name, description: str(form, 'description'), filter } }));
     revalidatePath('/segments');
     redirect(`/people?segmentId=${encodeURIComponent(segment.id)}`);

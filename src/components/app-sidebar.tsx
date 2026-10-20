@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * The navigation, drawn like the Mentio dashboard's on shadcn's Sidebar: the
+ * The navigation, drawn on shadcn's Sidebar: the
  * brand at the top, one flat list (an item with children opens a sub-list
  * under a line), the balance and the docs in a tinted block at the foot and
  * the workspace under them. On a phone it becomes a drawer.
  */
-import { ArrowUpRight, ChevronDown, ChevronsUpDown, CreditCard, KeyRound, LogOut, Search, Settings, SunMoon, Users, Wallet } from 'lucide-react';
+import { ChevronDown, ChevronsUpDown, CreditCard, KeyRound, LogOut, Search, Settings, SunMoon, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { brand } from '@/brand.config';
@@ -76,7 +76,7 @@ export function AppSidebar({ workspace, canSignOut = false }: { workspace: Works
 
       <div className="px-3 pt-3">
         <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-background font-normal text-muted-foreground" onClick={openCommandMenu}>
-          <Search /> Search…
+          <Search /> Buscar…
           <KbdGroup className="ml-auto">
             <Kbd>⌘</Kbd>
             <Kbd>K</Kbd>
@@ -94,7 +94,7 @@ export function AppSidebar({ workspace, canSignOut = false }: { workspace: Works
                 </SidebarMenuButton>
                 <CollapsibleTrigger render={<SidebarMenuAction className="top-2 data-[panel-open]:[&>svg]:rotate-0 [&>svg]:-rotate-90 [&>svg]:transition-transform" />}>
                   <ChevronDown />
-                  <span className="sr-only">Toggle {item.label}</span>
+                  <span className="sr-only">Alternar {item.label}</span>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub className="mt-0.5 mr-0 ml-5 gap-0.5 border-sidebar-border pr-0 pl-2">
@@ -126,15 +126,14 @@ export function AppSidebar({ workspace, canSignOut = false }: { workspace: Works
           {workspace.balanceCents !== null ? (
             <Link href="/settings/billing" className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-background/70">
               <Wallet className="size-4" />
-              <span className="flex-1">Balance</span>
+              <span className="flex-1">Saldo</span>
               <span className={cn('font-semibold tabular-nums', workspace.low ? 'text-destructive' : 'text-foreground')}>{money(workspace.balanceCents)}</span>
             </Link>
           ) : null}
-          <a href={DOCS.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-background/70">
+          <div className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm font-medium text-foreground">
             <DOCS.icon className="size-4" />
             <span className="flex-1">{DOCS.label}</span>
-            <ArrowUpRight className="size-3.5 text-muted-foreground" />
-          </a>
+          </div>
         </div>
         <div className="border-t border-sidebar-border p-2">
           <DropdownMenu>
@@ -144,44 +143,41 @@ export function AppSidebar({ workspace, canSignOut = false }: { workspace: Works
               </Avatar>
               <span className="grid min-w-0 flex-1 leading-tight">
                 <span className="truncate text-sm font-medium">{workspace.name ?? brand.name}</span>
-                <span className="truncate text-xs text-muted-foreground">Workspace</span>
+                <span className="truncate text-xs text-muted-foreground">Espacio de trabajo</span>
               </span>
               <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" sideOffset={6} className="w-56">
               <DropdownMenuItem render={<Link href="/settings/company" />}>
-                <Settings /> Settings
+                <Settings /> Ajustes
               </DropdownMenuItem>
               <DropdownMenuItem render={<Link href="/settings/billing" />}>
-                <CreditCard /> Billing
+                <CreditCard /> Facturación
               </DropdownMenuItem>
               <DropdownMenuItem render={<Link href="/settings/team" />}>
-                <Users /> Team
+                <Users /> Equipo
               </DropdownMenuItem>
               <DropdownMenuItem render={<Link href="/settings/api-keys" />}>
-                <KeyRound /> API keys
+                <KeyRound /> Claves de API
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
-                  <SunMoon /> Theme
+                  <SunMoon /> Tema
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuRadioGroup value={theme ?? 'system'} onValueChange={(value: string) => setTheme(value)}>
-                    <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="light">Claro</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dark">Oscuro</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="system">Sistema</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
-              <DropdownMenuItem render={<a href={DOCS.href} target="_blank" rel="noopener noreferrer" />}>
-                <DOCS.icon /> {DOCS.label}
-              </DropdownMenuItem>
               {canSignOut ? (
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => void signOut()}>
-                    <LogOut /> Sign out
+                    <LogOut /> Cerrar sesión
                   </DropdownMenuItem>
                 </>
               ) : null}

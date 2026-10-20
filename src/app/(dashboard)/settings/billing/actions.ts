@@ -13,7 +13,7 @@ export async function topUpAction(_: ActionState, form: FormData): Promise<Actio
     const { minTopUpCents: min, maxTopUpCents: max } = unwrap(await mentio().getWallet());
     const amountCents = Math.round(dollars * 100);
     if (!Number.isFinite(dollars) || amountCents < min || amountCents > max) {
-      throw new Error(`Top up between ${money(min)} and ${money(max)}.`);
+      throw new Error(`Recarga un monto de ${money(min)} a ${money(max)}.`);
     }
     const { url } = unwrap(await mentio().createTopUp({ body: { amountCents } }));
     redirect(url);

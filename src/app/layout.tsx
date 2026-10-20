@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 /** The document, the fonts, the theme and the toaster; the dashboard's chrome is (dashboard)/layout.tsx. */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${sans.variable} ${mono.variable}`} style={{ ['--brand-accent' as string]: brand.accent }}>
+    <html lang="es" suppressHydrationWarning className={`${sans.variable} ${mono.variable}`} style={{ ['--brand-accent' as string]: brand.accent }}>
       <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>{children}</TooltipProvider>

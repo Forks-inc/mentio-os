@@ -12,8 +12,8 @@ export function SecretForm({
   action,
   children,
   className,
-  title = 'Copy it now',
-  warning = 'It is shown once. Store it somewhere safe; it cannot be shown again.',
+  title = 'Cópiala ahora',
+  warning = 'Se muestra una sola vez. Guárdala en un lugar seguro; no podrás volver a verla.',
 }: {
   action: (state: SecretState, form: FormData) => Promise<SecretState>;
   children: ReactNode;
@@ -44,7 +44,7 @@ function SecretBox({ secret, title, warning, href }: { secret: string; title: st
         </InputGroupAddon>
       </InputGroup>
       {href ? (
-        <Link href={href} className="mt-3 inline-block text-xs text-primary hover:underline">I stored it, continue ›</Link>
+        <Link href={href} className="mt-3 inline-block text-xs text-primary hover:underline">Ya la guardé, continuar ›</Link>
       ) : null}
     </Notice>
   );

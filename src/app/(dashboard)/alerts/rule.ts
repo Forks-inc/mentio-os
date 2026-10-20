@@ -17,50 +17,50 @@ type Sentiment = NonNullable<AlertFilter['sentiments']>[number];
 export const MODES = ['instant', 'daily', 'weekly'] as const satisfies readonly AlertMode[];
 export const PLATFORMS = [...SEARCH_PLATFORMS, ...REVIEW_PLATFORMS] as const satisfies readonly Platform[];
 const SENTIMENT_VALUES = SENTIMENTS satisfies readonly Sentiment[];
-export const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+export const WEEKDAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'] as const;
 
 /** The relevance line the classifier draws: a rule with no floor sends from here up. */
 export const RELEVANCE_LINE = 40;
 
 export const MODE_LABELS: Record<AlertMode, string> = {
-  instant: 'Instant',
-  daily: 'Daily digest',
-  weekly: 'Weekly digest',
+  instant: 'Inmediata',
+  daily: 'Resumen diario',
+  weekly: 'Resumen semanal',
 };
 
 const pad = (n: number) => String(n).padStart(2, '0');
 export const timeOf = (schedule: AlertSchedule) => `${pad(schedule.hour)}:${pad(schedule.minute ?? 0)}`;
 
-/** "Instant", "Daily at 09:00 Europe/Madrid", "Weekly on Monday at 09:00 UTC". */
+/** "Inmediata", "Diaria a las 09:00 America/Mexico_City", "Semanal los lunes a las 09:00 UTC". */
 export function whenText(alert: Pick<Alert, 'mode' | 'schedule'>) {
   const s = alert.schedule;
-  if (alert.mode === 'instant' || !s) return 'Instant, as each mention arrives';
-  const at = `at ${timeOf(s)} ${s.timezone}`;
-  return alert.mode === 'weekly' ? `Weekly on ${WEEKDAYS[s.weekday ?? 1]} ${at}` : `Daily ${at}`;
+  if (alert.mode === 'instant' || !s) return 'Inmediata, al llegar cada mención';
+  const at = `a las ${timeOf(s)} (${s.timezone})`;
+  return alert.mode === 'weekly' ? `Semanal, los ${WEEKDAYS[s.weekday ?? 1]} ${at}` : `Diaria ${at}`;
 }
 
 /** The rule's filter as a few short phrases, for the list and the detail header. */
 export function describeFilter(filter: AlertFilter, names: { keywords: Map<string, string>; groups: Map<string, string> }): string[] {
   const parts: string[] = [];
   const floor = filter.minRelevance;
-  if (floor === undefined) parts.push('Relevant mentions');
-  else if (floor < RELEVANCE_LINE) parts.push(floor === 0 ? 'Every match, noise included' : `Relevance ${floor}+, some noise included`);
-  else parts.push(`Relevance ${floor}+`);
+  if (floor === undefined) parts.push('Menciones relevantes');
+  else if (floor < RELEVANCE_LINE) parts.push(floor === 0 ? 'Todas las coincidencias, incluido el ruido' : `Relevancia ${floor}+, incluye algo de ruido`);
+  else parts.push(`Relevancia ${floor}+`);
   const names_ = (ids: string[] | undefined, map: Map<string, string>) => (ids ?? []).map((id) => map.get(id) ?? id).join(', ');
-  if (filter.keywordIds?.length) parts.push(`keywords ${names_(filter.keywordIds, names.keywords)}`);
-  if (filter.groupIds?.length) parts.push(`groups ${names_(filter.groupIds, names.groups)}`);
-  if (filter.platforms?.length) parts.push(`on ${filter.platforms.map(platformName).join(', ')}`);
-  if (filter.sentiments?.length) parts.push(filter.sentiments.join(' or '));
-  if (filter.intents?.length) parts.push(filter.intents.map(tagName).join(' or '));
-  if (filter.minConfidence !== undefined) parts.push(`confidence ${filter.minConfidence}+`);
-  if (filter.minFollowers !== undefined) parts.push(`${filter.minFollowers}+ followers`);
-  if (filter.tags?.length) parts.push(`people tagged ${filter.tags.join(', ')}`);
-  if (filter.linkHosts?.length) parts.push(`linking to ${filter.linkHosts.join(', ')}`);
-  if (filter.languages?.length) parts.push(`in ${filter.languages.join(', ')}`);
-  if (filter.automated === true) parts.push('automated posts only');
-  if (filter.automated === false) parts.push('no automated posts');
-  if (filter.ratings?.length) parts.push(`${filter.ratings.join(', ')} star reviews`);
-  if (filter.excludeAuthors?.length) parts.push(`${filter.excludeAuthors.length} muted ${filter.excludeAuthors.length === 1 ? 'author' : 'authors'}`);
+  if (filter.keywordIds?.length) parts.push(`términos ${names_(filter.keywordIds, names.keywords)}`);
+  if (filter.groupIds?.length) parts.push(`campañas ${names_(filter.groupIds, names.groups)}`);
+  if (filter.platforms?.length) parts.push(`en ${filter.platforms.map(platformName).join(', ')}`);
+  if (filter.sentiments?.length) parts.push(filter.sentiments.map(tagName).join(' o '));
+  if (filter.intents?.length) parts.push(filter.intents.map(tagName).join(' o '));
+  if (filter.minConfidence !== undefined) parts.push(`confianza ${filter.minConfidence}+`);
+  if (filter.minFollowers !== undefined) parts.push(`${filter.minFollowers}+ seguidores`);
+  if (filter.tags?.length) parts.push(`audiencia etiquetada: ${filter.tags.join(', ')}`);
+  if (filter.linkHosts?.length) parts.push(`enlaces a ${filter.linkHosts.join(', ')}`);
+  if (filter.languages?.length) parts.push(`en ${filter.languages.join(', ')}`);
+  if (filter.automated === true) parts.push('solo publicaciones automatizadas');
+  if (filter.automated === false) parts.push('sin publicaciones automatizadas');
+  if (filter.ratings?.length) parts.push(`reseñas de ${filter.ratings.join(', ')} estrellas`);
+  if (filter.excludeAuthors?.length) parts.push(`${filter.excludeAuthors.length} ${filter.excludeAuthors.length === 1 ? 'autor silenciado' : 'autores silenciados'}`);
   return parts;
 }
 
@@ -69,7 +69,7 @@ function number(form: FormData, key: string, { min, max, label, integer = true }
   if (!raw) return undefined;
   const n = Number(raw);
   if (!Number.isFinite(n) || n < min || (max !== undefined && n > max) || (integer && !Number.isInteger(n))) {
-    throw new Error(`${label} must be ${integer ? 'a whole number' : 'a number'} from ${min}${max !== undefined ? ` to ${max}` : ' up'}.`);
+    throw new Error(`${label} debe ser ${integer ? 'un número entero' : 'un número'} de ${min}${max !== undefined ? ` a ${max}` : ' en adelante'}.`);
   }
   return n;
 }
@@ -96,9 +96,9 @@ export function readFilter(form: FormData, excludeAuthors: string[]): AlertFilte
   if (languages.length) filter.languages = languages;
   if (ratings.length) filter.ratings = ratings;
   if (excludeAuthors.length) filter.excludeAuthors = excludeAuthors;
-  const minRelevance = number(form, 'minRelevance', { min: 0, max: 100, label: 'Minimum relevance' });
-  const minConfidence = number(form, 'minConfidence', { min: 0, max: 1, label: 'Minimum confidence', integer: false });
-  const minFollowers = number(form, 'minFollowers', { min: 0, label: 'Minimum followers' });
+  const minRelevance = number(form, 'minRelevance', { min: 0, max: 100, label: 'Relevancia mínima' });
+  const minConfidence = number(form, 'minConfidence', { min: 0, max: 1, label: 'Confianza mínima', integer: false });
+  const minFollowers = number(form, 'minFollowers', { min: 0, label: 'Seguidores mínimos' });
   if (minRelevance !== undefined) filter.minRelevance = minRelevance;
   if (minConfidence !== undefined) filter.minConfidence = minConfidence;
   if (minFollowers !== undefined) filter.minFollowers = minFollowers;
@@ -116,10 +116,10 @@ export function readMode(form: FormData): AlertMode {
 export function readSchedule(form: FormData, mode: AlertMode): AlertSchedule | null {
   if (mode === 'instant') return null;
   const [hour, minute] = (str(form, 'time') || '09:00').split(':').map(Number);
-  if (!Number.isInteger(hour) || !Number.isInteger(minute)) throw new Error('Pick the time the digest goes out.');
+  if (!Number.isInteger(hour) || !Number.isInteger(minute)) throw new Error('Elige la hora de envío del resumen.');
   const timezone = str(form, 'timezone') || 'UTC';
   const schedule: AlertSchedule = { hour, minute, timezone, skipEmpty: bool(form, 'skipEmpty') };
-  if (mode === 'weekly') schedule.weekday = number(form, 'weekday', { min: 0, max: 6, label: 'Weekday' }) ?? 1;
+  if (mode === 'weekly') schedule.weekday = number(form, 'weekday', { min: 0, max: 6, label: 'Día de la semana' }) ?? 1;
   return schedule;
 }
 
@@ -127,17 +127,17 @@ export function readSchedule(form: FormData, mode: AlertMode): AlertSchedule | n
 export function alertFilterDefs(keywords: FilterOption[], groups: FilterOption[]): FilterDef[] {
   const SENTIMENT_COLORS: Record<string, string> = { positive: '#10b981', neutral: '#a1a1aa', negative: '#ef4444' };
   return [
-    ...(keywords.length ? [{ param: 'keywordIds', label: 'Keyword', icon: 'tag', kind: 'multi', options: keywords } as const] : []),
-    ...(groups.length ? [{ param: 'groupIds', label: 'Group', icon: 'folder', kind: 'multi', options: groups } as const] : []),
-    { param: 'platforms', label: 'Platform', icon: 'platform', kind: 'multi', options: PLATFORMS.map((p) => ({ value: p, label: platformName(p), platform: p })) },
-    { param: 'sentiments', label: 'Sentiment', icon: 'smile', kind: 'multi', options: SENTIMENT_VALUES.map((s) => ({ value: s, label: tagName(s), dot: SENTIMENT_COLORS[s] })) },
-    { param: 'intents', label: 'Intent', icon: 'target', kind: 'multi', options: INTENTS.map((i) => ({ value: i, label: tagName(i) })) },
-    { param: 'ratings', label: 'Rating', icon: 'star', kind: 'multi', options: [5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: '★'.repeat(n) })) },
-    { param: 'minConfidence', label: 'Min confidence', icon: 'gauge', kind: 'text', placeholder: '0.6', operator: '≥' },
-    { param: 'minFollowers', label: 'Min followers', icon: 'users', kind: 'text', placeholder: '1000', operator: '≥' },
-    { param: 'automated', label: 'Automated', icon: 'bot', kind: 'single', options: [{ value: 'false', label: 'Leave them out' }, { value: 'true', label: 'Only automated' }] },
-    { param: 'languages', label: 'Language', icon: 'languages', kind: 'text', placeholder: 'en, es' },
-    { param: 'tags', label: 'People tag', icon: 'tags', kind: 'text', placeholder: 'customer, vip' },
-    { param: 'linkHosts', label: 'Links to', icon: 'link', kind: 'text', placeholder: 'docs.example.com' },
+    ...(keywords.length ? [{ param: 'keywordIds', label: 'Candidato o tema', icon: 'tag', kind: 'multi', options: keywords } as const] : []),
+    ...(groups.length ? [{ param: 'groupIds', label: 'Campaña', icon: 'folder', kind: 'multi', options: groups } as const] : []),
+    { param: 'platforms', label: 'Plataforma', icon: 'platform', kind: 'multi', options: PLATFORMS.map((p) => ({ value: p, label: platformName(p), platform: p })) },
+    { param: 'sentiments', label: 'Sentimiento', icon: 'smile', kind: 'multi', options: SENTIMENT_VALUES.map((s) => ({ value: s, label: tagName(s), dot: SENTIMENT_COLORS[s] })) },
+    { param: 'intents', label: 'Intención', icon: 'target', kind: 'multi', options: INTENTS.map((i) => ({ value: i, label: tagName(i) })) },
+    { param: 'ratings', label: 'Calificación', icon: 'star', kind: 'multi', options: [5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: '★'.repeat(n) })) },
+    { param: 'minConfidence', label: 'Confianza mínima', icon: 'gauge', kind: 'text', placeholder: '0.6', operator: '≥' },
+    { param: 'minFollowers', label: 'Seguidores mínimos', icon: 'users', kind: 'text', placeholder: '1000', operator: '≥' },
+    { param: 'automated', label: 'Automatización', icon: 'bot', kind: 'single', options: [{ value: 'false', label: 'Excluir automatizadas' }, { value: 'true', label: 'Solo automatizadas' }] },
+    { param: 'languages', label: 'Idioma', icon: 'languages', kind: 'text', placeholder: 'es, en' },
+    { param: 'tags', label: 'Etiqueta de audiencia', icon: 'tags', kind: 'text', placeholder: 'prensa, voluntariado' },
+    { param: 'linkHosts', label: 'Enlaces a', icon: 'link', kind: 'text', placeholder: 'sitio.ejemplo.mx' },
   ];
 }

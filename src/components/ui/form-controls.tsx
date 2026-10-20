@@ -8,6 +8,7 @@
  * Combobox (one value), DatePicker, DateTimePicker.
  */
 import { format, isValid, parse } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { CalendarIcon, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Button } from './button';
@@ -68,7 +69,7 @@ export function CheckboxGroup({ name, options, selected }: { name: string; optio
 }
 
 /** Several values from a list, shown as chips, with a search: shadcn's multiple Combobox. */
-export function MultiSelect({ name, options, defaultValues = [], placeholder = 'Pick…', className }: { name: string; options: ReadonlyArray<Option>; defaultValues?: readonly string[]; placeholder?: string; className?: string }) {
+export function MultiSelect({ name, options, defaultValues = [], placeholder = 'Seleccionar…', className }: { name: string; options: ReadonlyArray<Option>; defaultValues?: readonly string[]; placeholder?: string; className?: string }) {
   // Keep ids no longer offered (a deleted keyword) so a save does not drop them silently.
   const all = [...options, ...defaultValues.filter((v) => !options.some(([o]) => o === v)).map((v) => [v, v] as const)];
   const labels = new Map(all.map(([v, l]) => [v, l]));
@@ -100,7 +101,7 @@ export function MultiSelect({ name, options, defaultValues = [], placeholder = '
           </ComboboxValue>
         </ComboboxChips>
         <ComboboxContent anchor={anchor}>
-          <ComboboxEmpty>Nothing matches.</ComboboxEmpty>
+        <ComboboxEmpty>Sin coincidencias.</ComboboxEmpty>
           <ComboboxList>
             {(v: string) => (
               <ComboboxItem key={v} value={v}>
@@ -123,7 +124,7 @@ export function Combobox({ name, options, defaultValue, placeholder, className }
       <ShadcnCombobox items={options as string[]} value={value} onValueChange={(next: string | null) => setValue(next)} autoHighlight>
         <ComboboxInput placeholder={placeholder} className={cn('w-full bg-background', className)} />
         <ComboboxContent>
-          <ComboboxEmpty>Nothing matches.</ComboboxEmpty>
+          <ComboboxEmpty>Sin coincidencias.</ComboboxEmpty>
           <ComboboxList>
             {(item: string) => (
               <ComboboxItem key={item} value={item}>
@@ -152,7 +153,7 @@ export function DatePicker({
   name,
   defaultValue,
   onChange,
-  placeholder = 'Pick a day',
+  placeholder = 'Elegir una fecha',
   fromDay,
   className,
   variant = 'outline',
@@ -179,14 +180,14 @@ export function DatePicker({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger render={<Button type="button" variant={variant} className={cn('justify-start font-normal', !day && 'text-muted-foreground', className)} />}>
           <CalendarIcon />
-          {day ? format(day, 'PP') : placeholder}
+          {day ? format(day, 'PP', { locale: es }) : placeholder}
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar mode="single" selected={day} onSelect={pick} defaultMonth={day} captionLayout="dropdown" disabled={min ? { before: min } : undefined} />
           {day ? (
             <div className="border-t p-2">
               <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => pick(undefined)}>
-                Clear
+                Limpiar
               </Button>
             </div>
           ) : null}
@@ -197,20 +198,20 @@ export function DatePicker({
 }
 
 /** A day and a time (a snooze, when an activity happened): shadcn's Calendar and a time Input. Submits YYYY-MM-DDTHH:mm. */
-export function DateTimePicker({ name, defaultValue, placeholder = 'Pick a day' }: { name: string; defaultValue?: string; placeholder?: string }) {
+export function DateTimePicker({ name, defaultValue, placeholder = 'Elegir una fecha' }: { name: string; defaultValue?: string; placeholder?: string }) {
   const [day, setDay] = useState<string | undefined>(defaultValue?.slice(0, 10));
   const [time, setTime] = useState(defaultValue?.slice(11, 16) || '09:00');
   return (
     <div className="flex gap-2">
       <input type="hidden" name={name} value={day ? `${day}T${time}` : ''} />
       <DatePicker defaultValue={day} onChange={setDay} placeholder={placeholder} className="flex-1" />
-      <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label="Time" className="w-28 bg-background [&::-webkit-calendar-picker-indicator]:hidden" />
+      <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} aria-label="Hora" className="w-28 bg-background [&::-webkit-calendar-picker-indicator]:hidden" />
     </div>
   );
 }
 
 /**
- * Platforms as pills with their logos, the Mentio dashboard's picker: on is
+ * Platforms as pills with their logos: on is
  * tinted, off is greyed. Every platform on submits nothing (the API's "all",
  * so a platform added later is tracked too); otherwise one value per pill.
  */
@@ -226,7 +227,7 @@ export function PlatformPicker({ name, options, defaultValue, labels }: { name: 
         value={on}
         onValueChange={(next: string[]) => next.length && setOn(options.filter((o) => next.includes(o)))}
         className="flex-wrap"
-        aria-label="Platforms"
+        aria-label="Plataformas"
       >
         {options.map((p) => (
           <ToggleGroupItem
@@ -241,7 +242,7 @@ export function PlatformPicker({ name, options, defaultValue, labels }: { name: 
         ))}
       </ToggleGroup>
       <p className="text-xs text-muted-foreground">
-        {all ? 'Every platform, including ones added later. Click one to leave it out.' : `${on.length} of ${options.length}. The last one cannot be turned off.`}
+        {all ? 'Se incluyen todas las plataformas, incluso las que se agreguen después. Selecciona una para excluirla.' : `${on.length} de ${options.length}. Debe quedar al menos una seleccionada.`}
       </p>
     </div>
   );
@@ -262,7 +263,7 @@ export function TokenInput({ name, defaultValue = [], placeholder, max = 50, spl
       {tokens.map((t) => (
         <Badge key={t} variant="secondary" className="h-6 gap-0.5 rounded-md pr-0.5 font-normal">
           {t}
-          <Button type="button" variant="ghost" size="icon-xs" aria-label={`Remove ${t}`} className="size-5" onClick={() => setTokens((prev) => prev.filter((x) => x !== t))}>
+          <Button type="button" variant="ghost" size="icon-xs" aria-label={`Eliminar ${t}`} className="size-5" onClick={() => setTokens((prev) => prev.filter((x) => x !== t))}>
             <X />
           </Button>
         </Badge>
@@ -332,10 +333,10 @@ export function Segmented({ name, options, defaultValue }: { name: string; optio
  * months (Dub's and Midday's range picker). Reports YYYY-MM-DD days, either
  * end possibly unset; `Clear` empties both.
  */
-export function DateRangePicker({ from, to, onChange, className, placeholder = 'Any time' }: { from?: string | null; to?: string | null; onChange: (range: { from?: string; to?: string }) => void; className?: string; placeholder?: string }) {
+export function DateRangePicker({ from, to, onChange, className, placeholder = 'Cualquier fecha' }: { from?: string | null; to?: string | null; onChange: (range: { from?: string; to?: string }) => void; className?: string; placeholder?: string }) {
   const [range, setRange] = useState<{ from?: Date; to?: Date } | undefined>(from || to ? { from: readDay(from), to: readDay(to) } : undefined);
   const [open, setOpen] = useState(false);
-  const label = range?.from ? (range.to ? `${format(range.from, 'MMM d')} – ${format(range.to, 'MMM d, yyyy')}` : `From ${format(range.from, 'MMM d, yyyy')}`) : placeholder;
+  const label = range?.from ? (range.to ? `${format(range.from, 'd MMM', { locale: es })} – ${format(range.to, 'd MMM yyyy', { locale: es })}` : `Desde ${format(range.from, 'd MMM yyyy', { locale: es })}`) : placeholder;
   const commit = (next: { from?: Date; to?: Date } | undefined) => {
     setRange(next);
     onChange({ from: next?.from ? format(next.from, DAY) : undefined, to: next?.to ? format(next.to, DAY) : undefined });
@@ -360,7 +361,7 @@ export function DateRangePicker({ from, to, onChange, className, placeholder = '
         {range?.from ? (
           <div className="border-t p-2">
             <Button type="button" variant="ghost" size="sm" className="w-full" onClick={() => commit(undefined)}>
-              Clear
+              Limpiar
             </Button>
           </div>
         ) : null}

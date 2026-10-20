@@ -1,6 +1,6 @@
 'use client';
 
-/** "Settings / Company" above every settings page, the way Zernio's settings read. */
+/** Breadcrumb above every settings page. */
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -14,7 +14,7 @@ export function SettingsBreadcrumb() {
     <Breadcrumb className="mb-4">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink render={<Link href={SETTINGS[0].href} />}>Settings</BreadcrumbLink>
+          <BreadcrumbLink render={<Link href={SETTINGS[0].href} />}>Ajustes</BreadcrumbLink>
         </BreadcrumbItem>
         {page ? (
           <>

@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 const SENTIMENT_DOT: Record<string, string> = { positive: 'bg-emerald-500', neutral: 'bg-zinc-400', negative: 'bg-red-500' };
 
 /**
- * The mentions list as the Mentio dashboard shows it, on shadcn's Table: one
+ * The mentions list, on shadcn's Table: one
  * row per mention, the post's own platform, its text (with what it replies
  * to), the keyword, the author, the verdict and the triage state. A row
  * opens the mention; the menu at its end triages it in place.
@@ -30,15 +30,15 @@ export function MentionTable({ mentions }: { mentions: Mention[] }) {
             <TableHead className="h-9 w-10 pr-0">
               <SelectAll />
             </TableHead>
-            <TableHead className="h-9 w-14 text-[11px]">Source</TableHead>
-            <TableHead className="text-[11px]">Mention</TableHead>
-            <TableHead className="text-[11px]">Keyword</TableHead>
-            <TableHead className="text-[11px]">Author</TableHead>
-            <TableHead className="text-[11px]">Sentiment</TableHead>
-            <TableHead className="text-right text-[11px]">Pri</TableHead>
-            <TableHead className="text-right text-[11px]">Rel</TableHead>
-            <TableHead className="text-[11px]">Status</TableHead>
-            <TableHead className="text-[11px]">Date</TableHead>
+            <TableHead className="h-9 w-14 text-[11px]">Plataforma</TableHead>
+            <TableHead className="text-[11px]">Mención</TableHead>
+            <TableHead className="text-[11px]">Candidato o tema</TableHead>
+            <TableHead className="text-[11px]">Autor</TableHead>
+            <TableHead className="text-[11px]">Sentimiento</TableHead>
+            <TableHead className="text-right text-[11px]">Prioridad</TableHead>
+            <TableHead className="text-right text-[11px]">Relevancia</TableHead>
+            <TableHead className="text-[11px]">Estado</TableHead>
+            <TableHead className="text-[11px]">Fecha</TableHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
@@ -64,7 +64,7 @@ export function MentionTable({ mentions }: { mentions: Mention[] }) {
                   <Link href={`/mentions/${mention.id}`} className="block after:absolute after:inset-0">
                     {mention.post.replyTo?.author ? (
                       <span className="mb-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <CornerUpLeft className="size-3" /> Replying to {mention.post.replyTo.author}
+                        <CornerUpLeft className="size-3" /> En respuesta a {mention.post.replyTo.author}
                       </span>
                     ) : null}
                     <span className="line-clamp-2 leading-snug">{mention.post.text}</span>
@@ -79,17 +79,17 @@ export function MentionTable({ mentions }: { mentions: Mention[] }) {
                       {author?.avatarUrl ? <AvatarImage src={author.avatarUrl} alt="" /> : null}
                       <AvatarFallback className="text-[10px] font-semibold">{(author?.name ?? '?').replace(/^@/, '').slice(0, 1).toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <span className="truncate text-muted-foreground">{author?.handle ?? author?.name ?? 'Unknown'}</span>
+                    <span className="truncate text-muted-foreground">{author?.handle ?? author?.name ?? 'Desconocido'}</span>
                   </span>
                 </TableCell>
                 <TableCell>
                   {verdict?.sentiment ? (
                     <span className="flex items-center gap-1.5">
                       <span className={cn('size-1.5 rounded-full', SENTIMENT_DOT[verdict.sentiment])} />
-                      {verdict.sentiment.charAt(0).toUpperCase() + verdict.sentiment.slice(1)}
+                      {sentimentName(verdict.sentiment)}
                     </span>
                   ) : (
-                    <span className="text-muted-foreground">Not scored</span>
+                    <span className="text-muted-foreground">Sin puntuación</span>
                   )}
                 </TableCell>
                 <TableCell className="text-right font-mono">{Math.round(mention.priority * 10) / 10}</TableCell>
@@ -99,7 +99,7 @@ export function MentionTable({ mentions }: { mentions: Mention[] }) {
                     <MentionStatus id={mention.id} status={mention.status} />
                     {mention.delivered ? (
                       <Badge variant="outline" className="text-muted-foreground">
-                        <Send /> Delivered
+                        <Send /> Entregada
                       </Badge>
                     ) : null}
                   </div>
@@ -117,3 +117,5 @@ export function MentionTable({ mentions }: { mentions: Mention[] }) {
     </MentionSelection>
   );
 }
+
+const sentimentName = (value: string) => ({ positive: 'Positivo', neutral: 'Neutral', negative: 'Negativo' })[value] ?? value;

@@ -19,6 +19,6 @@ export async function updateFiltersAction(_state: ActionState, form: FormData): 
       }),
     );
     revalidatePath('/settings/filters');
-    return 'Saved. The rules apply from the next poll.';
+    return 'Guardado. Las reglas se aplicarán desde la próxima consulta.';
   });
 }

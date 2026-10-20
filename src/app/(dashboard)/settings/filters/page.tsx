@@ -5,51 +5,51 @@ import { mentio, unwrap } from '@/lib/mentio';
 import { updateFiltersAction } from './actions';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Noise filters' };
+export const metadata = { title: 'Filtros de ruido' };
 
-/** Workspace-wide noise rules, on top of each keyword's own. */
+/** Organization-wide noise rules in addition to each candidate or topic's rules. */
 export default async function Filters() {
   const filters = unwrap(await mentio().getFilters());
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Noise filters"
-        description="Rules for every keyword in the workspace, on top of each keyword's own. A dropped post is never stored and never billed."
+        title="Filtros de ruido"
+        description="Reglas para todos los candidatos y temas del espacio de trabajo, además de sus reglas individuales. Las publicaciones descartadas no se guardan ni generan cargos."
       />
 
       <ActionForm action={updateFiltersAction} className="space-y-6">
-        <Card title="Everywhere" description="One entry per line, or separated by commas.">
+        <Card title="Todas las plataformas" description="Escribe un elemento por línea o sepáralos con comas.">
           <div className="grid gap-4 @lg:grid-cols-2">
-            <Field label="Excluded terms" hint="A post containing any of these is dropped, whatever keyword matched it. A * at the start or end is a wildcard. Up to 200.">
-              <Textarea name="excludedTerms" rows={6} defaultValue={filters.excludedTerms.join('\n')} placeholder={'hiring\njob\ncareers'} />
+            <Field label="Términos excluidos" hint="Se descarta cualquier publicación que incluya uno de estos términos, sin importar qué término monitoreado coincidió. Usa * al inicio o al final como comodín. Hasta 200.">
+              <Textarea name="excludedTerms" rows={6} defaultValue={filters.excludedTerms.join('\n')} placeholder={'empleo\nvacante\ntrabajo'} />
             </Field>
-            <Field label="Excluded authors" hint="Your own accounts, employees, known spammers: profile or post links, @handles, u/names, Bluesky DIDs or display names. Up to 200.">
-              <Textarea name="excludedAuthors" rows={6} defaultValue={filters.excludedAuthors.join('\n')} placeholder={'@acme\nhttps://github.com/acme-bot'} />
+            <Field label="Autores excluidos" hint="Cuentas propias, integrantes del equipo o cuentas falsas conocidas: enlaces a perfiles o publicaciones, @usuarios, nombres de cuenta, DID de Bluesky o nombres visibles. Hasta 200.">
+              <Textarea name="excludedAuthors" rows={6} defaultValue={filters.excludedAuthors.join('\n')} placeholder={'@cuenta_campana\n@cuenta_falsa'} />
             </Field>
           </div>
         </Card>
 
         <Card title="GitHub">
-          <Field label="Excluded repositories" hint="Issues, pull requests and comments in these repositories are dropped. owner/name or a github.com link.">
-            <Textarea name="excludedRepos" rows={4} defaultValue={filters.excludedRepos.join('\n')} placeholder="acme/website" />
+          <Field label="Repositorios excluidos" hint="Se descartan las incidencias, solicitudes de cambios y comentarios de estos repositorios. Usa propietario/nombre o un enlace de github.com.">
+            <Textarea name="excludedRepos" rows={4} defaultValue={filters.excludedRepos.join('\n')} placeholder="campana/sitio-web" />
           </Field>
         </Card>
 
         <Card title="Reddit">
           <div className="grid gap-4 @lg:grid-cols-2">
-            <Field label="Only these subreddits" hint="When set, only posts from these pass and the excluded list below is ignored. r/name or name.">
-              <Textarea name="subredditsOnly" rows={4} defaultValue={filters.subreddits.only.join('\n')} placeholder="r/devops" />
+            <Field label="Solo estos foros de Reddit" hint="Si agregas alguno, solo se aceptan publicaciones de estos y se ignora la lista de exclusión. Usa r/nombre o nombre.">
+              <Textarea name="subredditsOnly" rows={4} defaultValue={filters.subreddits.only.join('\n')} placeholder="r/mexico" />
             </Field>
-            <Field label="Excluded subreddits" hint="Posts from these are dropped. r/name or name.">
-              <Textarea name="subredditsExcluded" rows={4} defaultValue={filters.subreddits.excluded.join('\n')} placeholder="r/memes" />
+            <Field label="Foros de Reddit excluidos" hint="Se descartan las publicaciones de estos foros. Usa r/nombre o nombre.">
+              <Textarea name="subredditsExcluded" rows={4} defaultValue={filters.subreddits.excluded.join('\n')} placeholder="r/politica" />
             </Field>
           </div>
         </Card>
 
         <div className="flex items-center gap-3">
-          <SubmitButton>Save filters</SubmitButton>
-          {filters.updatedAt ? <span className="text-xs text-muted-foreground">Last changed {date(filters.updatedAt)}</span> : null}
+          <SubmitButton>Guardar filtros</SubmitButton>
+          {filters.updatedAt ? <span className="text-xs text-muted-foreground">Último cambio: {date(filters.updatedAt)}</span> : null}
         </div>
       </ActionForm>
     </div>

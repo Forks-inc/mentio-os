@@ -1,5 +1,8 @@
 /** Small formatting helpers shared by the pages. */
 
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
 export const PLATFORM_NAMES: Record<string, string> = {
   x: 'X',
   reddit: 'Reddit',
@@ -10,7 +13,7 @@ export const PLATFORM_NAMES: Record<string, string> = {
   stackoverflow: 'Stack Overflow',
   devto: 'DEV',
   youtube: 'YouTube',
-  news: 'News',
+  news: 'Noticias',
   tiktok: 'TikTok',
   instagram: 'Instagram',
   appstore: 'App Store',
@@ -31,39 +34,46 @@ export const SENTIMENTS = ['positive', 'neutral', 'negative'] as const;
 export function date(iso: string | null | undefined) {
   const d = iso ? new Date(iso) : null;
   if (!d || Number.isNaN(d.getTime())) return '';
-  return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(d);
+  return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).format(d);
 }
 
-/** "buy_intent" -> "Buy intent". */
-export const tagName = (tag: string) => tag.charAt(0).toUpperCase() + tag.slice(1).replace(/_/g, ' ');
+const TAG_NAMES: Record<string, string> = {
+  buy_intent: 'Intención de compra',
+  question: 'Pregunta',
+  complaint: 'Queja',
+  praise: 'Elogio',
+  comparison: 'Comparación',
+  churn_intent: 'Intención de abandono',
+  bug_report: 'Reporte de error',
+  pricing: 'Precios',
+  hiring: 'Contratación',
+  event: 'Evento',
+  promotional: 'Promoción',
+  brand: 'Candidato',
+  competitor: 'Adversario',
+  topic: 'Tema',
+};
+
+/** Etiquetas en español para intenciones, candidatos, adversarios y temas. */
+export const tagName = (tag: string) => TAG_NAMES[tag] ?? tag.replace(/_/g, ' ');
 
 export function compact(n: number | null | undefined) {
   if (n === null || n === undefined) return '0';
-  return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+  return new Intl.NumberFormat('es-MX', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 }
 
 export function money(cents: number) {
-  return new Intl.NumberFormat('en', { style: 'currency', currency: 'USD' }).format(cents / 100);
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD' }).format(cents / 100);
 }
 
 export function timeAgo(iso: string | null | undefined) {
   if (!iso || Number.isNaN(new Date(iso).getTime())) return '';
-  const seconds = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
-  if (seconds < 60) return 'just now';
-  const units: Array<[number, string]> = [
-    [60 * 60 * 24 * 365, 'y'],
-    [60 * 60 * 24 * 30, 'mo'],
-    [60 * 60 * 24, 'd'],
-    [60 * 60, 'h'],
-    [60, 'm'],
-  ];
-  for (const [size, label] of units) if (seconds >= size) return `${Math.floor(seconds / size)}${label} ago`;
-  return 'just now';
+  return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: es });
 }
 
-/** A calendar day, "Sep 30, 2026"; a date-only or full ISO string. */
+/** Una fecha de calendario, con formato para México; puede ser fecha o ISO completo. */
 export function day(iso: string | null | undefined) {
   const d = iso ? new Date(iso.length === 10 ? `${iso}T00:00:00Z` : iso) : null;
   if (!d || Number.isNaN(d.getTime())) return '';
-  return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' }).format(d);
+  return new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeZone: 'UTC' }).format(d);
 }

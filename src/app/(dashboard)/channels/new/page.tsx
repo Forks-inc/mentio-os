@@ -9,15 +9,13 @@ import { ACCOUNT_EVENTS, KINDS, KIND_LABELS, targetText, type ChannelKind } from
 import { SecretForm } from '../secret-form';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'New channel' };
-
-const DASHBOARD = 'https://app.mentio.dev';
+export const metadata = { title: 'Crear canal' };
 
 const BLURBS: Record<ChannelKind, string> = {
-  slack: 'Post to a channel of your connected Slack workspace.',
-  email: 'Send to a list of addresses.',
-  webhook: 'POST signed JSON to your own endpoint.',
-  telegram: 'Message a Telegram chat or group.',
+  slack: 'Envía avisos a un canal del espacio de trabajo conectado en Slack.',
+  email: 'Envía avisos a una lista de direcciones.',
+  webhook: 'Envía datos JSON firmados a tu propio endpoint.',
+  telegram: 'Envía mensajes a un chat o grupo de Telegram.',
 };
 
 export default async function NewChannel({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -27,7 +25,7 @@ export default async function NewChannel({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-6">
-      <PageHeader title="New channel" description="Choose where alerts should go." back={{ href: '/channels', label: 'Channels' }} />
+      <PageHeader title="Crear canal" description="Elige dónde recibir las alertas de campaña." back={{ href: '/channels', label: 'Canales' }} />
 
       <div className="grid gap-3 @lg:grid-cols-4">
         {KINDS.map((k, kIndex) => (
@@ -52,17 +50,17 @@ export default async function NewChannel({ searchParams }: { searchParams: Promi
 
 function SlackForm() {
   return (
-    <Card title="Slack channel" description={<>Your Slack workspace must be connected to Mentio first, in the <a href={DASHBOARD} className="text-primary hover:underline">Mentio dashboard</a>. For a private channel, invite the Mentio app to it.</>}>
+    <Card title="Canal de Slack" description="Primero conecta tu espacio de trabajo de Slack desde el panel de administración. Para un canal privado, agrega la aplicación al canal.">
       <ActionForm action={createSlackChannel} className="space-y-4">
         <div className="grid gap-4 @lg:grid-cols-2">
-          <Field label="Channel id" hint="In Slack: open the channel details; the id is at the bottom (C0123ABCD).">
+          <Field label="ID del canal" hint="En Slack, abre los detalles del canal; el ID aparece en la parte inferior (C0123ABCD).">
             <Input name="channelId" required maxLength={40} placeholder="C0123ABCD" />
           </Field>
-          <Field label="Channel name" hint="Used as the label.">
-            <Input name="channelName" required maxLength={90} placeholder="#brand-alerts" />
+          <Field label="Nombre del canal" hint="Se usará como etiqueta.">
+            <Input name="channelName" required maxLength={90} placeholder="#alertas-campana" />
           </Field>
         </div>
-        <SubmitButton>Add Slack channel</SubmitButton>
+        <SubmitButton>Agregar canal de Slack</SubmitButton>
       </ActionForm>
     </Card>
   );
@@ -70,12 +68,12 @@ function SlackForm() {
 
 function EmailForm() {
   return (
-    <Card title="Email list" description="Each address gets a confirmation link and receives nothing until it is clicked. Members of your workspace are confirmed at once.">
+    <Card title="Lista de correo" description="Cada dirección recibe un enlace de confirmación y no recibirá avisos hasta abrirlo. Las direcciones de miembros de tu espacio de trabajo se confirman de inmediato.">
       <ActionForm action={createEmailChannel} className="space-y-4">
-        <Field label="Addresses" hint="One per line or comma separated, up to 20.">
-          <Textarea name="emails" required rows={4} placeholder={'team@example.com\nfounder@example.com'} />
+        <Field label="Direcciones" hint="Hasta 20, una por línea o separadas por comas.">
+          <Textarea name="emails" required rows={4} placeholder={'equipo@campana.mx\ncoordinacion@campana.mx'} />
         </Field>
-        <SubmitButton>Add email list</SubmitButton>
+        <SubmitButton>Agregar lista de correo</SubmitButton>
       </ActionForm>
     </Card>
   );
@@ -83,25 +81,25 @@ function EmailForm() {
 
 function WebhookForm() {
   return (
-    <Card title="Webhook" description="Every request is signed with a secret shown once, after you create it.">
-      <SecretForm action={createWebhookChannel} className="space-y-4" title="Your signing secret" warning="Shown once. Verify X-Mentions-Signature-V2 with it: v2= plus the hex HMAC-SHA256 of the timestamp, a dot and the raw body.">
+    <Card title="Webhook" description="Cada solicitud se firma con una clave secreta que se muestra una sola vez al crear el canal.">
+      <SecretForm action={createWebhookChannel} className="space-y-4" title="Tu clave de firma" warning="Se muestra una sola vez. Úsala para verificar la firma v2: el valor HMAC-SHA256 hexadecimal de la marca de tiempo, un punto y el cuerpo original.">
         <div className="grid gap-4 @lg:grid-cols-2">
-          <Field label="URL" hint="Where the POSTs go. Use https.">
-            <Input name="url" type="text" inputMode="url" required placeholder="https://example.com/hooks/mentio" />
+          <Field label="URL" hint="Destino de las solicitudes POST. Usa https.">
+            <Input name="url" type="text" inputMode="url" required placeholder="https://ejemplo.mx/webhooks/campana" />
           </Field>
-          <Field label="Label" hint="Defaults to the URL's host.">
-            <Input name="label" maxLength={80} placeholder="CRM sync" />
+          <Field label="Etiqueta" hint="De forma predeterminada, se usa el dominio de la URL.">
+            <Input name="label" maxLength={80} placeholder="Alertas de campaña" />
           </Field>
         </div>
-        <Field label="Custom headers" hint={'One per line as "Name: value", for your own auth.'}>
+        <Field label="Encabezados personalizados" hint={'Uno por línea con el formato "Nombre: valor", para tu autenticación.'}>
           <Textarea name="headers" rows={3} placeholder="Authorization: Bearer ..." className="font-mono" />
         </Field>
         <div>
-          <p className="text-sm font-medium text-foreground">Account events</p>
-          <p className="mb-2 text-xs text-muted-foreground">Sent here on their own, with no alert involved. Mentions and digests still arrive through alerts.</p>
+          <p className="text-sm font-medium text-foreground">Eventos de la cuenta</p>
+          <p className="mb-2 text-xs text-muted-foreground">Se envían directamente, sin una alerta. Las menciones y los resúmenes periódicos siguen llegando por medio de las alertas.</p>
           <CheckboxGroup name="events" options={ACCOUNT_EVENTS.map(([id, label]) => [id, `${label} (${id})`] as const)} selected={[]} />
         </div>
-        <SubmitButton>Create webhook</SubmitButton>
+        <SubmitButton>Crear webhook</SubmitButton>
       </SecretForm>
     </Card>
   );
@@ -110,14 +108,14 @@ function WebhookForm() {
 async function TelegramInfo() {
   const telegram = unwrap(await mentio().listChannels()).data.filter((c) => c.kind === 'telegram');
   return (
-    <Card title="Telegram" description="Telegram chats are connected from the Mentio dashboard, not through the API.">
+    <Card title="Telegram" description="Los chats de Telegram se conectan desde el panel de administración, no mediante la API.">
       <ol className="list-decimal space-y-1 pl-5 text-sm text-foreground/80">
-        <li>Open the <a href={DASHBOARD} className="text-primary hover:underline">Mentio dashboard</a> and connect Telegram.</li>
-        <li>Follow the link it gives you and press Start, or add the bot to a group.</li>
-        <li>The chat shows up here as a channel. Point an alert at it.</li>
+        <li>Abre el panel de administración y conecta Telegram.</li>
+        <li>Sigue el enlace que aparece y pulsa Iniciar, o agrega el bot a un grupo.</li>
+        <li>El chat aparecerá aquí como un canal. Selecciónalo en una alerta.</li>
       </ol>
       <div className="mt-4">
-        <p className="mb-2 text-sm font-medium">Connected chats</p>
+        <p className="mb-2 text-sm font-medium">Chats conectados</p>
         {telegram.length ? (
           <ul className="divide-y divide-line rounded-md border border-line text-sm">
             {telegram.map((c) => (
@@ -128,7 +126,7 @@ async function TelegramInfo() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">None yet.</p>
+          <p className="text-sm text-muted-foreground">Aún no hay chats conectados.</p>
         )}
       </div>
     </Card>

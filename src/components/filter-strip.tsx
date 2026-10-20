@@ -51,7 +51,7 @@ export function FilterButton({
         disabled={properties.length === 0}
         render={
           compact ? (
-            <Button variant="outline" size="icon-sm" aria-label="Add filter" className="border-border bg-background shadow-none" />
+            <Button variant="outline" size="icon-sm" aria-label="Agregar filtro" className="border-border bg-background shadow-none" />
           ) : (
             <Button
               variant="outline"
@@ -66,7 +66,7 @@ export function FilterButton({
         ) : (
           <>
             <ListFilter aria-hidden className="size-3.5" />
-            Filter
+            Filtrar
           </>
         )}
       </DropdownMenuTrigger>
@@ -101,7 +101,7 @@ export function FilterStrip({
       {children}
       <FilterButton compact properties={addable} onAdd={onAdd} />
       <Button variant="ghost" size="sm" className="ml-auto" onClick={onClear}>
-        Clear
+        Limpiar
       </Button>
     </div>
   );
@@ -128,9 +128,9 @@ export function FilterChip({
         <Icon aria-hidden className="size-3.5 text-muted-foreground" />
         {label}
       </span>
-      {operator ?? <span className="flex shrink-0 items-center border-r border-border px-2 text-muted-foreground">is</span>}
+      {operator ?? <span className="flex shrink-0 items-center border-r border-border px-2 text-muted-foreground">es</span>}
       <span className="flex min-w-0 items-stretch border-r border-border">{children}</span>
-      <Button type="button" variant="ghost" aria-label={`Remove ${label} filter`} onClick={onRemove} className={cn(SEGMENT_CLASS, 'px-2 text-muted-foreground')}>
+      <Button type="button" variant="ghost" aria-label={`Eliminar filtro ${label}`} onClick={onRemove} className={cn(SEGMENT_CLASS, 'px-2 text-muted-foreground')}>
         <X aria-hidden className="size-3.5" />
       </Button>
     </div>
@@ -145,11 +145,11 @@ export function FilterChipOperator({ negated, onToggle }: { negated: boolean; on
       type="button"
       variant="ghost"
       onClick={onToggle}
-      title={negated ? 'Switch to is' : 'Switch to is not'}
-      aria-label={negated ? 'Operator: is not. Switch to is' : 'Operator: is. Switch to is not'}
+      title={negated ? 'Cambiar a es' : 'Cambiar a no es'}
+      aria-label={negated ? 'Operador: no es. Cambiar a es' : 'Operador: es. Cambiar a no es'}
       className={cn(SEGMENT_CLASS, 'border-r border-border px-2 text-muted-foreground')}
     >
-      {negated ? 'is not' : 'is'}
+      {negated ? 'no es' : 'es'}
     </Button>
   );
 }
@@ -183,7 +183,7 @@ function summarize(
   const chosen = options.filter((option) => values.includes(option.value));
   if (chosen.length === 0) return { label: empty, placeholder: true };
   if (chosen.length <= 2) return { label: chosen.map((option) => option.label).join(', '), placeholder: false };
-  return { label: `${chosen.length} selected`, placeholder: false };
+  return { label: `${chosen.length} seleccionados`, placeholder: false };
 }
 
 /** A chip segment is a ghost Button squared into the chip: no radius, full height, normal weight. */
@@ -195,7 +195,7 @@ export function FilterChipMulti({
   values,
   onChange,
   autoOpen = false,
-  empty = 'Select...',
+  empty = 'Seleccionar…',
   name,
   onOpenChange,
 }: {
@@ -311,8 +311,8 @@ function FilterChipSearchMulti({
         <span className={cn('truncate', placeholder && 'text-muted-foreground')}>{label}</span>
       </ComboboxTrigger>
       <ComboboxContent aria-label={name ?? label} className="w-56 min-w-56">
-        <ComboboxInput showTrigger={false} placeholder="Search..." aria-label="Search options" />
-        <ComboboxEmpty>No matches</ComboboxEmpty>
+        <ComboboxInput showTrigger={false} placeholder="Buscar…" aria-label="Buscar opciones" />
+        <ComboboxEmpty>Sin coincidencias</ComboboxEmpty>
         <ComboboxList className="max-h-(--list-height)" style={{ '--list-height': `${VISIBLE_ROWS * 2}rem` } as CSSProperties}>
           {(item: string) => {
             const option = byValue.get(item);
@@ -351,7 +351,7 @@ export function FilterChipSelect({
         size="sm"
         className="h-auto min-w-0 rounded-none border-0 bg-transparent pr-1.5 pl-2.5 hover:bg-muted focus-visible:ring-0 focus-visible:bg-muted dark:bg-transparent dark:hover:bg-muted"
       >
-        <SelectValue placeholder="Select..." className="truncate" />
+        <SelectValue placeholder="Seleccionar…" className="truncate" />
       </SelectTrigger>
       <SelectContent alignItemWithTrigger={false} align="start">
         {children}

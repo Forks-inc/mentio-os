@@ -6,9 +6,9 @@ import { mentio, unwrap } from '@/lib/mentio';
 import { keywordName, mentionsHref, type WindowQuery } from './window';
 
 const duration = (ms: number | null) => {
-  if (ms === null) return 'None done';
+  if (ms === null) return 'Sin resolver';
   const hours = ms / 3_600_000;
-  return hours < 1 ? `${Math.max(1, Math.round(ms / 60_000))} min` : hours < 48 ? `${hours.toFixed(1)} h` : `${(hours / 24).toFixed(1)} days`;
+  return hours < 1 ? `${Math.max(1, Math.round(ms / 60_000))} min` : hours < 48 ? `${hours.toFixed(1)} h` : `${(hours / 24).toFixed(1)} días`;
 };
 
 /** Headline numbers against the previous window, the trend, and where it came from. */
@@ -32,64 +32,64 @@ export async function Overview({ query, summary }: { query: WindowQuery; summary
   const total = (values: number[]) => values.reduce((a, b) => a + b, 0);
   const ranked = [...byPlatform.data].sort((a, b) => total(b.points.map((p) => p.matched)) - total(a.points.map((p) => p.matched)));
   const stacks = ranked.slice(0, 5).map((s, i) => ({ name: platformName(s.key), color: CHART_COLORS[i], values: s.points.map((p) => p.matched) }));
-  if (ranked.length > 5) stacks.push({ name: 'Other', color: '#d4d4d8', values: labels.map((_, i) => total(ranked.slice(5).map((s) => s.points[i]?.matched ?? 0))) });
+  if (ranked.length > 5) stacks.push({ name: 'Otros', color: '#d4d4d8', values: labels.map((_, i) => total(ranked.slice(5).map((s) => s.points[i]?.matched ?? 0))) });
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
-        <Stat label="Matched" value={compact(summary.matched)} delta={pct(summary.matched, prev?.matched)} spark={points.map((p) => p.matched)} hint={`${compact(summary.posts)} posts`} href={link({})} />
+        <Stat label="Menciones" value={compact(summary.matched)} delta={pct(summary.matched, prev?.matched)} spark={points.map((p) => p.matched)} hint={`${compact(summary.posts)} publicaciones`} href={link({})} />
         <Stat
-          label="Relevant"
+          label="Relevantes"
           value={compact(summary.relevant)}
           delta={pct(summary.relevant, prev?.relevant)}
           spark={points.map((p) => p.relevant)}
-          hint={summary.matched ? `${Math.round((summary.relevant / summary.matched) * 100)}% of matched` : undefined}
+          hint={summary.matched ? `${Math.round((summary.relevant / summary.matched) * 100)}% del total` : undefined}
           href={link({ relevant: 'true' })}
         />
         <Stat
-          label="Negative"
+          label="Sentimiento negativo"
           value={compact(summary.sentiment.negative)}
           delta={pct(summary.sentiment.negative, prev?.sentiment.negative)}
           invert
           spark={points.map((p) => p.negative)}
-          hint={scored ? `${Math.round((summary.sentiment.negative / scored) * 100)}% of classified` : undefined}
+          hint={scored ? `${Math.round((summary.sentiment.negative / scored) * 100)}% de las clasificadas` : undefined}
           href={link({ sentiments: 'negative' })}
         />
-        <Stat label="Est. reach" value={compact(summary.reach.followers)} delta={pct(summary.reach.followers, prev?.reach.followers)} hint={`${compact(summary.reach.people)} authors known`} />
-        <Stat label="People" value={compact(summary.people)} delta={pct(summary.people, prev?.people)} />
-        <Stat label="Posts" value={compact(summary.posts)} delta={pct(summary.posts, prev?.posts)} />
-        <Stat label="Buying intent" value={compact(summary.buyIntent)} delta={pct(summary.buyIntent, prev?.buyIntent)} href={link({ intents: 'buy_intent' })} />
-        <Stat label="Questions" value={compact(summary.questions)} delta={pct(summary.questions, prev?.questions)} href={link({ intents: 'question' })} />
+        <Stat label="Alcance estimado" value={compact(summary.reach.followers)} delta={pct(summary.reach.followers, prev?.reach.followers)} hint={`${compact(summary.reach.people)} autores identificados`} />
+        <Stat label="Autores" value={compact(summary.people)} delta={pct(summary.people, prev?.people)} />
+        <Stat label="Publicaciones" value={compact(summary.posts)} delta={pct(summary.posts, prev?.posts)} />
+        <Stat label="Intención de apoyo" value={compact(summary.buyIntent)} delta={pct(summary.buyIntent, prev?.buyIntent)} href={link({ intents: 'buy_intent' })} />
+        <Stat label="Preguntas" value={compact(summary.questions)} delta={pct(summary.questions, prev?.questions)} href={link({ intents: 'question' })} />
       </div>
 
-      <Card title="Mentions over time" description={`Per ${series.window.bucket}. Bars are matched mentions split by platform; the dark line is relevant ones, the dashed line the previous period.`}>
+      <Card title="Menciones en el tiempo" description={`Por ${{ hour: 'hora', day: 'día', week: 'semana', month: 'mes' }[series.window.bucket] ?? series.window.bucket}. Las barras muestran menciones por canal; la línea oscura, las relevantes, y la discontinua, el periodo anterior.`}>
         <StackedBars
           labels={labels}
           stacks={stacks}
           lines={[
-            { name: 'Relevant', color: '#18181b', values: points.map((p) => p.relevant) },
-            ...(previous.length === points.length ? [{ name: 'Previous period', color: '#a1a1aa', values: previous.map((p) => p.matched), dashed: true }] : []),
+            { name: 'Relevantes', color: '#18181b', values: points.map((p) => p.relevant) },
+            ...(previous.length === points.length ? [{ name: 'Periodo anterior', color: '#a1a1aa', values: previous.map((p) => p.matched), dashed: true }] : []),
           ]}
         />
       </Card>
 
-      <Card title="Sentiment over time" description={`${compact(summary.sentiment.unclassified)} matches not scored yet.`}>
+      <Card title="Sentimiento en el tiempo" description={`${compact(summary.sentiment.unclassified)} menciones aún sin clasificar.`}>
         <StackedBars
           labels={labels}
           height={160}
           stacks={[
-            { name: 'Positive', color: '#10b981', values: points.map((p) => p.positive) },
+            { name: 'Positivo', color: '#10b981', values: points.map((p) => p.positive) },
             { name: 'Neutral', color: '#d4d4d8', values: points.map((p) => p.neutral) },
-            { name: 'Negative', color: '#ef4444', values: points.map((p) => p.negative) },
+            { name: 'Negativo', color: '#ef4444', values: points.map((p) => p.negative) },
           ]}
         />
       </Card>
 
       <div className="grid gap-6 @4xl:grid-cols-2">
-        <Card title="Top platforms">
+        <Card title="Canales principales">
           <BarList items={platforms.data.slice(0, 8).map((r) => ({ label: platformName(r.key), value: r.matched, href: link({ platforms: r.key }), icon: <PlatformIcon platform={r.key} /> }))} />
         </Card>
-        <Card title="Top keywords">
+        <Card title="Términos monitoreados principales">
           <BarList
             items={keywords.data.slice(0, 8).map((r) => ({
               label: r.keyword ? keywordName(r.keyword) : r.label,
@@ -100,14 +100,14 @@ export async function Overview({ query, summary }: { query: WindowQuery; summary
         </Card>
       </div>
 
-      <Card title="Inbox" description="Where this window's matches stand.">
+      <Card title="Seguimiento de menciones" description="Estado de las menciones en este periodo.">
         <div className="grid gap-3 @lg:grid-cols-3 @4xl:grid-cols-6">
-          <Stat label="Open" value={compact(summary.triage.open)} href={link({ status: 'open' })} />
-          <Stat label="Done" value={compact(summary.triage.done)} href={link({ status: 'done' })} />
-          <Stat label="Ignored" value={compact(summary.triage.ignored)} href={link({ status: 'ignored' })} />
-          <Stat label="Waiting over 24 h" value={compact(summary.triage.waiting)} hint="Relevant and still open" />
-          <Stat label="Handled" value={summary.triage.handledRate === null ? 'n/a' : `${Math.round(summary.triage.handledRate * 100)}%`} hint="Done out of relevant" />
-          <Stat label="Median time to done" value={<span className="text-base">{duration(summary.triage.medianTimeToDoneMs)}</span>} />
+          <Stat label="Abiertas" value={compact(summary.triage.open)} href={link({ status: 'open' })} />
+          <Stat label="Resueltas" value={compact(summary.triage.done)} href={link({ status: 'done' })} />
+          <Stat label="Ignoradas" value={compact(summary.triage.ignored)} href={link({ status: 'ignored' })} />
+          <Stat label="Pendientes por más de 24 h" value={compact(summary.triage.waiting)} hint="Relevantes y aún abiertas" />
+          <Stat label="Atendidas" value={summary.triage.handledRate === null ? 's/d' : `${Math.round(summary.triage.handledRate * 100)}%`} hint="Resueltas de las relevantes" />
+          <Stat label="Tiempo medio para resolver" value={<span className="text-base">{duration(summary.triage.medianTimeToDoneMs)}</span>} />
         </div>
       </Card>
     </div>

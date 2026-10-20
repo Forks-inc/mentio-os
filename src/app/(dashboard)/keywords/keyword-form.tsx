@@ -9,7 +9,7 @@ import { date, platformName, REVIEW_PLATFORMS, SEARCH_PLATFORMS } from '@/lib/fo
 import { createKeywordAction, updateKeywordAction } from './actions';
 import { KIND_LABELS, KINDS, sourceKey, takesCountries, takesLanguage } from './shared';
 
-const KIND_HINTS: Record<string, string> = { brand: 'Your own names.', competitor: 'A rival: counted in share of voice.', topic: 'The space you work in.' };
+const KIND_HINTS: Record<string, string> = { brand: 'Nombres de tus candidatos.', competitor: 'Un adversario para comparar la participación de voz.', topic: 'Un tema de agenda que sigue la campaña.' };
 
 export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Group[] }) {
   const editing = Boolean(keyword);
@@ -17,81 +17,81 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
   const cap = keyword?.cap ? (keyword.cap.welcome ? keyword.cap.own : keyword.cap.mentions) : null;
   const matching = keyword?.matching;
   // The keyword's own group always appears, so saving never moves it by accident.
-  const groupOptions = groups.map((g) => [g.id, g.isDefault ? `${g.name} (default)` : g.name] as const);
+  const groupOptions = groups.map((g) => [g.id, g.isDefault ? `${g.name} (predeterminada)` : g.name] as const);
   if (keyword && !groups.some((g) => g.id === keyword.group.id)) groupOptions.unshift([keyword.group.id, keyword.group.name]);
 
   return (
     <ActionForm action={editing ? updateKeywordAction : createKeywordAction} className="space-y-6">
       {keyword ? <input type="hidden" name="id" value={keyword.id} /> : null}
 
-      <Card title="Keyword">
+      <Card title="Candidato o tema">
         <div className="grid gap-4 @lg:grid-cols-2">
           {keyword ? (
-            <Field label="Term" hint="A term cannot be changed.">
+            <Field label="Término" hint="No puedes cambiar un término después de crearlo.">
               <Input value={keyword.term} readOnly disabled />
             </Field>
           ) : (
-            <Field label="Term" hint="Matched as a phrase.">
-              <Input name="term" required minLength={2} maxLength={80} placeholder="Your brand, a competitor, a topic" />
+            <Field label="Término" hint="Se busca como una frase exacta.">
+              <Input name="term" required minLength={2} maxLength={80} placeholder="Nombre del candidato, apodo, adversario o tema de agenda" />
             </Field>
           )}
-          <Field group label="Kind">
+          <Field group label="Tipo">
             <Segmented
               name="kind"
               defaultValue={keyword?.kind ?? 'brand'}
               options={KINDS.map((k) => ({ value: k, label: KIND_LABELS[k], description: KIND_HINTS[k] }))}
             />
           </Field>
-          <Field label="Group" hint="A term can be tracked once per group.">
+          <Field label="Campaña" hint="Puedes monitorear un término una vez por campaña.">
             <Select name="groupId" defaultValue={keyword?.group.id ?? defaultGroup} options={groupOptions} />
           </Field>
-          <Field label="Monthly mention cap" hint="Per calendar month. Empty for none.">
-            <Input name="cap" type="number" min={1} max={1000000} defaultValue={cap ?? ''} placeholder="No cap" />
+          <Field label="Límite mensual de menciones" hint="Por mes calendario. Déjalo vacío para no fijar un límite.">
+            <Input name="cap" type="number" min={1} max={1000000} defaultValue={cap ?? ''} placeholder="Sin límite" />
           </Field>
         </div>
         {keyword?.cap?.welcome ? (
           <p className="mt-3 text-xs text-amber-700">
-            Your workspace is on its welcome credit, so this keyword stops at {keyword.cap.mentions} mentions a month until the first top-up. The cap above is the one it gets after that.
+            Tu espacio de trabajo tiene saldo de bienvenida. Este término se detendrá al llegar a {keyword.cap.mentions} menciones al mes, hasta la primera recarga. Después se aplicará el límite indicado arriba.
           </p>
         ) : null}
-        <Field className="mt-4" label="Context for the classifier" hint="What the term means here, and what to ignore.">
-          <Textarea name="context" rows={2} maxLength={300} defaultValue={keyword?.context ?? ''} placeholder="Arc is our browser; ignore the geometry word." />
+        <Field className="mt-4" label="Contexto para clasificar menciones" hint="Aclara a quién o qué se refiere el término y qué conversación debe ignorarse.">
+          <Textarea name="context" rows={2} maxLength={300} defaultValue={keyword?.context ?? ''} placeholder="María López es nuestra candidata; ignora menciones a otras personas con el mismo nombre." />
         </Field>
       </Card>
 
-      <Card title="Platforms">
+      <Card title="Plataformas">
         <PlatformPicker name="platforms" options={SEARCH_PLATFORMS} defaultValue={keyword?.platforms ?? null} labels={Object.fromEntries(SEARCH_PLATFORMS.map((p) => [p, platformName(p)]))} />
-        <SwitchRow name="reviewsOnly" defaultChecked={keyword?.platforms?.length === 0} label="Reviews only" hint="Search the term nowhere; only collect the review pages below." />
+        <SwitchRow name="reviewsOnly" defaultChecked={keyword?.platforms?.length === 0} label="Solo reseñas" hint="No busques el término en plataformas; recopila únicamente las páginas de reseñas indicadas abajo." />
       </Card>
 
-      <Card title="Matching rules" description="Checked before a mention is stored. A dropped post is never billed.">
+      <Card title="Reglas de coincidencia" description="Se revisan antes de guardar una mención. Las publicaciones descartadas no generan cargos.">
         <div className="grid gap-4 @lg:grid-cols-2">
-          <Field label="Required terms" hint="The post must also contain these.">
-            <TokenInput name="requiredTerms" defaultValue={matching?.requiredTerms} placeholder="api, sdk… press Enter" />
+          <Field label="Términos requeridos" hint="La publicación también debe incluir estos términos.">
+            <TokenInput name="requiredTerms" defaultValue={matching?.requiredTerms} placeholder="candidatura, propuesta… presiona Enter" />
           </Field>
-          <Field group label="Required mode">
+          <Field group label="Coincidencia de términos requeridos">
             <Segmented
               name="requiredMode"
               defaultValue={matching?.requiredMode ?? 'any'}
               options={[
-                { value: 'any', label: 'Any of them', description: 'One required term is enough.' },
-                { value: 'all', label: 'All of them', description: 'Every required term must appear.' },
+                { value: 'any', label: 'Cualquiera', description: 'Basta con que aparezca un término requerido.' },
+                { value: 'all', label: 'Todos', description: 'Deben aparecer todos los términos requeridos.' },
               ]}
             />
           </Field>
-          <Field label="Excluded terms" hint="Dropped when present. * is a wildcard: *bot.">
-            <TokenInput name="excludedTerms" defaultValue={matching?.excludedTerms} placeholder="hiring, job… press Enter" />
+          <Field label="Términos excluidos" hint="La mención se descarta si aparece alguno. Usa * como comodín: *bot.">
+            <TokenInput name="excludedTerms" defaultValue={matching?.excludedTerms} placeholder="empleo, vacante… presiona Enter" />
           </Field>
-          <Field label="Excluded authors" hint="Links, @handles or names.">
-            <TokenInput name="excludedAuthors" defaultValue={matching?.excludedAuthors} splitOnComma={false} placeholder="@spammer… press Enter" />
+          <Field label="Autores excluidos" hint="Enlaces, @usuarios o nombres de cuentas.">
+            <TokenInput name="excludedAuthors" defaultValue={matching?.excludedAuthors} splitOnComma={false} placeholder="@cuenta_falsa… presiona Enter" />
           </Field>
         </div>
-        <SwitchRow name="caseSensitive" defaultChecked={matching?.caseSensitive ?? false} label="Case sensitive" hint="The term must appear as typed: RAG, never rag." />
+        <SwitchRow name="caseSensitive" defaultChecked={matching?.caseSensitive ?? false} label="Distinguir mayúsculas y minúsculas" hint="El término debe aparecer tal como lo escribiste: RAG, no rag." />
       </Card>
 
       <Card
-        title="Review pages"
-        description="Every review of a connected page becomes a mention. A new page brings its last 30 days free."
+        title="Páginas de reseñas"
+        description="Cada reseña de una página conectada se registra como mención. Al agregar una página se recuperan gratis los últimos 30 días."
       >
         {keyword && keyword.reviewSources.length > 0 ? (
           <ul className="mb-4 divide-y divide-line rounded-md border border-line">
@@ -103,22 +103,22 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
                     <div className="min-w-0">
                       <span className="font-medium">{platformName(src.platform)}</span>{' '}
                       <a href={src.url} target="_blank" rel="noreferrer" className="break-all text-primary hover:underline">{src.id}</a>
-                      <span className="ml-2 text-xs text-muted-foreground">since {date(src.connectedAt)}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">desde {date(src.connectedAt)}</span>
                     </div>
                     <div className="text-destructive">
-                      <Checkbox name="removeSource" value={key} label="Remove" />
+                      <Checkbox name="removeSource" value={key} label="Eliminar" />
                     </div>
                   </div>
                   {takesCountries(src.platform) || takesLanguage(src.platform) ? (
                     <div className="grid gap-2 @lg:grid-cols-2">
                       {takesCountries(src.platform) ? (
-                        <Field label="Countries" hint="Two-letter codes, comma separated.">
+                        <Field label="Países" hint="Códigos de dos letras separados por comas.">
                           <Input name={`${key}.countries`} defaultValue={src.countries.join(', ')} />
                         </Field>
                       ) : null}
                       {takesLanguage(src.platform) ? (
-                        <Field label="Language">
-                          <Input name={`${key}.language`} defaultValue={src.language ?? ''} placeholder="en" />
+                        <Field label="Idioma">
+                          <Input name={`${key}.language`} defaultValue={src.language ?? ''} placeholder="es" />
                         </Field>
                       ) : null}
                     </div>
@@ -128,29 +128,29 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
             })}
           </ul>
         ) : null}
-        <p className="mb-3 text-xs font-medium text-foreground/80">{keyword?.reviewSources.length ? 'Connect another page' : 'Connect a page'} (optional)</p>
+        <p className="mb-3 text-xs font-medium text-foreground/80">{keyword?.reviewSources.length ? 'Conectar otra página' : 'Conectar una página'} (opcional)</p>
         <div className="grid gap-4 @lg:grid-cols-2">
-          <Field className="@lg:col-span-2" label="Link" hint="An App Store or Google Play app, a Trustpilot page or a Google Maps place (a maps.app.goo.gl link works).">
-            <Input name="rsUrl" type="text" inputMode="url" placeholder="https://apps.apple.com/us/app/notion/id1232780281" />
+          <Field className="@lg:col-span-2" label="Enlace" hint="Una app de App Store o Google Play, una página de Trustpilot o un lugar de Google Maps (también sirve un enlace maps.app.goo.gl).">
+            <Input name="rsUrl" type="text" inputMode="url" placeholder="https://apps.apple.com/mx/app/ejemplo/id123456789" />
           </Field>
-          <Field label="Or the platform" hint="Needed when you give an id instead of a link.">
-            <Select name="rsPlatform" placeholder="From the link" options={REVIEW_PLATFORMS.map((p) => [p, platformName(p)] as const)} />
+          <Field label="O elige la plataforma" hint="Indícala si agregas un identificador en lugar de un enlace.">
+            <Select name="rsPlatform" placeholder="Detectar del enlace" options={REVIEW_PLATFORMS.map((p) => [p, platformName(p)] as const)} />
           </Field>
-          <Field label="And the id" hint="App Store: the digits after id. Google Play: the package name. Trustpilot: the domain. Google Maps: the Place ID.">
-            <Input name="rsId" placeholder="notion.so" />
+          <Field label="Y el identificador" hint="App Store: los dígitos después de id. Google Play: el nombre del paquete. Trustpilot: el dominio. Google Maps: el ID del lugar.">
+            <Input name="rsId" placeholder="ejemplo.mx" />
           </Field>
-          <Field label="Countries" hint="App Store and Google Play only, up to 20, comma separated. Default: the link's, else us.">
-            <Input name="rsCountries" placeholder="us, gb, de" />
+          <Field label="Países" hint="Solo para App Store y Google Play; hasta 20, separados por comas. Predeterminado: el del enlace o México.">
+            <Input name="rsCountries" placeholder="mx, us, es" />
           </Field>
-          <Field label="Language" hint="Google Play only. Default: the link's, else en.">
-            <Input name="rsLanguage" placeholder="en" />
+          <Field label="Idioma" hint="Solo para Google Play. Predeterminado: el del enlace o español.">
+            <Input name="rsLanguage" placeholder="es" />
           </Field>
         </div>
       </Card>
 
       <div data-slot="form-actions" className="flex items-center justify-between gap-3">
-        <span className="text-xs text-muted-foreground">{editing ? null : 'A new keyword reads back the last 30 days at once.'}</span>
-        <SubmitButton>{editing ? 'Save changes' : 'Create keyword'}</SubmitButton>
+        <span className="text-xs text-muted-foreground">{editing ? null : 'Un término nuevo recupera de inmediato los últimos 30 días.'}</span>
+        <SubmitButton>{editing ? 'Guardar cambios' : 'Agregar término'}</SubmitButton>
       </div>
     </ActionForm>
   );

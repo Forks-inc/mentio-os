@@ -8,9 +8,9 @@ import { keywordName, mentionsHref, type WindowQuery } from './window';
 type Row = AnalyticsBreakdown['data'][number];
 type By = AnalyticsBreakdown['by'];
 
-const LANGUAGES = new Intl.DisplayNames(['en'], { type: 'language' });
+const LANGUAGES = new Intl.DisplayNames(['es-MX'], { type: 'language' });
 const languageName = (code: string) => {
-  if (code === 'unknown') return 'Unknown';
+  if (code === 'unknown') return 'Desconocido';
   try {
     return LANGUAGES.of(code) ?? code;
   } catch {
@@ -20,13 +20,13 @@ const languageName = (code: string) => {
 
 /** Each dimension: how to name a row and which feed filter it opens. */
 const DIMENSIONS: Array<{ by: Exclude<By, 'hour'>; title: string; description?: string; label: (r: Row) => string; filter: (r: Row) => Record<string, string> | null }> = [
-  { by: 'platform', title: 'Platform', label: (r) => platformName(r.key), filter: (r) => ({ platforms: r.key }) },
-  { by: 'keyword', title: 'Keyword', label: (r) => (r.keyword ? keywordName(r.keyword) : r.label), filter: (r) => (r.keyword ? { keywordIds: r.keyword.id } : null) },
-  { by: 'sentiment', title: 'Sentiment', label: (r) => tagName(r.key), filter: (r) => (r.key === 'unclassified' ? null : { sentiments: r.key }) },
-  { by: 'intent', title: 'Intent', description: 'A mention can carry several, so shares overlap.', label: (r) => tagName(r.key), filter: (r) => ({ intents: r.key }) },
-  { by: 'status', title: 'Status', label: (r) => tagName(r.key), filter: (r) => ({ status: r.key }) },
-  { by: 'language', title: 'Language', label: (r) => languageName(r.key), filter: (r) => (r.key === 'unknown' ? null : { languages: r.key }) },
-  { by: 'person', title: 'Top people', description: 'Who posted the most. Anonymous posts are left out.', label: (r) => r.person?.name ?? r.label, filter: () => null },
+  { by: 'platform', title: 'Canal', label: (r) => platformName(r.key), filter: (r) => ({ platforms: r.key }) },
+  { by: 'keyword', title: 'Término monitoreado', label: (r) => (r.keyword ? keywordName(r.keyword) : r.label), filter: (r) => (r.keyword ? { keywordIds: r.keyword.id } : null) },
+  { by: 'sentiment', title: 'Sentimiento', label: (r) => ({ positive: 'Positivo', neutral: 'Neutral', negative: 'Negativo', unclassified: 'Sin clasificar' }[r.key] ?? tagName(r.key)), filter: (r) => (r.key === 'unclassified' ? null : { sentiments: r.key }) },
+  { by: 'intent', title: 'Intención', description: 'Una mención puede tener varias intenciones; los porcentajes se superponen.', label: (r) => ({ buy_intent: 'Intención de apoyo', question: 'Pregunta', complaint: 'Queja', praise: 'Reconocimiento', comparison: 'Comparación', churn_intent: 'Intención de cambio', bug_report: 'Reporte de error', pricing: 'Costo', hiring: 'Contratación', event: 'Evento', promotional: 'Promoción' } as Record<string, string>)[r.key] ?? tagName(r.key), filter: (r) => ({ intents: r.key }) },
+  { by: 'status', title: 'Estado', label: (r) => ({ open: 'Abierto', done: 'Resuelto', ignored: 'Ignorado', snoozed: 'Pospuesto', new: 'Nuevo' }[r.key] ?? tagName(r.key)), filter: (r) => ({ status: r.key }) },
+  { by: 'language', title: 'Idioma', label: (r) => languageName(r.key), filter: (r) => (r.key === 'unknown' ? null : { languages: r.key }) },
+  { by: 'person', title: 'Autores con más menciones', description: 'Autores con más publicaciones; se omiten las publicaciones anónimas.', label: (r) => r.person?.name ?? r.label, filter: () => null },
 ];
 
 /** Every dimension the breakdown report groups by, each linking into the feed. */
@@ -53,7 +53,7 @@ export async function Breakdowns({ query, window }: { query: WindowQuery; window
           </Card>
         ))}
       </div>
-      <Card title="When people post" description={`Matches by weekday and hour, ${hour.window.timezone}.`}>
+      <Card title="Horario de publicación" description={`Menciones por día de la semana y hora, zona horaria ${hour.window.timezone}.`}>
         <HourHeatmap rows={hour.data} />
       </Card>
     </div>

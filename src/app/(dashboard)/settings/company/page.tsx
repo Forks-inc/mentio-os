@@ -6,63 +6,63 @@ import { mentio, unwrap } from '@/lib/mentio';
 import { updateContextAction, updateProfileAction } from './actions';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Company' };
+export const metadata = { title: 'Perfil de la organización' };
 
-/** The company profile: what the classifier scores every mention against, one small card per part. */
+/** Organization profile used to evaluate the political conversation around candidates. */
 export default async function Company() {
   const company = unwrap(await mentio().getCompany());
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Company" description="What the classifier knows about you. The more precise, the less noise." />
+      <PageHeader title="Perfil de la organización" description="Contexto de tu organización para analizar la conversación sobre tus candidatos. Cuanto más preciso, menos ruido." />
 
       <div className="grid gap-4">
-        <FormCard action={updateProfileAction} title="Brand" description="Who you are and where you post." hint="Your own posts are recognized by these accounts.">
+        <FormCard action={updateProfileAction} title="Organización" description="Quiénes son y dónde publican." hint="Estas cuentas permiten identificar las publicaciones propias de la organización.">
           <div className="grid gap-4 @lg:grid-cols-2">
-            <Field label="Name">
+            <Field label="Nombre">
               <Input name="name" required maxLength={120} defaultValue={company.name} />
             </Field>
-            <Field label="Website">
-              <Input name="website" inputMode="url" maxLength={300} defaultValue={company.website ?? ''} placeholder="https://acme.com" />
+            <Field label="Sitio web">
+              <Input name="website" inputMode="url" maxLength={300} defaultValue={company.website ?? ''} placeholder="https://campana.mx" />
             </Field>
-            <Field label="X account">
-              <Input name="x" maxLength={60} defaultValue={company.accounts.x ?? ''} placeholder="acme" />
+            <Field label="Cuenta de X">
+              <Input name="x" maxLength={60} defaultValue={company.accounts.x ?? ''} placeholder="campana_mx" />
             </Field>
-            <Field label="LinkedIn page">
-              <Input name="linkedin" maxLength={200} defaultValue={company.accounts.linkedin ?? ''} placeholder="acme-inc" />
+            <Field label="Página de LinkedIn">
+              <Input name="linkedin" maxLength={200} defaultValue={company.accounts.linkedin ?? ''} placeholder="equipo-campana" />
             </Field>
           </div>
         </FormCard>
 
-        <FormCard action={updateProfileAction} title="What you do" description="One paragraph. The biggest lever on relevance." hint="Applies to new mentions.">
-          <Textarea name="description" rows={4} maxLength={1000} defaultValue={company.description} placeholder="Acme is an API that…" aria-label="What the company does" />
+        <FormCard action={updateProfileAction} title="Qué hace la organización" description="Resume su trabajo en un párrafo. Esto ayuda a evaluar la relevancia de las menciones." hint="Se aplica a las menciones nuevas.">
+          <Textarea name="description" rows={4} maxLength={1000} defaultValue={company.description} placeholder="Somos el equipo de campaña de…" aria-label="A qué se dedica la organización" />
         </FormCard>
 
-        <FormCard action={updateProfileAction} title="Relevance" description="What counts for you, and who you compete with." hint="One entry per line.">
-          <Field label="Guidelines">
-            <Textarea name="guidelines" rows={3} maxLength={2000} defaultValue={company.guidelines ?? ''} placeholder="Posts about our API count. Job listings never do." />
+        <FormCard action={updateProfileAction} title="Relevancia" description="Qué temas importan a la campaña y qué adversarios comparar." hint="Escribe una indicación por línea.">
+          <Field label="Criterios de relevancia">
+            <Textarea name="guidelines" rows={3} maxLength={2000} defaultValue={company.guidelines ?? ''} placeholder="Cuenta la conversación sobre propuestas y gestión. Excluye anuncios de empleo." />
           </Field>
           <div className="grid gap-4 @lg:grid-cols-2">
-            <Field label="Use cases">
-              <Textarea name="useCases" rows={4} defaultValue={company.useCases.join('\n')} placeholder={'Brand monitoring\nLead finding'} />
+            <Field label="Temas prioritarios">
+              <Textarea name="useCases" rows={4} defaultValue={company.useCases.join('\n')} placeholder={'Seguridad pública\nTransporte y movilidad'} />
             </Field>
-            <Field label="Competitors">
-              <Textarea name="competitors" rows={4} defaultValue={company.competitors.join('\n')} placeholder={'Rival One\nRival Two'} />
+            <Field label="Adversarios">
+              <Textarea name="competitors" rows={4} defaultValue={company.competitors.join('\n')} placeholder={'Nombre del adversario\nApodo o nombre de campaña'} />
             </Field>
           </div>
         </FormCard>
 
         <Collapsible>
-          <CollapsibleTrigger className="text-sm text-muted-foreground hover:text-foreground">Advanced: the text the classifier reads</CollapsibleTrigger>
+          <CollapsibleTrigger className="text-sm text-muted-foreground hover:text-foreground">Avanzado: texto que usa el clasificador</CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
-            <FormCard action={updateContextAction} title="Classifier text" description="Composed from the cards above. Edit it to override; the next save above composes it again." submit="Save override">
-              <Textarea name="context" rows={10} maxLength={4000} defaultValue={company.context} className="font-mono text-xs" aria-label="Classifier text" />
+            <FormCard action={updateContextAction} title="Contexto del clasificador" description="Se compone con los campos anteriores. Puedes editarlo; al guardar cualquier campo de arriba, se vuelve a componer." submit="Guardar contexto">
+              <Textarea name="context" rows={10} maxLength={4000} defaultValue={company.context} className="font-mono text-xs" aria-label="Contexto del clasificador" />
             </FormCard>
           </CollapsibleContent>
         </Collapsible>
 
         <p className="text-xs text-muted-foreground">
-          Keywords in a <Link href="/settings/groups" className="text-primary hover:underline">group</Link> with its own description are judged with that instead.
+          Los términos monitoreados en una <Link href="/settings/groups" className="text-primary hover:underline">campaña</Link> con descripción propia se evalúan con ese contexto.
         </p>
       </div>
     </div>

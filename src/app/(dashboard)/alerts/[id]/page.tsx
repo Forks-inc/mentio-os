@@ -8,9 +8,9 @@ import { loadRuleContext } from '../names';
 import { MODE_LABELS, describeFilter, whenText } from '../rule';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Alert' };
+export const metadata = { title: 'Alerta' };
 
-/** One rule: edit it, try it, run its digest now, and keep its muted authors. */
+/** Edit the rule, send a test, run its summary, and manage silenced authors. */
 export default async function AlertDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [alert, context] = await Promise.all([mentio().getAlert({ path: { id } }).then(unwrap), loadRuleContext()]);
@@ -20,34 +20,34 @@ export default async function AlertDetail({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-6">
       <PageHeader
-        back={{ href: '/alerts', label: 'Alerts' }}
+        back={{ href: '/alerts', label: 'Alertas' }}
         title={
           <span className="flex flex-wrap items-center gap-2">
             {alert.name}
             <Badge tone={alert.mode === 'instant' ? 'accent' : 'outline'}>{MODE_LABELS[alert.mode]}</Badge>
-            {alert.enabled ? <Badge tone="good">Enabled</Badge> : <Badge>Disabled</Badge>}
+            {alert.enabled ? <Badge tone="good">Activa</Badge> : <Badge>Desactivada</Badge>}
           </span>
         }
         description={describeFilter(alert.filter, context.names).join(' · ')}
-        actions={<LinkButton href={`/mentions?alertId=${encodeURIComponent(alert.id)}`}>Mentions it matches</LinkButton>}
+        actions={<LinkButton href={`/mentions?alertId=${encodeURIComponent(alert.id)}`}>Ver menciones coincidentes</LinkButton>}
       />
 
       <div className="grid gap-3 @lg:grid-cols-3">
-        <Stat label="Sent in the last 7 days" value={compact(alert.stats.sentLast7d)} hint="Across every channel" />
-        <Stat label="Last sent" value={alert.stats.lastSentAt ? timeAgo(alert.stats.lastSentAt) : 'Never'} hint={alert.stats.lastSentAt ? date(alert.stats.lastSentAt) : undefined} />
-        <Stat label="Schedule" value={<span className="text-base">{whenText(alert)}</span>} hint={alert.stats.nextRunAt ? `Next ${date(alert.stats.nextRunAt)}` : undefined} />
+        <Stat label="Envíos en los últimos 7 días" value={compact(alert.stats.sentLast7d)} hint="En todos los canales" />
+        <Stat label="Último envío" value={alert.stats.lastSentAt ? timeAgo(alert.stats.lastSentAt) : 'Nunca'} hint={alert.stats.lastSentAt ? date(alert.stats.lastSentAt) : undefined} />
+        <Stat label="Programación" value={<span className="text-base">{whenText(alert)}</span>} hint={alert.stats.nextRunAt ? `Siguiente: ${date(alert.stats.nextRunAt)}` : undefined} />
       </div>
 
-      <Card title="Try it" description="A test sends a sample to every channel. Running the digest sends the last 24 hours now, without moving the schedule.">
+      <Card title="Probar alerta" description="La prueba envía una muestra a cada canal. Ejecutar el resumen envía ahora las menciones de las últimas 24 horas sin cambiar la programación.">
         <div className="flex flex-wrap items-start gap-3">
           <ActionForm action={testAlertAction}>
             {hidden}
-            <SubmitButton variant="secondary">Send a test</SubmitButton>
+            <SubmitButton variant="secondary">Enviar prueba</SubmitButton>
           </ActionForm>
           {alert.mode === 'instant' ? null : (
             <ActionForm action={runDigestAction}>
               {hidden}
-              <SubmitButton variant="secondary">Run digest now</SubmitButton>
+              <SubmitButton variant="secondary">Enviar resumen ahora</SubmitButton>
             </ActionForm>
           )}
         </div>
@@ -55,7 +55,7 @@ export default async function AlertDetail({ params }: { params: Promise<{ id: st
 
       <AlertForm alert={alert} action={updateAlertAction} channels={context.channels} keywords={context.keywords} groups={context.groups} />
 
-      <Card title="Muted authors" description="Never sent by this rule. Links are stored as the author's profile; a name or handle matches on every platform.">
+      <Card title="Autores silenciados" description="Esta regla nunca enviará sus menciones. Los enlaces se guardan como perfil; un nombre o usuario coincide en todas las plataformas.">
         {muted.length ? (
           <ul className="mb-4 divide-y divide-line rounded-md border border-line">
             {muted.map((author, authorIndex) => (
@@ -64,27 +64,27 @@ export default async function AlertDetail({ params }: { params: Promise<{ id: st
                 <ActionForm action={unmuteAuthorAction}>
                   {hidden}
                   <input type="hidden" name="author" value={author} />
-                  <SubmitButton size="sm" variant="ghost">Unmute</SubmitButton>
+                  <SubmitButton size="sm" variant="ghost">Dejar de silenciar</SubmitButton>
                 </ActionForm>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mb-4 text-sm text-muted-foreground">Nobody is muted.</p>
+          <p className="mb-4 text-sm text-muted-foreground">No hay autores silenciados.</p>
         )}
         <ActionForm action={muteAuthorsAction} resetOnSuccess className="space-y-2">
           {hidden}
-          <Field label="Mute authors" hint="One per line, up to 50 at a time: profile or post links, @handles, u/names or display names.">
+          <Field label="Silenciar autores" hint="Hasta 50 por envío, uno por línea: enlaces a perfiles o publicaciones, @usuarios o nombres visibles.">
             <Textarea name="authors" rows={3} placeholder={'https://x.com/somebot\n@spammer'} />
           </Field>
-          <SubmitButton variant="secondary">Mute</SubmitButton>
+          <SubmitButton variant="secondary">Silenciar</SubmitButton>
         </ActionForm>
       </Card>
 
-      <Card title="Delete alert" description="The rule stops at once. Its channels stay.">
+      <Card title="Eliminar alerta" description="La regla se detiene de inmediato. Sus canales permanecen conectados.">
         <ActionForm action={deleteAlertAction}>
           {hidden}
-          <SubmitButton variant="danger" confirm={`Delete the alert "${alert.name}"?`}>Delete alert</SubmitButton>
+          <SubmitButton variant="danger" confirm={`¿Eliminar la alerta "${alert.name}"?`}>Eliminar alerta</SubmitButton>
         </ActionForm>
       </Card>
     </div>
