@@ -1,14 +1,15 @@
 import type { ListKeywordsData } from '@mentio-dev/sdk';
 import { Tag, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { EmptyState, LinkButton, OffsetPager, PageHeader, Table, td, TableCell, TableRow, rowLink } from '@/components/ui';
+import { Badge, EmptyState, LinkButton, OffsetPager, PageHeader, Table, td, TableCell, TableRow, rowLink } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { UrlFilters } from '@/components/url-filters';
 import { isOneOf } from '@/lib/form';
 import { compact, PLATFORM_NAMES, platformName, REVIEW_PLATFORMS, SEARCH_PLATFORMS, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
 import { many, one, withParams, type SearchParams } from '@/lib/params';
 import { KeywordActions } from './keyword-actions';
-import { KeywordBadges, KIND_LABELS, KINDS, PlatformIcons, SORTS, STATUSES } from './shared';
+import { KeywordBadges, KIND_LABELS, KINDS, PlatformIcons, SORTS, STATUSES, variantOf } from './shared';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Candidatos y temas' };
@@ -47,7 +48,7 @@ export default async function Keywords({ searchParams }: { searchParams: Promise
   return (
     <div>
       <PageHeader
-        title="Candidatos y temas"
+        title={<span className="inline-flex items-center gap-1">Candidatos y temas <InfoTip text="Monitorea a la persona de tu campaña, a sus adversarios y los asuntos de agenda que siguen." /></span>}
         description="Monitorea a tus candidatos, adversarios y temas de agenda en las plataformas seleccionadas. Cada término nuevo recupera 30 días de conversación."
         actions={<LinkButton href="/keywords/new" variant="primary" create><Plus /> Agregar candidato o tema</LinkButton>}
       />
@@ -65,21 +66,34 @@ export default async function Keywords({ searchParams }: { searchParams: Promise
       />
 
       {page.data.length === 0 ? (
-        <EmptyState icon={Tag} title={filtered ? 'Ningún candidato o tema coincide con estos filtros.' : 'Aún no hay candidatos ni temas monitoreados.'}>
-          {filtered ? null : <Link href="/keywords/new" className="text-primary hover:underline">Agrega tu primer candidato o tema</Link>}
+        <EmptyState
+          icon={Tag}
+          title={filtered ? 'Ningún término coincide con estos filtros.' : 'Aún no hay términos monitoreados.'}
+          example="Una campaña puede seguir a “María López” como candidata, “José Pérez” como adversario y “seguridad” como tema."
+          action={filtered ? <LinkButton href="/keywords" variant="primary">Quitar filtros</LinkButton> : <LinkButton href="/keywords/new" variant="primary">Agregar candidato o tema</LinkButton>}
+        >
+          {filtered ? 'Quita filtros o prueba con otro término para encontrar resultados.' : 'Al agregarlos, la conversación de campaña aparecerá aquí.'}
         </EmptyState>
       ) : (
-        <Table head={['Candidato o tema', 'Plataformas', 'Últimos 7 días', 'Este mes', 'Relevantes', '']}>
+        <Table head={[
+          <span className="inline-flex items-center gap-1">Término monitoreado <InfoTip text="Candidato, adversario o tema que la campaña decidió seguir." /></span>,
+          <span className="inline-flex items-center gap-1">Plataformas <InfoTip text="Canales donde se buscan las publicaciones que mencionan este término." /></span>,
+          <span className="inline-flex items-center gap-1">Últimos 7 días <InfoTip text="Menciones encontradas durante los siete días más recientes." /></span>,
+          <span className="inline-flex items-center gap-1">Este mes <InfoTip term="menciones" /></span>,
+          <span className="inline-flex items-center gap-1">Relevantes <InfoTip term="relevancia" /></span>,
+          '',
+        ]}>
           {page.data.map((keyword) => (
             <TableRow key={keyword.id} className={keyword.muted ? 'text-muted-foreground' : ''}>
               <TableCell className={td}>
                 <Link href={`/keywords/${keyword.id}`} data-row-link className={`font-medium text-foreground hover:underline ${rowLink}`}>{keyword.term}</Link>
-                <span className="ml-2 text-xs text-muted-foreground">{KIND_LABELS[keyword.kind]}</span>
+                <Badge className="ml-2" tone={keyword.kind === 'brand' ? 'accent' : keyword.kind === 'competitor' ? 'warn' : 'neutral'}>{KIND_LABELS[keyword.kind]}</Badge>
+                {variantOf(keyword.context) ? <Badge className="ml-1" tone="outline">Variante de {variantOf(keyword.context)}</Badge> : null}
                 {showGroups && !keyword.group.isDefault ? <span className="ml-2 text-xs text-muted-foreground">en {keyword.group.name}</span> : null}
                 <div className="mt-1"><KeywordBadges keyword={keyword} /></div>
                 {keyword.stats.noise.noisy ? (
                   <p className="mt-1 max-w-xs text-xs text-red-600">
-                    Poca relevancia reciente: {keyword.stats.noise.relevant} de {keyword.stats.noise.scored} menciones fueron relevantes. Ajusta los términos requeridos o excluidos.
+                    Pocas menciones recientes parecen hablar de este término: {keyword.stats.noise.relevant} de {keyword.stats.noise.scored}. <InfoTip term="relevancia" /> Ajusta los términos requeridos o excluidos.
                   </p>
                 ) : null}
               </TableCell>

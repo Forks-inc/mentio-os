@@ -5,7 +5,8 @@ import { Avatar, keywordLabel } from '@/components/mention-card';
 import { ExternalLink } from 'lucide-react';
 import { PlatformIcon } from '@/components/platform-icon';
 import { Avatar as UiAvatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge, Card, DateTimePicker, Field, Input, LinkButton, PageHeader, Select, Textarea, buttonClass, sentimentTone } from '@/components/ui';
+import { Badge, Card, DateTimePicker, EmptyState, Field, Input, LinkButton, PageHeader, Select, Textarea, buttonClass, sentimentTone } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { ActionForm, CopyButton, SubmitButton } from '@/components/ui/client';
 import { compact, platformName, tagName, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
@@ -165,9 +166,9 @@ export default async function MentionPage({ params }: { params: Promise<{ id: st
             </Card>
           ) : null}
 
-          <Card title="Clasificación" description={verdict?.feedback ? 'El equipo corrigió esta clasificación.' : 'Resultado del análisis de esta mención.'}>
+          <Card title={<span className="inline-flex items-center gap-1">Clasificación <InfoTip text="Lectura automática del tono, el tema y la relevancia de esta publicación." /></span>} description={verdict?.feedback ? 'El equipo corrigió esta clasificación.' : 'Resultado del análisis de esta mención.'}>
             {!verdict ? (
-              <p className="text-sm text-muted-foreground">Aún no se ha clasificado.</p>
+              <EmptyState compact title="Aún no se ha clasificado esta mención" example="Un post que apoya una propuesta de seguridad puede quedar como positivo y relevante." action={<LinkButton href="/mentions" variant="primary" size="sm">Volver a las menciones</LinkButton>}>Cuando se complete el análisis, aquí aparecerán su tono y los temas que expresa.</EmptyState>
             ) : verdict.failed ? (
               <p className="text-sm text-muted-foreground">No se pudo clasificar esta mención.</p>
             ) : (
@@ -217,7 +218,7 @@ export default async function MentionPage({ params }: { params: Promise<{ id: st
         </div>
 
         <div className="min-w-0 space-y-6">
-          <Card title="Autor">
+          <Card title={<span className="inline-flex items-center gap-1">Autor <InfoTip term="autor" /></span>}>
             {author ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -244,7 +245,7 @@ export default async function MentionPage({ params }: { params: Promise<{ id: st
             )}
           </Card>
 
-          <Card title="Término monitoreado">
+          <Card title={<span className="inline-flex items-center gap-1">Término monitoreado <InfoTip text="Candidato, adversario o tema que coincidió con esta publicación." /></span>}>
             <dl className="divide-y divide-line">
               <Row label="Término monitoreado">
                 <Link href={`/mentions?keywordIds=${encodeURIComponent(mention.keyword.id)}`} className="text-primary hover:underline">{keywordLabel(mention.keyword)}</Link>
@@ -318,13 +319,11 @@ export default async function MentionPage({ params }: { params: Promise<{ id: st
           </Card>
 
           {entry ? (
-            <Card title="Silenciar autor" description="Evita que una alerta envíe sus publicaciones. Seguirán apareciendo en la lista.">
+            <Card title={<span className="inline-flex items-center gap-1">Silenciar autor <InfoTip term="alerta" /></span>} description="Evita que una alerta envíe sus publicaciones. Seguirán apareciendo en la lista.">
               {alerts === null ? (
                 <p className="text-sm text-muted-foreground">No se pudieron cargar las alertas.</p>
               ) : alerts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Aún no hay alertas. <Link href="/alerts" className="text-primary hover:underline">Crear una</Link>.
-                </p>
+                <EmptyState compact title="Aún no hay alertas" example="Puedes crear un aviso para que el equipo reciba una mención negativa sobre “seguridad”." action={<LinkButton href="/alerts/new" variant="primary" size="sm">Crear una alerta</LinkButton>}>Una alerta puede avisarte cuando llegue una publicación que cumpla tus reglas.</EmptyState>
               ) : (
                 <ActionForm action={muteAuthorInAlert} className="space-y-2">
                   <input type="hidden" name="author" value={entry} />

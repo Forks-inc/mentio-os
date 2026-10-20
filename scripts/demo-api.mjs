@@ -6,12 +6,12 @@
  * Writes answer like the real API (201 with a resource, 204 on delete) but
  * change nothing. Used by `npm run demo`; never point production at it.
  *
- *   node scripts/demo-api.mjs [port]      default 4010
+ *   node scripts/demo-api.mjs [port]      default 4010; also accepts DEMO_PORT or PORT
  *   DEMO_API_LOG=1 prints every write it receives
  */
 import http from 'node:http';
 
-const PORT = Number(process.argv[2] ?? process.env.DEMO_API_PORT ?? 4010);
+const PORT = Number(process.argv[2] ?? process.env.DEMO_API_PORT ?? process.env.DEMO_PORT ?? process.env.PORT ?? 4010);
 const SPEC_URL = process.env.MENTIO_OPENAPI_URL ?? 'https://api.mentio.dev/v1/openapi.json';
 
 const spec = await (await fetch(SPEC_URL)).json();
@@ -162,6 +162,693 @@ function sample(schema, name = '', path = '', depth = 0) {
   }
 }
 
+// ---- Political campaign fixture -------------------------------------------------
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const CAMPAIGN = {
+  id: 'grp_campaign_ana_torres',
+  name: 'Campaña Ana Torres',
+  externalId: 'campana-ana-torres',
+  isDefault: true,
+  context: 'Campaña política mexicana de Ana Torres; seguir conversación electoral y propuestas, no menciones de homónimos.',
+};
+const POLITICAL_PLATFORMS = ['x', 'tiktok', 'youtube', 'news', 'instagram', 'reddit'];
+const KEYWORDS = [
+  { id: 'kw_ana_torres', term: 'Ana Torres', kind: 'brand', context: 'Candidata de esta campaña política mexicana.' },
+  { id: 'kw_luis_mendez', term: 'Luis Méndez', kind: 'competitor', context: 'Candidato adversario en la contienda.' },
+  { id: 'kw_carla_ruiz', term: 'Carla Ruiz', kind: 'competitor', context: 'Candidata adversaria en la contienda.' },
+  { id: 'kw_seguridad', term: 'Seguridad', kind: 'topic', context: 'Propuestas y conversación pública sobre seguridad.' },
+  { id: 'kw_economia', term: 'Economía', kind: 'topic', context: 'Propuestas y conversación pública sobre economía.' },
+  { id: 'kw_transporte', term: 'Transporte', kind: 'topic', context: 'Movilidad y transporte público en la contienda.' },
+  { id: 'kw_salud', term: 'Salud', kind: 'topic', context: 'Propuestas y conversación pública sobre salud.' },
+  { id: 'kw_agua', term: 'Agua', kind: 'topic', context: 'Propuestas y conversación pública sobre abasto de agua.' },
+];
+const TOPICS = KEYWORDS.filter((keyword) => keyword.kind === 'topic');
+const TOPIC_FOR_CANDIDATE = {
+  kw_ana_torres: 'kw_transporte',
+  kw_luis_mendez: 'kw_seguridad',
+  kw_carla_ruiz: 'kw_economia',
+};
+const AUTHORS = [
+  { id: 'aut_elena_cruz', name: 'Elena Cruz', handle: '@elenacruzmx', platform: 'x', followers: 18200, tags: ['periodista'] },
+  { id: 'aut_javier_ortega', name: 'Javier Ortega', handle: '@jortegamx', platform: 'x', followers: 8400, tags: ['analista'] },
+  { id: 'aut_paola_navarro', name: 'Paola Navarro', handle: '@paolanavarro', platform: 'x', followers: 3200, tags: [] },
+  { id: 'aut_mateo_solis', name: 'Mateo Solís', handle: '@mateosolis', platform: 'x', followers: 15600, tags: ['periodista'] },
+  { id: 'aut_renata_vargas', name: 'Renata Vargas', handle: '@renatavargas', platform: 'tiktok', followers: 94500, tags: ['creadora'] },
+  { id: 'aut_michelle_rios', name: 'Michelle Ríos', handle: '@michelle.rios', platform: 'tiktok', followers: 48200, tags: ['creadora'] },
+  { id: 'aut_raul_cervantes', name: 'Raúl Cervantes', handle: '@raulcervantes', platform: 'tiktok', followers: 22100, tags: [] },
+  { id: 'aut_karla_vega', name: 'Karla Vega', handle: '@karlavegamx', platform: 'tiktok', followers: 70500, tags: ['creadora'] },
+  { id: 'aut_punto_civico', name: 'Punto Cívico', handle: '@puntocivico', platform: 'youtube', followers: 136000, tags: ['medio'] },
+  { id: 'aut_mariana_leon', name: 'Mariana León', handle: '@marianaleon', platform: 'youtube', followers: 27200, tags: ['analista'] },
+  { id: 'aut_diego_ortiz', name: 'Diego Ortiz', handle: '@diegoortizmx', platform: 'youtube', followers: 11800, tags: [] },
+  { id: 'aut_mesa_publica', name: 'Mesa Pública', handle: '@mesapublica', platform: 'youtube', followers: 86400, tags: ['medio'] },
+  { id: 'aut_diario_centro', name: 'Diario del Centro', handle: '@diariodelcentro', platform: 'news', followers: 214000, tags: ['medio'] },
+  { id: 'aut_lucia_montes', name: 'Lucía Montes', handle: '@luciamontes', platform: 'news', followers: 7900, tags: ['periodista'] },
+  { id: 'aut_agenda_hoy', name: 'Agenda Hoy', handle: '@agendahoy', platform: 'news', followers: 66800, tags: ['medio'] },
+  { id: 'aut_pablo_nieto', name: 'Pablo Nieto', handle: '@pablonieto', platform: 'news', followers: 4200, tags: [] },
+  { id: 'aut_observa_mx', name: 'Observa MX', handle: '@observa.mx', platform: 'instagram', followers: 53600, tags: ['medio'] },
+  { id: 'aut_fernanda_rios', name: 'Fernanda Ríos', handle: '@fer.rios', platform: 'instagram', followers: 9300, tags: [] },
+  { id: 'aut_carlos_arias', name: 'Carlos Arias', handle: '@carlosarias', platform: 'instagram', followers: 17100, tags: [] },
+  { id: 'aut_voz_vecinal', name: 'Voz Vecinal', handle: '@vozvecinal', platform: 'instagram', followers: 28400, tags: ['comunidad'] },
+  { id: 'aut_ruta_publica', name: 'ruta_publica', handle: 'u/ruta_publica', platform: 'reddit', followers: null, tags: [] },
+  { id: 'aut_girasol_88', name: 'girasol_88', handle: 'u/girasol_88', platform: 'reddit', followers: null, tags: [] },
+  { id: 'aut_cdmx_llector', name: 'llector_del_barrio', handle: 'u/llector_del_barrio', platform: 'reddit', followers: null, tags: [] },
+  { id: 'aut_civica_azul', name: 'civica_azul', handle: 'u/civica_azul', platform: 'reddit', followers: null, tags: [] },
+];
+
+const MESSAGES = {
+  positive: [
+    'Me gustó que explicara la propuesta con costos y fechas; así sí se puede comparar.',
+    'La respuesta fue concreta y tomó en cuenta lo que pidió la gente del barrio.',
+    'Bien por presentar una meta medible y publicar cómo van a rendir cuentas.',
+    'No coincido en todo, pero esta idea sí atiende un problema que lleva años.',
+  ],
+  neutral: [
+    '¿Dónde puedo revisar el documento completo y el calendario de la propuesta?',
+    'Hoy hubo foro; comparto los puntos que presentó cada candidatura.',
+    'Estoy comparando las propuestas antes de decidir mi voto.',
+    'La campaña publicó una actualización y falta ver cómo se implementaría.',
+  ],
+  negative: [
+    'La explicación no responde quién va a pagar ni cuándo se vería el primer resultado.',
+    'Otra promesa sin plazos claros; la gente necesita respuestas y seguimiento.',
+    'La propuesta suena bien en el templete, pero no explica cómo resolvería el problema diario.',
+    'No me convence que cambien de postura sin aclarar qué pasó con el plan anterior.',
+  ],
+};
+const INTENTS = {
+  positive: [['praise'], ['praise', 'buy_intent'], ['testimonial'], ['praise', 'industry_insight']],
+  neutral: [['question'], ['comparison'], ['question', 'buy_intent'], ['industry_insight']],
+  negative: [['complaint'], ['complaint', 'question'], ['churn_intent'], ['feedback', 'complaint']],
+};
+const SENTIMENTS = ['positive', 'neutral', 'negative'];
+
+function hash(value) {
+  let result = 2166136261;
+  for (const character of value) result = Math.imul(result ^ character.charCodeAt(0), 16777619);
+  return result >>> 0;
+}
+
+function dayString(offset = 0, base = new Date()) {
+  const date = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate()) + offset * DAY_MS);
+  return date.toISOString().slice(0, 10);
+}
+
+function dateForMention(day, index) {
+  if (day === dayString(0)) return new Date(Date.now() - ((index * 17) % 180) * 60_000).toISOString();
+  return new Date(`${day}T${String(9 + (index * 3) % 12).padStart(2, '0')}:${String((index * 17) % 60).padStart(2, '0')}:00.000Z`).toISOString();
+}
+
+function authorUrl(author) {
+  const handle = author.handle.replace(/^@/, '').replace(/^u\//, '');
+  const paths = {
+    x: `https://x.com/${handle}`,
+    tiktok: `https://www.tiktok.com/@${handle}`,
+    youtube: `https://www.youtube.com/@${handle}`,
+    news: `https://diariodelcentro.mx/autores/${handle}`,
+    instagram: `https://www.instagram.com/${handle}`,
+    reddit: `https://www.reddit.com/user/${handle}`,
+  };
+  return paths[author.platform];
+}
+
+function postUrl(platform, author, suffix) {
+  const handle = author.handle.replace(/^@/, '').replace(/^u\//, '');
+  const paths = {
+    x: `https://x.com/${handle}/status/${suffix}`,
+    tiktok: `https://www.tiktok.com/@${handle}/video/${suffix}`,
+    youtube: `https://www.youtube.com/watch?v=${suffix}`,
+    news: `https://diariodelcentro.mx/politica/${suffix}`,
+    instagram: `https://www.instagram.com/p/${suffix}`,
+    reddit: `https://www.reddit.com/r/MexicoPolitico/comments/${suffix}/`,
+  };
+  return paths[platform];
+}
+
+function campaignKeyword(keyword) {
+  return {
+    id: keyword.id,
+    term: keyword.term,
+    kind: keyword.kind,
+    group: { id: CAMPAIGN.id, name: CAMPAIGN.name, externalId: CAMPAIGN.externalId, isDefault: true },
+  };
+}
+
+let mentionSequence = 0;
+function makeMention({ keyword, day, index, sentiment, author, text, sharedPostId }) {
+  const id = `mm_campaign_${String(++mentionSequence).padStart(5, '0')}`;
+  const publishedAt = dateForMention(day, index);
+  const topic = TOPICS[(index + hash(keyword.id)) % TOPICS.length];
+  const body = text ?? `${keyword.kind === 'topic' ? `${keyword.term}: ` : `${keyword.term} habló sobre ${topic.term.toLowerCase()}: `}${MESSAGES[sentiment][index % MESSAGES[sentiment].length]}`;
+  const intentSet = INTENTS[sentiment][(index + hash(keyword.id)) % INTENTS[sentiment].length];
+  const postId = sharedPostId ?? hash(`${keyword.id}|${day}|${index}|${author.id}`).toString(36);
+  const relevance = sentiment === 'negative' && day === dayString(-3) ? 62 + (index % 30) : 48 + ((index * 11) % 51);
+  const status = index % 9 === 0 ? 'done' : index % 13 === 0 ? 'ignored' : 'open';
+  return {
+    id,
+    status,
+    relevant: relevance >= 40,
+    delivered: true,
+    priority: Math.round((relevance / 2 + (author.followers ? Math.log10(author.followers) * 7 : 8)) * 10) / 10,
+    keyword: {
+      id: keyword.id,
+      term: keyword.term,
+      group: { id: CAMPAIGN.id, name: CAMPAIGN.name, externalId: CAMPAIGN.externalId, isDefault: true },
+      matchedAs: 'phrase',
+      matchedIn: 'text',
+    },
+    post: {
+      platform: author.platform,
+      kind: 'post',
+      url: postUrl(author.platform, author, postId),
+      text: body,
+      title: author.platform === 'news' || author.platform === 'youtube' || author.platform === 'reddit' ? `${keyword.term}: voces de la contienda` : null,
+      imageUrl: null,
+      subreddit: author.platform === 'reddit' ? 'MexicoPolitico' : null,
+      flair: author.platform === 'reddit' ? 'Debate' : null,
+      repository: null,
+      links: [],
+      publishedAt,
+      engagement: author.platform === 'news' ? null : {
+        likes: index * 9 + 3,
+        reposts: index + 1,
+        replies: index % 12,
+        quotes: author.platform === 'x' ? index % 5 : null,
+        views: author.followers ? author.followers * 3 + index * 31 : null,
+        bookmarks: author.platform === 'x' ? index % 9 : null,
+      },
+      replyTo: null,
+    },
+    parentMentionId: null,
+    author: {
+      id: author.id,
+      name: author.name,
+      handle: author.handle,
+      url: authorUrl(author),
+      avatarUrl: null,
+      followers: author.followers,
+      tags: author.tags,
+    },
+    review: null,
+    classification: {
+      relevance,
+      sentiment,
+      intents: intentSet,
+      automated: false,
+      language: 'es',
+      country: null,
+      organization: author.tags.includes('medio'),
+      confidence: 0.72 + (index % 25) / 100,
+      uncertain: false,
+      note: sentiment === 'negative' ? 'Señala una preocupación o una crítica a la propuesta.' : sentiment === 'positive' ? 'Reconoce un aspecto favorable de la propuesta.' : 'Pide información o compara posturas sin tomar partido.',
+      failed: false,
+      feedback: null,
+    },
+    triage: { assignee: null, snoozedUntil: null, note: null },
+    duplicateOf: null,
+    duplicates: [],
+    stats: { comments: author.platform === 'youtube' || author.platform === 'reddit' ? index % 16 : 0 },
+    createdAt: publishedAt,
+  };
+}
+
+function makeCampaignMentions() {
+  const rows = [];
+  const today = new Date();
+  for (let age = 179; age >= 0; age--) {
+    const day = dayString(-age, today);
+    for (const [keywordIndex, keyword] of KEYWORDS.entries()) {
+      const keyHash = hash(`${keyword.id}|${day}`);
+      const count = 1 + (keyHash % 3);
+      for (let index = 0; index < count; index++) {
+        const choice = hash(`${keyword.id}|${day}|${index}|tone`) % 100;
+        const sentiment = choice < 25 ? 'negative' : choice < 58 ? 'neutral' : 'positive';
+        const author = AUTHORS[(age * 5 + keywordIndex * 3 + index) % AUTHORS.length];
+        rows.push(makeMention({ keyword, day, index, sentiment, author }));
+      }
+    }
+  }
+
+  // One same-day public transit failure matches both Ana and the agenda topic.
+  // Its sharp rise in negative posts puts the simulated crisis exactly three days back.
+  const crisisDay = dayString(-3, today);
+  const ana = KEYWORDS.find((keyword) => keyword.id === 'kw_ana_torres');
+  const transport = KEYWORDS.find((keyword) => keyword.id === 'kw_transporte');
+  for (let index = 0; index < 20; index++) {
+    const author = AUTHORS[index % AUTHORS.length];
+    const sharedPostId = `crisis_transporte_${crisisDay.replaceAll('-', '')}_${index}`;
+    const text = `Otra vez hay retrasos en el transporte público. Ana Torres prometió revisar la ruta, pero hoy varias personas reportan largas esperas y falta una explicación clara.`;
+    for (const keyword of [ana, transport]) {
+      rows.push(makeMention({ keyword, day: crisisDay, index: index + 40, sentiment: 'negative', author, text, sharedPostId }));
+    }
+  }
+  return rows.sort((a, b) => a.post.publishedAt.localeCompare(b.post.publishedAt));
+}
+
+const CAMPAIGN_MENTIONS = makeCampaignMentions();
+const TODAY = dayString(0);
+
+function queryValues(url, name) {
+  return url.searchParams.getAll(name).flatMap((value) => value.split(',')).map((value) => value.trim()).filter(Boolean);
+}
+
+function queryFilterSet(url, ...names) {
+  return new Set(names.flatMap((name) => queryValues(url, name)));
+}
+
+function parseDay(value, fallback) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value ?? '') ? value : fallback;
+}
+
+function addDays(day, count) {
+  return dayString(count, new Date(`${day}T00:00:00.000Z`));
+}
+
+function getWindow(url) {
+  const requestedDays = Number(url.searchParams.get('range')?.replace(/d$/, '')) || 30;
+  const days = [7, 30, 90, 365].includes(requestedDays) ? requestedDays : 30;
+  const to = parseDay(url.searchParams.get('to'), TODAY);
+  const from = parseDay(url.searchParams.get('from'), addDays(to, 1 - days));
+  const actualDays = Math.max(1, Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS) + 1);
+  return { from, to, days: actualDays, timezone: url.searchParams.get('timezone') || 'UTC' };
+}
+
+function selectedMentions(url, window = null) {
+  const keywordIds = queryFilterSet(url, 'keywordIds', 'keywordId');
+  const groups = queryFilterSet(url, 'groupIds', 'groupId');
+  const platforms = queryFilterSet(url, 'platforms', 'platform');
+  const sentiments = queryFilterSet(url, 'sentiments', 'sentiment');
+  const intents = queryFilterSet(url, 'intents', 'intent');
+  const from = window?.from ?? parseDay(url.searchParams.get('since'), '0000-01-01');
+  const to = window?.to ?? parseDay(url.searchParams.get('until'), TODAY);
+  const sinceTime = url.searchParams.get('since');
+  const untilTime = url.searchParams.get('until');
+  const search = (url.searchParams.get('q') ?? '').toLocaleLowerCase('es-MX');
+
+  return CAMPAIGN_MENTIONS.filter((mention) => {
+    if (keywordIds.size && !keywordIds.has(mention.keyword.id)) return false;
+    if (groups.size && !groups.has(CAMPAIGN.id)) return false;
+    if (platforms.size && !platforms.has(mention.post.platform)) return false;
+    if (sentiments.size && !sentiments.has(mention.classification.sentiment)) return false;
+    if (intents.size && !mention.classification.intents.some((intent) => intents.has(intent))) return false;
+    if (window && (mention.post.publishedAt.slice(0, 10) < from || mention.post.publishedAt.slice(0, 10) > to)) return false;
+    if (!window && (mention.post.publishedAt.slice(0, 10) < from || mention.post.publishedAt.slice(0, 10) > to)) return false;
+    if (sinceTime && sinceTime.includes('T') && mention.post.publishedAt < sinceTime) return false;
+    if (untilTime && untilTime.includes('T') && mention.post.publishedAt > untilTime) return false;
+    if (url.searchParams.get('status') && mention.status !== url.searchParams.get('status')) return false;
+    if (url.searchParams.get('relevant') === 'true' && !mention.relevant) return false;
+    if (url.searchParams.get('relevant') === 'false' && mention.relevant) return false;
+    if (url.searchParams.get('personId') && mention.author.id !== url.searchParams.get('personId')) return false;
+    if (search && !`${mention.post.text} ${mention.author.name} ${mention.keyword.term}`.toLocaleLowerCase('es-MX').includes(search)) return false;
+    return true;
+  });
+}
+
+function sentimentTotals(rows) {
+  const totals = { positive: 0, neutral: 0, negative: 0, unclassified: 0 };
+  for (const row of rows) {
+    const sentiment = row.classification.sentiment ?? 'unclassified';
+    if (sentiment in totals) totals[sentiment]++;
+  }
+  return totals;
+}
+
+function summarize(rows) {
+  const sentiments = sentimentTotals(rows);
+  const done = rows.filter((row) => row.status === 'done').length;
+  const relevant = rows.filter((row) => row.relevant).length;
+  const people = new Map(rows.filter((row) => row.author?.id).map((row) => [row.author.id, row.author]));
+  const knownFollowers = [...people.values()].filter((person) => Number.isFinite(person.followers));
+  const doneTimes = rows.filter((row) => row.status === 'done').map((row) => Date.now() - Date.parse(row.createdAt)).sort((a, b) => a - b);
+  const middle = Math.floor(doneTimes.length / 2);
+  const medianTimeToDoneMs = doneTimes.length ? doneTimes.length % 2 ? doneTimes[middle] : Math.round((doneTimes[middle - 1] + doneTimes[middle]) / 2) : null;
+  return {
+    matched: rows.length,
+    relevant,
+    posts: new Set(rows.map((row) => row.post.url)).size,
+    people: people.size,
+    sentiment: sentiments,
+    buyIntent: rows.filter((row) => row.classification.intents.includes('buy_intent')).length,
+    questions: rows.filter((row) => row.classification.intents.includes('question')).length,
+    reach: {
+      followers: knownFollowers.reduce((total, person) => total + person.followers, 0),
+      people: knownFollowers.length,
+    },
+    triage: {
+      open: rows.filter((row) => row.status === 'open').length,
+      ignored: rows.filter((row) => row.status === 'ignored').length,
+      done,
+      waiting: rows.filter((row) => row.status === 'open' && row.relevant && Date.now() - Date.parse(row.createdAt) > DAY_MS).length,
+      handledRate: relevant ? Math.round((done / relevant) * 10000) / 10000 : null,
+      medianTimeToDoneMs,
+    },
+  };
+}
+
+function summaryResponse(url) {
+  const window = getWindow(url);
+  const rows = selectedMentions(url, window);
+  const summary = summarize(rows);
+  const response = {
+    window,
+    ...summary,
+    previous: null,
+  };
+  if (url.searchParams.get('compare') === 'true') {
+    const previousWindow = { ...window, from: addDays(window.from, -window.days), to: addDays(window.from, -1) };
+    const previous = summarize(selectedMentions(url, previousWindow));
+    response.previous = Object.fromEntries(Object.entries(previous).filter(([key]) => key !== 'window'));
+  }
+  return response;
+}
+
+function bucketFor(day, bucket) {
+  if (bucket === 'hour') return `${day.slice(0, 13)}:00`;
+  if (bucket === 'month') return `${day.slice(0, 7)}-01`;
+  if (bucket === 'week') {
+    const date = new Date(`${day}T00:00:00.000Z`);
+    const weekday = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() - weekday + 1);
+    return date.toISOString().slice(0, 10);
+  }
+  return day.slice(0, 10);
+}
+
+function bucketLabels(window, bucket) {
+  const labels = new Set();
+  if (bucket === 'hour') {
+    const start = Date.parse(`${window.from}T00:00:00.000Z`);
+    const end = Date.parse(`${window.to}T23:00:00.000Z`);
+    for (let instant = start; instant <= end; instant += 60 * 60 * 1000) labels.add(new Date(instant).toISOString().slice(0, 13) + ':00');
+  } else {
+    for (let day = window.from; day <= window.to; day = addDays(day, 1)) labels.add(bucketFor(day, bucket));
+  }
+  return [...labels];
+}
+
+function seriesPoint(rows, date) {
+  const sentiment = sentimentTotals(rows);
+  return {
+    date,
+    matched: rows.length,
+    relevant: rows.filter((row) => row.relevant).length,
+    positive: sentiment.positive,
+    neutral: sentiment.neutral,
+    negative: sentiment.negative,
+    unclassified: sentiment.unclassified,
+  };
+}
+
+function seriesResponse(url) {
+  const window = getWindow(url);
+  const requestedBucket = url.searchParams.get('bucket');
+  const bucket = ['hour', 'day', 'week', 'month'].includes(requestedBucket)
+    ? requestedBucket
+    : window.days <= 90 ? 'day' : 'week';
+  const dimension = url.searchParams.get('by');
+  const buildData = (targetWindow) => {
+    const rows = selectedMentions(url, targetWindow);
+    const keywordFilter = queryFilterSet(url, 'keywordIds', 'keywordId');
+    let dimensions;
+    if (dimension === 'keyword') {
+      dimensions = KEYWORDS.filter((keyword) => !keywordFilter.size || keywordFilter.has(keyword.id))
+        .map((keyword) => ({ key: keyword.id, label: keyword.term, keyword: campaignKeyword(keyword) }));
+    } else if (dimension === 'platform') {
+      dimensions = POLITICAL_PLATFORMS.filter((platform) => !queryFilterSet(url, 'platforms', 'platform').size || queryFilterSet(url, 'platforms', 'platform').has(platform))
+        .map((platform) => ({ key: platform, label: platform, keyword: null }));
+    } else if (dimension === 'sentiment') {
+      dimensions = ['positive', 'neutral', 'negative', 'unclassified'].map((value) => ({ key: value, label: value, keyword: null }));
+    } else {
+      dimensions = [{ key: 'total', label: 'Total', keyword: null }];
+    }
+    const labels = bucketLabels(targetWindow, bucket);
+    return dimensions.map((series) => {
+      const selected = rows.filter((row) => {
+        if (dimension === 'keyword') return row.keyword.id === series.key;
+        if (dimension === 'platform') return row.post.platform === series.key;
+        if (dimension === 'sentiment') return (row.classification.sentiment ?? 'unclassified') === series.key;
+        return true;
+      });
+      const grouped = new Map();
+      for (const row of selected) {
+        const key = bucketFor(row.post.publishedAt, bucket);
+        grouped.set(key, [...(grouped.get(key) ?? []), row]);
+      }
+      return {
+        key: series.key,
+        label: series.label,
+        keyword: series.keyword,
+        points: labels.map((date) => seriesPoint(grouped.get(date) ?? [], date)),
+      };
+    });
+  };
+
+  const response = { window: { ...window, bucket }, data: buildData(window), previous: null };
+  if (url.searchParams.get('compare') === 'true') {
+    const previousWindow = { ...window, from: addDays(window.from, -window.days), to: addDays(window.from, -1) };
+    response.previous = buildData(previousWindow);
+  }
+  return response;
+}
+
+function breakdownRows(rows, dimension, denominator) {
+  const groups = new Map();
+  const add = (key, label, row, extra = {}) => {
+    if (!groups.has(key)) groups.set(key, { key, label, rows: [], ...extra });
+    groups.get(key).rows.push(row);
+  };
+  for (const row of rows) {
+    if (dimension === 'keyword') add(row.keyword.id, row.keyword.term, row, { keyword: campaignKeyword(KEYWORDS.find((keyword) => keyword.id === row.keyword.id)) });
+    else if (dimension === 'platform') add(row.post.platform, row.post.platform, row);
+    else if (dimension === 'sentiment') add(row.classification.sentiment ?? 'unclassified', row.classification.sentiment ?? 'unclassified', row);
+    else if (dimension === 'intent') for (const intent of row.classification.intents) add(intent, intent, row);
+    else if (dimension === 'status') add(row.status, row.status, row);
+    else if (dimension === 'hour') {
+      const date = new Date(row.post.publishedAt);
+      const slot = { weekday: date.getUTCDay(), hour: date.getUTCHours() };
+      const key = `${slot.weekday}-${slot.hour}`;
+      add(key, key, row, { slot });
+    } else if (dimension === 'person') {
+      const author = row.author;
+      add(author.id, author.name ?? author.handle ?? author.id, row, {
+        person: { id: author.id, name: author.name, platform: row.post.platform, url: author.url, avatarUrl: author.avatarUrl, followers: author.followers },
+      });
+    } else if (dimension === 'language') {
+      const key = row.classification.language ?? 'unknown';
+      add(key, key, row);
+    } else if (dimension === 'country') {
+      const key = row.classification.country ?? 'unknown';
+      add(key, key, row);
+    } else if (dimension === 'subreddit' && row.post.platform === 'reddit') {
+      const key = (row.post.subreddit ?? 'unknown').toLocaleLowerCase('en');
+      add(key, row.post.subreddit ?? 'unknown', row);
+    }
+  }
+  return [...groups.values()].map((group) => ({
+    key: group.key,
+    label: group.label,
+    keyword: group.keyword ?? null,
+    person: group.person ?? null,
+    slot: group.slot ?? null,
+    matched: group.rows.length,
+    relevant: group.rows.filter((row) => row.relevant).length,
+    share: denominator ? Math.round((group.rows.length / denominator) * 1000) / 10 : 0,
+    sentiment: sentimentTotals(group.rows),
+    previous: null,
+  })).sort((a, b) => b.matched - a.matched || a.label.localeCompare(b.label, 'es-MX'));
+}
+
+function analyticsBreakdownResponse(url) {
+  const window = getWindow(url);
+  const dimension = url.searchParams.get('by') ?? 'keyword';
+  const rows = selectedMentions(url, window);
+  const data = breakdownRows(rows, dimension, rows.length);
+  if (url.searchParams.get('compare') === 'true') {
+    const previousWindow = { ...window, from: addDays(window.from, -window.days), to: addDays(window.from, -1) };
+    const previousRows = selectedMentions(url, previousWindow);
+    const previous = new Map(breakdownRows(previousRows, dimension, previousRows.length).map((row) => [row.key, row]));
+    for (const row of data) row.previous = { matched: previous.get(row.key)?.matched ?? 0, relevant: previous.get(row.key)?.relevant ?? 0 };
+  }
+  return { window, by: dimension, data };
+}
+
+function shareOfVoiceResponse(url) {
+  const window = getWindow(url);
+  const selected = selectedMentions(url, window);
+  const keywordFilter = queryFilterSet(url, 'keywordIds', 'keywordId');
+  const keywords = KEYWORDS.filter((keyword) => !keywordFilter.size || keywordFilter.has(keyword.id));
+  const candidateTotal = selected.filter((row) => row.keyword.kind === 'brand' || row.keyword.kind === 'competitor').length;
+  const compare = url.searchParams.get('compare') === 'true';
+  let previousRows = [];
+  if (compare) {
+    const previousWindow = { ...window, from: addDays(window.from, -window.days), to: addDays(window.from, -1) };
+    previousRows = selectedMentions(url, previousWindow);
+  }
+  return {
+    window,
+    data: keywords.map((keyword) => {
+      const matches = selected.filter((row) => row.keyword.id === keyword.id);
+      const previousMatches = previousRows.filter((row) => row.keyword.id === keyword.id);
+      const matched = matches.length;
+      return {
+        keyword: campaignKeyword(keyword),
+        matched,
+        relevant: matches.filter((row) => row.relevant).length,
+        negative: matches.filter((row) => row.classification.sentiment === 'negative').length,
+        buyIntent: matches.filter((row) => row.classification.intents.includes('buy_intent')).length,
+        share: keyword.kind === 'topic' || candidateTotal === 0 ? null : Math.round((matched / candidateTotal) * 1000) / 10,
+        previous: compare ? { matched: previousMatches.length } : null,
+      };
+    }),
+  };
+}
+
+function campaignGroupResponse() {
+  return {
+    id: CAMPAIGN.id,
+    name: CAMPAIGN.name,
+    externalId: CAMPAIGN.externalId,
+    isDefault: true,
+    context: CAMPAIGN.context,
+    stats: { keywords: KEYWORDS.length, active: KEYWORDS.length },
+    createdAt: new Date(Date.now() - 180 * DAY_MS).toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function campaignKeywordResponse(keyword) {
+  const template = sample(schemas.Keyword, '', '/v1/keywords.data');
+  const allMatches = CAMPAIGN_MENTIONS.filter((row) => row.keyword.id === keyword.id);
+  const last7d = allMatches.filter((row) => row.post.publishedAt.slice(0, 10) >= addDays(TODAY, -6)).length;
+  const thisMonth = allMatches.filter((row) => row.post.publishedAt.slice(0, 7) === TODAY.slice(0, 7)).length;
+  template.id = keyword.id;
+  template.term = keyword.term;
+  template.kind = keyword.kind;
+  template.muted = false;
+  template.pausedForBalance = false;
+  template.pausedForNoise = false;
+  template.pausedForCap = false;
+  template.group = { id: CAMPAIGN.id, name: CAMPAIGN.name, externalId: CAMPAIGN.externalId, isDefault: true };
+  template.platforms = [...POLITICAL_PLATFORMS];
+  template.context = keyword.context;
+  template.stats = {
+    ...template.stats,
+    mentions: allMatches.length,
+    relevant: allMatches.filter((row) => row.relevant).length,
+    last7d,
+    thisMonth,
+    lastMentionAt: allMatches.at(-1)?.post.publishedAt ?? null,
+  };
+  template.createdAt = new Date(Date.now() - 180 * DAY_MS).toISOString();
+  return template;
+}
+
+function keywordsResponse(url) {
+  const terms = queryFilterSet(url, 'kind');
+  const groupIds = queryFilterSet(url, 'groupId');
+  const platforms = queryFilterSet(url, 'platform');
+  const search = (url.searchParams.get('q') ?? '').toLocaleLowerCase('es-MX');
+  const matching = KEYWORDS.filter((keyword) => {
+    if (terms.size && !terms.has(keyword.kind)) return false;
+    if (groupIds.size && !groupIds.has(CAMPAIGN.id)) return false;
+    if (platforms.size && ![...platforms].some((platform) => POLITICAL_PLATFORMS.includes(platform))) return false;
+    if (search && !`${keyword.term} ${keyword.context}`.toLocaleLowerCase('es-MX').includes(search)) return false;
+    return true;
+  });
+  const offset = Number(url.searchParams.get('offset')) || 0;
+  const requestedLimit = Number(url.searchParams.get('limit')) || matching.length;
+  return matching.slice(offset, offset + requestedLimit).map(campaignKeywordResponse);
+}
+
+function personRowsResponse(url) {
+  const rows = selectedMentions(url);
+  const byPerson = new Map();
+  for (const row of rows) {
+    const personRows = byPerson.get(row.author.id) ?? [];
+    personRows.push(row);
+    byPerson.set(row.author.id, personRows);
+  }
+  const platforms = queryFilterSet(url, 'platforms', 'platform');
+  const keywordKinds = queryFilterSet(url, 'keywordKinds');
+  const tags = queryFilterSet(url, 'tags', 'tag');
+  const intents = queryFilterSet(url, 'intents');
+  const query = (url.searchParams.get('q') ?? '').toLocaleLowerCase('es-MX');
+  const handle = (url.searchParams.get('handle') ?? '').toLocaleLowerCase('es-MX');
+  const minFollowers = Number(url.searchParams.get('minFollowers')) || 0;
+  const maxFollowers = Number(url.searchParams.get('maxFollowers')) || Number.POSITIVE_INFINITY;
+  const minMentions = Number(url.searchParams.get('minMentions')) || 0;
+  const minNegative = Number(url.searchParams.get('minNegative')) || 0;
+  let people = [...byPerson.values()].map((personMatches) => {
+    const first = personMatches[0];
+    const author = first.author;
+    const sentiment = sentimentTotals(personMatches);
+    const timestamps = personMatches.map((row) => row.post.publishedAt).sort();
+    return {
+      id: author.id,
+      platform: first.post.platform,
+      name: author.name,
+      handle: author.handle,
+      url: author.url,
+      avatarUrl: null,
+      accounts: [{ id: author.id, platform: first.post.platform, name: author.name, handle: author.handle, url: author.url }],
+      reach: { followers: author.followers, following: null, posts: null },
+      profile: null,
+      stats: {
+        mentions: personMatches.length,
+        relevant: personMatches.filter((row) => row.relevant).length,
+        sentiment: { positive: sentiment.positive, neutral: sentiment.neutral, negative: sentiment.negative },
+        firstSeenAt: timestamps[0],
+        lastSeenAt: timestamps.at(-1),
+      },
+      annotations: { tags: author.tags, notes: '', muted: false },
+      outreach: { owner: null, stage: 'not_contacted', lastContactedAt: null },
+      _authors: author,
+      _matches: personMatches,
+    };
+  }).filter((person) => {
+    const personMatches = person._matches;
+    if (platforms.size && !platforms.has(person.platform)) return false;
+    if (keywordKinds.size && !personMatches.some((row) => keywordKinds.has(row.keyword.kind))) return false;
+    if (tags.size && ![...tags].some((tag) => person.annotations.tags.includes(tag))) return false;
+    if (query && !`${person.name} ${person.handle}`.toLocaleLowerCase('es-MX').includes(query)) return false;
+    if (handle && !person.handle.toLocaleLowerCase('es-MX').includes(handle)) return false;
+    if ((person.reach.followers ?? 0) < minFollowers || (person.reach.followers ?? 0) > maxFollowers) return false;
+    if (person.stats.mentions < minMentions || person.stats.sentiment.negative < minNegative) return false;
+    if (intents.size && !personMatches.some((row) => row.classification.intents.some((intent) => intents.has(intent)))) return false;
+    if (url.searchParams.get('muted') === 'true' && !person.annotations.muted) return false;
+    if (url.searchParams.get('muted') === 'false' && person.annotations.muted) return false;
+    return true;
+  });
+  const sort = url.searchParams.get('sort') ?? 'mentions';
+  people.sort((a, b) => {
+    if (sort === 'recent') return b.stats.lastSeenAt.localeCompare(a.stats.lastSeenAt);
+    if (sort === 'reach') return (b.reach.followers ?? 0) - (a.reach.followers ?? 0);
+    if (sort === 'new') return b.stats.firstSeenAt.localeCompare(a.stats.firstSeenAt);
+    return b.stats.mentions - a.stats.mentions || a.name.localeCompare(b.name, 'es-MX');
+  });
+  const total = people.length;
+  const offset = Number(url.searchParams.get('offset')) || 0;
+  const limit = Number(url.searchParams.get('limit')) || 50;
+  people = people.slice(offset, offset + limit).map(({ _authors, _matches, ...person }) => person);
+  return { data: people, total };
+}
+
+function mentionsResponse(url) {
+  let rows = selectedMentions(url);
+  const sort = url.searchParams.get('sort') ?? 'newest';
+  rows = [...rows].sort((a, b) => sort === 'priority'
+    ? b.priority - a.priority || b.post.publishedAt.localeCompare(a.post.publishedAt)
+    : sort === 'oldest'
+      ? a.post.publishedAt.localeCompare(b.post.publishedAt)
+      : b.post.publishedAt.localeCompare(a.post.publishedAt));
+  const limit = Math.min(Math.max(Number(url.searchParams.get('limit')) || 50, 1), 500);
+  const cursor = url.searchParams.get('cursor');
+  const offset = cursor === 'demo_page_2' ? limit : 0;
+  const data = rows.slice(offset, offset + limit);
+  const nextCursor = offset + limit < rows.length && !cursor ? 'demo_page_2' : null;
+  return { data, nextCursor };
+}
+
 // ---- Routing -------------------------------------------------------------------
 
 const routes = [];
@@ -196,7 +883,35 @@ http
     if (status === '204') return respond(res, 204);
     const content = responses[status]?.content ?? {};
     if (content['text/csv']) return respond(res, 200, 'id,platform,text\nmm_1,reddit,"acme vs the incumbent"\n', 'text/csv');
-    const body = sample(content['application/json']?.schema, '', route.path);
+    let body = sample(content['application/json']?.schema, '', route.path);
+    if (req.method === 'GET') {
+      switch (route.op.operationId) {
+        case 'listGroups':
+          body = { data: [campaignGroupResponse()] };
+          break;
+        case 'listKeywords':
+          body = { ...body, data: keywordsResponse(url) };
+          break;
+        case 'searchMentions':
+          body = mentionsResponse(url);
+          break;
+        case 'listPeople':
+          body = personRowsResponse(url);
+          break;
+        case 'getShareOfVoice':
+          body = shareOfVoiceResponse(url);
+          break;
+        case 'getAnalyticsSummary':
+          body = summaryResponse(url);
+          break;
+        case 'getAnalyticsSeries':
+          body = seriesResponse(url);
+          break;
+        case 'getAnalyticsBreakdown':
+          body = analyticsBreakdownResponse(url);
+          break;
+      }
+    }
     // Lists end after one page, so "older" links do not loop forever.
     if (body && typeof body === 'object' && 'nextCursor' in body) body.nextCursor = url.searchParams.get('cursor') ? null : 'demo_page_2';
     respond(res, Number(status), body);

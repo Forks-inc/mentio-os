@@ -65,10 +65,10 @@ export function Card({ title, description, actions, children, className }: { tit
 }
 
 /** A number on a small card: its label, the change in percent (colored), a sparkline, a hint. */
-export function Stat({ label, value, hint, href, delta, spark, invert = false }: { label: string; value: ReactNode; hint?: ReactNode; href?: string; delta?: number | null; spark?: number[]; invert?: boolean }) {
+export function Stat({ label, value, hint, href, delta, spark, invert = false }: { label: ReactNode; value: ReactNode; hint?: ReactNode; href?: string; delta?: number | null; spark?: number[]; invert?: boolean }) {
   const good = delta === null || delta === undefined ? null : invert ? delta <= 0 : delta >= 0;
   const card = (
-    <ShadcnCard size="sm" className={cn('h-full gap-1', href && 'transition-shadow group-hover/stat:ring-foreground/20')}>
+    <ShadcnCard size="sm" className={cn('relative h-full gap-1', href && 'transition-shadow group-hover/stat:ring-foreground/20')}>
       <CardHeader className="grid-cols-[1fr_auto]">
         <CardDescription className="text-xs">{label}</CardDescription>
         {delta === null || delta === undefined ? null : (
@@ -85,9 +85,10 @@ export function Stat({ label, value, hint, href, delta, spark, invert = false }:
         </div>
         {hint ? <p className="mt-1 truncate text-xs text-muted-foreground">{hint}</p> : null}
       </CardContent>
+      {href ? <Link href={href} aria-label={`Ver detalles de ${typeof label === 'string' ? label : 'esta métrica'}`} className="absolute inset-0 z-10 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" /> : null}
     </ShadcnCard>
   );
-  return href ? <Link href={href} className="group/stat block">{card}</Link> : card;
+  return href ? <div className="group/stat block">{card}</div> : card;
 }
 
 /** Badge tones over shadcn's Badge. */
@@ -155,15 +156,16 @@ export function LinkButton({ href, variant = 'secondary', size = 'md', children,
 }
 
 /** shadcn's Empty, laid out like Zernio's: an icon in a circle, a title, a line of help, one action. */
-export function EmptyState({ title, children, icon: Icon = Inbox, action }: { title: ReactNode; children?: ReactNode; icon?: LucideIcon; action?: ReactNode }) {
+export function EmptyState({ title, children, icon: Icon = Inbox, action, example, compact = false, className }: { title: ReactNode; children?: ReactNode; icon?: LucideIcon; action?: ReactNode; example?: ReactNode; compact?: boolean; className?: string }) {
   return (
-    <Empty className="rounded-lg border border-dashed bg-card py-12">
+    <Empty className={cn('rounded-lg border border-dashed bg-card', compact ? 'py-5' : 'py-12', className)}>
       <EmptyHeader>
-        <EmptyMedia className="mb-3 flex size-14 items-center justify-center rounded-2xl border bg-muted/50">
-          <Icon className="size-6 text-muted-foreground" />
+        <EmptyMedia className={cn('mb-3 flex items-center justify-center rounded-2xl border bg-muted/50', compact ? 'size-10' : 'size-14')}>
+          <Icon className={cn('text-muted-foreground', compact ? 'size-5' : 'size-6')} />
         </EmptyMedia>
-        <EmptyTitle className="text-base font-medium">{title}</EmptyTitle>
+        <EmptyTitle className={cn('font-medium', compact ? 'text-sm' : 'text-base')}>{title}</EmptyTitle>
         {children ? <EmptyDescription className="max-w-sm text-sm text-balance">{children}</EmptyDescription> : null}
+        {example ? <p className="max-w-sm text-xs text-muted-foreground"><span className="font-medium text-foreground">Ejemplo de campaña:</span> {example}</p> : null}
       </EmptyHeader>
       {action ? <EmptyContent>{action}</EmptyContent> : null}
     </Empty>

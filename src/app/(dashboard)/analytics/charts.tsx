@@ -1,5 +1,8 @@
 /** What the analytics page needs beyond the kit: the change label, the hour heatmap, the palette and the tabs. */
 import type { AnalyticsBreakdown } from '@mentio-dev/sdk';
+import type { ReactNode } from 'react';
+import { ChartColumn } from 'lucide-react';
+import { EmptyState, LinkButton } from '@/components/ui';
 import { Tabs } from '@/components/ui/client';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CHART_COLORS } from '@/lib/chart-colors';
@@ -30,7 +33,7 @@ export function HourHeatmap({ rows }: { rows: AnalyticsBreakdown['data'] }) {
   const cells = new Map<string, number>();
   for (const row of rows) if (row.slot) cells.set(`${row.slot.weekday}-${row.slot.hour}`, row.matched);
   const max = Math.max(1, ...cells.values());
-  if (cells.size === 0) return <p className="text-sm text-muted-foreground">Sin datos en este periodo.</p>;
+  if (cells.size === 0) return <EmptyState compact icon={ChartColumn} title="Aún no hay horarios con menciones" example="Cuando se publique una mención sobre “María López”, aquí verás los días y horas con más conversación." action={<LinkButton href="/keywords/new" variant="primary" size="sm">Agregar término</LinkButton>}>Este reporte ayuda a ubicar cuándo se conversa sobre los temas de la campaña.</EmptyState>;
   return (
     <div className="overflow-x-auto">
       <div className="inline-grid min-w-full gap-0.5 text-[10px] text-muted-foreground" style={{ gridTemplateColumns: 'auto repeat(24, minmax(12px, 1fr))' }}>
@@ -67,6 +70,6 @@ function HeatRow({ day, cells, max }: { day: number; cells: Map<string, number>;
 export const PALETTE = [...CHART_COLORS, '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#71717a'];
 
 /** Tabs driven by a search param, keeping the rest of the URL: the kit's shadcn Tabs. */
-export function ParamTabs({ current, items }: { current: string; items: Array<{ value: string; label: string; href: string }> }) {
+export function ParamTabs({ current, items }: { current: string; items: Array<{ value: string; label: ReactNode; href: string }> }) {
   return <Tabs current={current} items={items} />;
 }

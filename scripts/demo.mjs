@@ -5,7 +5,7 @@
  */
 import { spawn } from 'node:child_process';
 
-const API_PORT = process.env.DEMO_API_PORT ?? '4010';
+const API_PORT = process.env.DEMO_PORT ?? process.env.DEMO_API_PORT ?? '4010';
 const api = spawn(process.execPath, ['scripts/demo-api.mjs', API_PORT], { stdio: 'inherit' });
 const next = spawn('npx', ['next', 'dev'], {
   stdio: 'inherit',

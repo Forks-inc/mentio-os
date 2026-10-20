@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ActionForm, SubmitButton } from '@/components/ui/client';
-import { Badge, Card, DateTimePicker, Field, Input, PageHeader, Select, Stat, Textarea, buttonClass, sentimentTone, SwitchRow } from '@/components/ui';
+import { Badge, Card, DateTimePicker, EmptyState, Field, Input, LinkButton, PageHeader, Select, Stat, Textarea, buttonClass, sentimentTone, SwitchRow } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { Button } from '@/components/ui/button';
 import { compact, date, platformName, tagName, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
@@ -39,7 +40,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
           <span className="flex items-center gap-3">
             <Avatar person={person} size="size-10" />
             <span className="min-w-0">
-              <span className="block truncate">{displayName(person)}</span>
+              <span className="flex items-center gap-1 truncate">{displayName(person)} <InfoTip term="autor" /></span>
               <span className="block text-sm font-normal text-muted-foreground">
                 {[person.handle, platformName(person.platform)].filter(Boolean).join(' · ')}
               </span>
@@ -56,12 +57,12 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
       />
 
       <div className="grid gap-3 @lg:grid-cols-2 @4xl:grid-cols-5">
-        <Stat label="Seguidores" value={reach.followers === null ? '?' : compact(reach.followers)} hint={reach.posts !== null ? `${compact(reach.posts)} publicaciones` : undefined} />
-        <Stat label="Menciones" value={stats.mentions} hint={`${stats.relevant} relevantes`} />
-        <Stat label="Primera actividad" value={<span className="text-base">{timeAgo(stats.firstSeenAt)}</span>} hint={date(stats.firstSeenAt)} />
-        <Stat label="Última actividad" value={<span className="text-base">{timeAgo(stats.lastSeenAt)}</span>} hint={date(stats.lastSeenAt)} />
+        <Stat label={<span className="inline-flex items-center gap-1">Seguidores <InfoTip term="alcance" /></span>} value={reach.followers === null ? '?' : compact(reach.followers)} hint={reach.posts !== null ? `${compact(reach.posts)} publicaciones` : undefined} />
+        <Stat label={<span className="inline-flex items-center gap-1">Menciones <InfoTip term="menciones" /></span>} value={stats.mentions} hint={`${stats.relevant} relevantes`} />
+        <Stat label={<span className="inline-flex items-center gap-1">Primera actividad <InfoTip text="Fecha de la primera mención que se registró para este autor." /></span>} value={<span className="text-base">{timeAgo(stats.firstSeenAt)}</span>} hint={date(stats.firstSeenAt)} />
+        <Stat label={<span className="inline-flex items-center gap-1">Última actividad <InfoTip text="Fecha de la mención más reciente que se registró para este autor." /></span>} value={<span className="text-base">{timeAgo(stats.lastSeenAt)}</span>} hint={date(stats.lastSeenAt)} />
         <Stat
-          label="Último contacto"
+          label={<span className="inline-flex items-center gap-1">Último contacto <InfoTip text="Fecha en que el equipo registró el contacto más reciente con este autor." /></span>}
           value={<span className="text-base">{outreach.lastContactedAt ? timeAgo(outreach.lastContactedAt) : 'Nunca'}</span>}
           hint={outreach.owner ? `Responsable: ${outreach.owner.name ?? outreach.owner.email}` : 'Sin responsable'}
         />
@@ -92,7 +93,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
               <p className="text-sm text-muted-foreground">Los datos del perfil aparecen cuando se consulta al autor en su canal.</p>
             )}
             <div className="mt-4 border-t border-line pt-3">
-              <p className="mb-1.5 text-xs text-muted-foreground">Sentimiento de sus menciones</p>
+              <p className="mb-1.5 inline-flex items-center gap-1 text-xs text-muted-foreground">Sentimiento de sus menciones <InfoTip term="sentimiento o tono" /></p>
               <SentimentBar sentiment={stats.sentiment} className="h-2 w-full" />
               <p className="mt-1.5 text-xs text-muted-foreground">
                 {stats.sentiment.positive} positivo · {stats.sentiment.neutral} neutral · {stats.sentiment.negative} negativo
@@ -126,7 +127,7 @@ export default async function PersonPage({ params, searchParams }: { params: Pro
 
           <Card title="Menciones recientes" actions={<Link href={`/mentions?personId=${person.id}`} className="text-xs text-primary hover:underline">Ver todas</Link>}>
             {mentions.data.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No hay menciones para mostrar.</p>
+              <EmptyState compact title="Aún no hay menciones de esta persona" example="Cuando esta autora publique sobre “María López” o “seguridad”, la conversación aparecerá aquí." action={<LinkButton href="/keywords/new" variant="primary" size="sm">Agregar término a la campaña</LinkButton>}>Las menciones se muestran cuando coinciden con algún término monitoreado.</EmptyState>
             ) : (
               <ul className="divide-y divide-line">
                 {mentions.data.map((m) => (

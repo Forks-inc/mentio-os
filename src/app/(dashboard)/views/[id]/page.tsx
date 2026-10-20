@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Card, Field, Input, LinkButton, PageHeader } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { ActionForm, SubmitButton } from '@/components/ui/client';
 import { describeFilter, fromViewFilter } from '@/app/(dashboard)/mentions/filters';
 import { ViewFilterFields } from '@/app/(dashboard)/mentions/filter-fields';
@@ -22,7 +23,7 @@ export default async function ViewPage({ params }: { params: Promise<{ id: strin
     <div className="space-y-6">
       <PageHeader
         back={{ href: '/views', label: 'Vistas' }}
-        title={view.name}
+        title={<span className="inline-flex items-center gap-1">{view.name} <InfoTip term="vista guardada" /></span>}
         description={conditions.length ? conditions.join(' · ') : 'Sin condiciones: todas las menciones.'}
         actions={<LinkButton href={`/mentions?viewId=${encodeURIComponent(view.id)}`} variant="primary">Abrir menciones</LinkButton>}
       />

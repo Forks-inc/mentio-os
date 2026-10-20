@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Download, Users, UsersRound } from 'lucide-react';
 import { ActionForm, DrawerButton, SubmitButton } from '@/components/ui/client';
 import { Badge, EmptyState, Field, Input, LinkButton, OffsetPager, PageHeader, Table, buttonClass, td, TableCell, TableRow, rowLink } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { UrlFilters } from '@/components/url-filters';
 import { compact, platformName, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
@@ -38,7 +39,7 @@ export default async function People({ searchParams }: { searchParams: Promise<S
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Audiencia"
+        title={<span className="inline-flex items-center gap-1">Audiencia <InfoTip text="Personas y cuentas que publicaron sobre los candidatos o temas que monitorea tu campaña." /></span>}
         description="Autores que mencionaron a tus candidatos o temas, con sus cuentas agrupadas para comparar el alcance y la conversación."
         actions={
           <>
@@ -81,9 +82,17 @@ export default async function People({ searchParams }: { searchParams: Promise<S
       <p className="text-xs text-muted-foreground">{page.total} {page.total === 1 ? 'autor' : 'autores'}</p>
 
       {page.data.length === 0 ? (
-        <EmptyState icon={Users} title="Ningún autor coincide con estos filtros.">Ajusta algún filtro o espera a que aparezcan nuevas menciones de campaña.</EmptyState>
+        <EmptyState icon={Users} title="Ningún autor coincide con estos filtros." example="Una periodista que publique varias veces sobre “seguridad” aparecerá aquí como autora de la conversación." action={<div className="flex flex-wrap justify-center gap-2"><LinkButton href="/people">Quitar filtros</LinkButton><LinkButton href="/keywords/new" variant="primary">Agregar términos a la campaña</LinkButton></div>}>Cuando aparezcan menciones nuevas, sus autores se agruparán aquí para que puedas revisar su actividad.</EmptyState>
       ) : (
-        <Table head={['Autor', 'Seguidores', 'Menciones', 'Sentimiento', 'Etapa', 'Etiquetas', 'Última actividad']}>
+        <Table head={[
+          <span className="inline-flex items-center gap-1">Autor <InfoTip term="autor" /></span>,
+          <span className="inline-flex items-center gap-1">Seguidores <InfoTip term="alcance" /></span>,
+          <span className="inline-flex items-center gap-1">Menciones <InfoTip term="menciones" /></span>,
+          <span className="inline-flex items-center gap-1">Sentimiento <InfoTip term="sentimiento o tono" /></span>,
+          <span className="inline-flex items-center gap-1">Etapa <InfoTip text="Punto del seguimiento del equipo, por ejemplo nuevo, contactado o aliado." /></span>,
+          <span className="inline-flex items-center gap-1">Etiquetas <InfoTip text="Notas breves que el equipo asigna para organizar a los autores." /></span>,
+          <span className="inline-flex items-center gap-1">Última actividad <InfoTip text="Fecha de la publicación más reciente de esta persona." /></span>,
+        ]}>
           {page.data.map((person) => (
             <TableRow key={person.id} className={person.annotations.muted ? 'text-muted-foreground' : ''}>
               <TableCell className={td}>

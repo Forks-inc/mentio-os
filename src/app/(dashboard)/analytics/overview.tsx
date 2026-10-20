@@ -1,6 +1,7 @@
 import type { AnalyticsSummary } from '@mentio-dev/sdk';
 import { PlatformIcon } from '@/components/platform-icon';
-import { BarList, CHART_COLORS, Card, StackedBars, Stat } from '@/components/ui';
+import { BarList, CHART_COLORS, Card, EmptyState, LinkButton, StackedBars, Stat } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { compact, platformName } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
 import { keywordName, mentionsHref, type WindowQuery } from './window';
@@ -10,6 +11,17 @@ const duration = (ms: number | null) => {
   const hours = ms / 3_600_000;
   return hours < 1 ? `${Math.max(1, Math.round(ms / 60_000))} min` : hours < 48 ? `${hours.toFixed(1)} h` : `${(hours / 24).toFixed(1)} días`;
 };
+
+const chartEmpty = (title: string, example: string) => (
+  <EmptyState
+    compact
+    title={title}
+    example={example}
+    action={<LinkButton href="/keywords/new" variant="primary" size="sm">Agregar término</LinkButton>}
+  >
+    Cuando se registren términos de campaña y lleguen publicaciones, este espacio mostrará los resultados.
+  </EmptyState>
+);
 
 /** Headline numbers against the previous window, the trend, and where it came from. */
 export async function Overview({ query, summary }: { query: WindowQuery; summary: AnalyticsSummary }) {
@@ -37,9 +49,9 @@ export async function Overview({ query, summary }: { query: WindowQuery; summary
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 @2xl:grid-cols-4">
-        <Stat label="Menciones" value={compact(summary.matched)} delta={pct(summary.matched, prev?.matched)} spark={points.map((p) => p.matched)} hint={`${compact(summary.posts)} publicaciones`} href={link({})} />
+        <Stat label={<span className="inline-flex items-center gap-1">Menciones <InfoTip term="menciones" /></span>} value={compact(summary.matched)} delta={pct(summary.matched, prev?.matched)} spark={points.map((p) => p.matched)} hint={`${compact(summary.posts)} publicaciones`} href={link({})} />
         <Stat
-          label="Relevantes"
+          label={<span className="inline-flex items-center gap-1">Relevantes <InfoTip term="relevancia" /></span>}
           value={compact(summary.relevant)}
           delta={pct(summary.relevant, prev?.relevant)}
           spark={points.map((p) => p.relevant)}
@@ -47,7 +59,7 @@ export async function Overview({ query, summary }: { query: WindowQuery; summary
           href={link({ relevant: 'true' })}
         />
         <Stat
-          label="Sentimiento negativo"
+          label={<span className="inline-flex items-center gap-1">Sentimiento negativo <InfoTip term="sentimiento o tono" /></span>}
           value={compact(summary.sentiment.negative)}
           delta={pct(summary.sentiment.negative, prev?.sentiment.negative)}
           invert
@@ -55,26 +67,26 @@ export async function Overview({ query, summary }: { query: WindowQuery; summary
           hint={scored ? `${Math.round((summary.sentiment.negative / scored) * 100)}% de las clasificadas` : undefined}
           href={link({ sentiments: 'negative' })}
         />
-        <Stat label="Alcance estimado" value={compact(summary.reach.followers)} delta={pct(summary.reach.followers, prev?.reach.followers)} hint={`${compact(summary.reach.people)} autores identificados`} />
-        <Stat label="Autores" value={compact(summary.people)} delta={pct(summary.people, prev?.people)} />
-        <Stat label="Publicaciones" value={compact(summary.posts)} delta={pct(summary.posts, prev?.posts)} />
-        <Stat label="Intención de apoyo" value={compact(summary.buyIntent)} delta={pct(summary.buyIntent, prev?.buyIntent)} href={link({ intents: 'buy_intent' })} />
-        <Stat label="Preguntas" value={compact(summary.questions)} delta={pct(summary.questions, prev?.questions)} href={link({ intents: 'question' })} />
+        <Stat label={<span className="inline-flex items-center gap-1">Alcance estimado <InfoTip term="alcance" /></span>} value={compact(summary.reach.followers)} delta={pct(summary.reach.followers, prev?.reach.followers)} hint={`${compact(summary.reach.people)} autores identificados`} />
+        <Stat label={<span className="inline-flex items-center gap-1">Autores <InfoTip term="autor" /></span>} value={compact(summary.people)} delta={pct(summary.people, prev?.people)} />
+        <Stat label={<span className="inline-flex items-center gap-1">Publicaciones <InfoTip text="Cantidad de posts y reseñas recopilados durante el periodo." /></span>} value={compact(summary.posts)} delta={pct(summary.posts, prev?.posts)} />
+        <Stat label={<span className="inline-flex items-center gap-1">Intención de apoyo <InfoTip term="intención" /></span>} value={compact(summary.buyIntent)} delta={pct(summary.buyIntent, prev?.buyIntent)} href={link({ intents: 'buy_intent' })} />
+        <Stat label={<span className="inline-flex items-center gap-1">Preguntas <InfoTip term="intención" /></span>} value={compact(summary.questions)} delta={pct(summary.questions, prev?.questions)} href={link({ intents: 'question' })} />
       </div>
 
-      <Card title="Menciones en el tiempo" description={`Por ${{ hour: 'hora', day: 'día', week: 'semana', month: 'mes' }[series.window.bucket] ?? series.window.bucket}. Las barras muestran menciones por canal; la línea oscura, las relevantes, y la discontinua, el periodo anterior.`}>
-        <StackedBars
+      <Card title={<span className="inline-flex items-center gap-1">Menciones en el tiempo <InfoTip term="menciones" /></span>} description={`Por ${{ hour: 'hora', day: 'día', week: 'semana', month: 'mes' }[series.window.bucket] ?? series.window.bucket}. Las barras muestran menciones por canal; la línea oscura, las relevantes, y la discontinua, el periodo anterior.`}>
+        {labels.length === 0 ? chartEmpty('Aún no hay menciones en el periodo', 'Registra a “María López” y el tema “seguridad” para ver la conversación por día y canal.') : <StackedBars
           labels={labels}
           stacks={stacks}
           lines={[
             { name: 'Relevantes', color: '#18181b', values: points.map((p) => p.relevant) },
             ...(previous.length === points.length ? [{ name: 'Periodo anterior', color: '#a1a1aa', values: previous.map((p) => p.matched), dashed: true }] : []),
           ]}
-        />
+        />}
       </Card>
 
-      <Card title="Sentimiento en el tiempo" description={`${compact(summary.sentiment.unclassified)} menciones aún sin clasificar.`}>
-        <StackedBars
+      <Card title={<span className="inline-flex items-center gap-1">Sentimiento en el tiempo <InfoTip term="sentimiento o tono" /></span>} description={`${compact(summary.sentiment.unclassified)} menciones aún sin clasificar.`}>
+        {labels.length === 0 ? chartEmpty('Aún no hay datos de tono', 'Sigue “María López” y “seguridad” para ver si las publicaciones son positivas, neutrales o negativas.') : <StackedBars
           labels={labels}
           height={160}
           stacks={[
@@ -82,32 +94,32 @@ export async function Overview({ query, summary }: { query: WindowQuery; summary
             { name: 'Neutral', color: '#d4d4d8', values: points.map((p) => p.neutral) },
             { name: 'Negativo', color: '#ef4444', values: points.map((p) => p.negative) },
           ]}
-        />
+        />}
       </Card>
 
       <div className="grid gap-6 @4xl:grid-cols-2">
-        <Card title="Canales principales">
-          <BarList items={platforms.data.slice(0, 8).map((r) => ({ label: platformName(r.key), value: r.matched, href: link({ platforms: r.key }), icon: <PlatformIcon platform={r.key} /> }))} />
+        <Card title={<span className="inline-flex items-center gap-1">Canales principales <InfoTip text="Plataformas donde se publicaron las menciones de este periodo." /></span>}>
+          {platforms.data.length === 0 ? chartEmpty('Aún no hay canales con menciones', 'Cuando una publicación sobre “María López” aparezca en Instagram, Reddit u otro canal, aquí podrás comparar dónde se conversa.') : <BarList items={platforms.data.slice(0, 8).map((r) => ({ label: platformName(r.key), value: r.matched, href: link({ platforms: r.key }), icon: <PlatformIcon platform={r.key} /> }))} />}
         </Card>
-        <Card title="Términos monitoreados principales">
-          <BarList
+        <Card title={<span className="inline-flex items-center gap-1">Términos monitoreados principales <InfoTip text="Candidatos, adversarios y temas con más menciones en este periodo." /></span>}>
+          {keywords.data.length === 0 ? chartEmpty('Aún no hay términos monitoreados', 'Registra “María López” como candidata, “José Pérez” como adversario y “seguridad” como tema.') : <BarList
             items={keywords.data.slice(0, 8).map((r) => ({
               label: r.keyword ? keywordName(r.keyword) : r.label,
               value: r.matched,
               href: r.keyword ? link({ keywordIds: r.keyword.id }) : undefined,
             }))}
-          />
+          />}
         </Card>
       </div>
 
-      <Card title="Seguimiento de menciones" description="Estado de las menciones en este periodo.">
+      <Card title={<span className="inline-flex items-center gap-1">Seguimiento de menciones <InfoTip text="Muestra cuántas menciones están abiertas, resueltas o ignoradas y cuánto tarda el equipo en atenderlas." /></span>} description="Estado de las menciones en este periodo.">
         <div className="grid gap-3 @lg:grid-cols-3 @4xl:grid-cols-6">
-          <Stat label="Abiertas" value={compact(summary.triage.open)} href={link({ status: 'open' })} />
-          <Stat label="Resueltas" value={compact(summary.triage.done)} href={link({ status: 'done' })} />
-          <Stat label="Ignoradas" value={compact(summary.triage.ignored)} href={link({ status: 'ignored' })} />
-          <Stat label="Pendientes por más de 24 h" value={compact(summary.triage.waiting)} hint="Relevantes y aún abiertas" />
-          <Stat label="Atendidas" value={summary.triage.handledRate === null ? 's/d' : `${Math.round(summary.triage.handledRate * 100)}%`} hint="Resueltas de las relevantes" />
-          <Stat label="Tiempo medio para resolver" value={<span className="text-base">{duration(summary.triage.medianTimeToDoneMs)}</span>} />
+          <Stat label={<span className="inline-flex items-center gap-1">Abiertas <InfoTip text="Menciones relevantes que todavía no se han marcado como resueltas o ignoradas." /></span>} value={compact(summary.triage.open)} href={link({ status: 'open' })} />
+          <Stat label={<span className="inline-flex items-center gap-1">Resueltas <InfoTip text="Menciones que el equipo ya atendió y marcó como resueltas." /></span>} value={compact(summary.triage.done)} href={link({ status: 'done' })} />
+          <Stat label={<span className="inline-flex items-center gap-1">Ignoradas <InfoTip text="Menciones que el equipo decidió no seguir atendiendo." /></span>} value={compact(summary.triage.ignored)} href={link({ status: 'ignored' })} />
+          <Stat label={<span className="inline-flex items-center gap-1">Pendientes por más de 24 h <InfoTip text="Menciones relevantes que siguen abiertas después de un día." /></span>} value={compact(summary.triage.waiting)} hint="Relevantes y aún abiertas" />
+          <Stat label={<span className="inline-flex items-center gap-1">Atendidas <InfoTip text="Porcentaje de menciones relevantes que ya fueron resueltas." /></span>} value={summary.triage.handledRate === null ? 's/d' : `${Math.round(summary.triage.handledRate * 100)}%`} hint="Resueltas de las relevantes" />
+          <Stat label={<span className="inline-flex items-center gap-1">Tiempo medio para resolver <InfoTip text="Tiempo habitual entre la llegada de una mención y el momento en que el equipo la resuelve." /></span>} value={<span className="text-base">{duration(summary.triage.medianTimeToDoneMs)}</span>} />
         </div>
       </Card>
     </div>

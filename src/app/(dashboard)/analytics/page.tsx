@@ -1,4 +1,5 @@
 import { PageHeader, RangeLinks } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { UrlFilters } from '@/components/url-filters';
 import { PLATFORM_NAMES, day } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
@@ -29,7 +30,7 @@ export default async function Analytics({ searchParams }: { searchParams: Promis
   const tabs = [
     { value: 'overview', label: 'Resumen', href: tabHref('overview') },
     { value: 'breakdowns', label: 'Desgloses', href: tabHref('breakdowns') },
-    { value: 'voice', label: 'Participación de voz', href: tabHref('voice') },
+    { value: 'voice', label: <span className="inline-flex items-center gap-1">Participación de voz <InfoTip term="participación de voz" /></span>, href: tabHref('voice') },
     ...(hasReviews ? [{ value: 'reviews', label: 'Reseñas', href: tabHref('reviews') }] : []),
   ];
 

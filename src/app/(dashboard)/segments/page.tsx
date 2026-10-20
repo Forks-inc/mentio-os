@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Layers } from 'lucide-react';
 import { ActionForm, SubmitButton, DrawerButton } from '@/components/ui/client';
 import { Badge, Card, Conditions, EmptyState, Field, Input, LinkButton, PageHeader, Table, td, TableCell, TableRow, rowLink } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
 import { FilterFields } from '../people/filter-fields';
@@ -21,7 +22,7 @@ export default async function Segments() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Segmentos"
+        title={<span className="inline-flex items-center gap-1">Segmentos <InfoTip term="segmento" /></span>}
         description="Agrupa autores por temas de campaña, conversación o nivel de interacción para comparar cómo responde la audiencia. Los grupos se actualizan cuando llegan nuevas menciones."
         actions={
           <>
@@ -39,9 +40,15 @@ export default async function Segments() {
       />
 
       {segments.data.length === 0 ? (
-        <EmptyState icon={Layers} title="Aún no hay segmentos.">Guarda una plantilla, crea un segmento aquí o filtra la audiencia y guarda el resultado.</EmptyState>
+        <EmptyState icon={Layers} title="Aún no hay segmentos." example="Crea “Autores que mencionan movilidad” para reunir y revisar a quienes publican sobre ese tema." action={<LinkButton href="/people" variant="primary">Explorar audiencia</LinkButton>}>Guarda una plantilla, crea un segmento o filtra la audiencia para seguir a un grupo de autores.</EmptyState>
       ) : (
-        <Table head={['Segmento', 'Condiciones', 'Autores', 'Actualizado', '']}>
+        <Table head={[
+          <span className="inline-flex items-center gap-1">Segmento <InfoTip term="segmento" /></span>,
+          <span className="inline-flex items-center gap-1">Condiciones <InfoTip text="Filtros que deciden qué autores pertenecen al segmento." /></span>,
+          <span className="inline-flex items-center gap-1">Autores <InfoTip term="autor" /></span>,
+          <span className="inline-flex items-center gap-1">Actualizado <InfoTip text="Última vez que se guardaron cambios en este segmento." /></span>,
+          '',
+        ]}>
           {segments.data.map((segment) => {
             const conditions = describeFilter(segment.filter, memberNames);
             return (

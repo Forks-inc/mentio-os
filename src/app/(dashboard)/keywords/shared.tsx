@@ -5,7 +5,14 @@ import { Badge } from '@/components/ui';
 import { platformName } from '@/lib/format';
 
 export const KINDS = ['brand', 'competitor', 'topic'] as const;
-export const KIND_LABELS: Record<(typeof KINDS)[number], string> = { brand: 'Candidato', competitor: 'Adversario', topic: 'Tema de agenda' };
+export const KIND_LABELS: Record<(typeof KINDS)[number], string> = { brand: 'Candidato', competitor: 'Adversario', topic: 'Tema' };
+
+/** The primary term named by the campaign's explicit variant context convention. */
+export function variantOf(context?: string | null) {
+  const prefix = 'Variante de: ';
+  if (!context?.startsWith(prefix)) return null;
+  return context.slice(prefix.length).trim() || null;
+}
 
 export const STATUSES = [
   ['active', 'Activo'],

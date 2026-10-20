@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Eye, Plus } from 'lucide-react';
 import { Conditions, EmptyState, Field, Input, LinkButton, PageHeader, Table, td, TableCell, TableRow, rowLink } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { ActionForm, DrawerButton, SubmitButton } from '@/components/ui/client';
 import { describeFilter, fromViewFilter, parseFilters } from '@/app/(dashboard)/mentions/filters';
 import { ViewFilterFields } from '@/app/(dashboard)/mentions/filter-fields';
@@ -38,14 +39,19 @@ export default async function ViewsPage() {
 
   return (
     <div>
-      <PageHeader title="Vistas" description="Filtros guardados para consultar menciones de candidatos y temas de campaña." actions={<NewView options={options} />} />
+      <PageHeader title={<span className="inline-flex items-center gap-1">Vistas <InfoTip term="vista guardada" /></span>} description="Filtros guardados para consultar menciones de candidatos y temas de campaña." actions={<NewView options={options} />} />
 
       {views.data.length === 0 ? (
-        <EmptyState icon={Eye} title="Aún no hay vistas guardadas" action={<NewView options={options} primary={false} />}>
-          Filtra las <Link href="/mentions" className="text-primary hover:underline">menciones</Link> y guárdalas, o crea una vista aquí.
+        <EmptyState icon={Eye} title="Aún no hay vistas guardadas" example="Guarda “críticas a la propuesta de seguridad” para consultar esas menciones con facilidad." action={<NewView options={options} primary={false} />}>
+          Filtra las <Link href="/mentions" className="text-primary hover:underline">menciones</Link> de campaña y guarda la búsqueda para volver a usarla.
         </EmptyState>
       ) : (
-        <Table head={['Vista guardada', 'Condiciones', 'Actualizada', '']}>
+        <Table head={[
+          <span className="inline-flex items-center gap-1">Vista guardada <InfoTip term="vista guardada" /></span>,
+          <span className="inline-flex items-center gap-1">Condiciones <InfoTip text="Filtros que se aplican al abrir esta vista de menciones." /></span>,
+          <span className="inline-flex items-center gap-1">Actualizada <InfoTip text="Última vez que se guardaron cambios en esta vista." /></span>,
+          '',
+        ]}>
           {views.data.map((view) => {
             const href = `/mentions?viewId=${encodeURIComponent(view.id)}`;
             return (

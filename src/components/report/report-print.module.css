@@ -1,0 +1,42 @@
+@page {
+  size: letter;
+  margin: 0.55in;
+}
+
+@media print {
+  :global(html),
+  :global(body) {
+    background: #fff !important;
+  }
+
+  :global(body *) {
+    visibility: hidden !important;
+  }
+
+  .sheet,
+  .sheet * {
+    visibility: visible !important;
+  }
+
+  .sheet {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    color: #111 !important;
+  }
+
+  .toolbar {
+    display: none !important;
+  }
+
+  .section {
+    break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .muted {
+    color: #444 !important;
+  }
+}

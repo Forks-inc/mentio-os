@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
-import type { ReactNode } from 'react';
 import { Badge, Card, LinkButton, Notice, PageHeader, Stat, Table, td, TableCell, TableRow } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { compact, date, platformName, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
 import { KeywordActions } from '../keyword-actions';
 import { KeywordForm } from '../keyword-form';
-import { KeywordBadges, KIND_LABELS, platformsLabel } from '../shared';
+import { KeywordBadges, KIND_LABELS, platformsLabel, variantOf } from '../shared';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Término monitoreado' };
@@ -26,6 +26,8 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
         title={
           <span className="flex flex-wrap items-center gap-2">
             {keyword.term}
+            <Badge tone={keyword.kind === 'brand' ? 'accent' : keyword.kind === 'competitor' ? 'warn' : 'neutral'}>{KIND_LABELS[keyword.kind]}</Badge>
+            {variantOf(keyword.context) ? <Badge tone="outline">Variante de {variantOf(keyword.context)}</Badge> : null}
             <KeywordBadges keyword={keyword} />
           </span>
         }
@@ -48,14 +50,14 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
       ) : null}
 
       <div className="grid grid-cols-2 gap-3 @4xl:grid-cols-5">
-        <Stat label="Menciones" value={compact(stats.mentions)} hint="todas las coincidencias" href={mentionsHref} />
-        <Stat label="Relevantes" value={compact(stats.relevant)} hint={`${stats.feedback.relevant} marcadas relevantes, ${stats.feedback.notRelevant} no relevantes`} />
-        <Stat label="Últimos 7 días" value={compact(stats.last7d)} hint={stats.lastMentionAt ? `última ${timeAgo(stats.lastMentionAt)}` : 'sin menciones'} />
-        <Stat label="Este mes" value={compact(stats.thisMonth)} hint={keyword.cap ? `límite ${compact(keyword.cap.mentions)}` : 'sin límite'} />
+        <Stat label={<span className="inline-flex items-center gap-1">Menciones <InfoTip term="menciones" /></span>} value={compact(stats.mentions)} hint="todas las coincidencias" href={mentionsHref} />
+        <Stat label={<span className="inline-flex items-center gap-1">Relevantes <InfoTip term="relevancia" /></span>} value={compact(stats.relevant)} hint={`${stats.feedback.relevant} marcadas relevantes, ${stats.feedback.notRelevant} no relevantes`} />
+        <Stat label={<span className="inline-flex items-center gap-1">Últimos 7 días <InfoTip term="menciones" /></span>} value={compact(stats.last7d)} hint={stats.lastMentionAt ? `última ${timeAgo(stats.lastMentionAt)}` : 'sin menciones'} />
+        <Stat label={<span className="inline-flex items-center gap-1">Este mes <InfoTip term="menciones" /></span>} value={compact(stats.thisMonth)} hint={keyword.cap ? `límite ${compact(keyword.cap.mentions)}` : 'sin límite'} />
       </div>
 
       <div className="grid gap-6 @4xl:grid-cols-2">
-        <Card title="Límite mensual de menciones">
+        <Card title={<span className="inline-flex items-center gap-1">Límite mensual de menciones <InfoTip term="menciones" /></span>}>
           {keyword.cap ? (
             <div className="space-y-2 text-sm">
               <p>
@@ -73,7 +75,7 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
           )}
         </Card>
 
-        <Card title="Actualización por plataforma" description="Consulta el estado del monitoreo. Las plataformas con transmisión en vivo, como Bluesky, no muestran un registro.">
+        <Card title={<span className="inline-flex items-center gap-1">Actualización por plataforma <InfoTip text="Momento en que cada canal buscó publicaciones nuevas para este término." /></span>} description="Consulta el estado del monitoreo. Las plataformas con transmisión en vivo, como Bluesky, no muestran un registro.">
           {keyword.polling.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aún no se consulta.</p>
           ) : (
@@ -93,7 +95,12 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
       </div>
 
       {keyword.reviewSources.length > 0 ? (
-        <Table head={['Página de reseñas', 'Países', 'Idioma', 'Conectada']}>
+        <Table head={[
+          <span className="inline-flex items-center gap-1">Página de reseñas <InfoTip text="Página conectada para recibir y monitorear reseñas." /></span>,
+          <span className="inline-flex items-center gap-1">Países <InfoTip text="Mercados de App Store o Google Play que se consultan." /></span>,
+          <span className="inline-flex items-center gap-1">Idioma <InfoTip text="Idioma de reseñas que se consulta cuando la plataforma permite elegirlo." /></span>,
+          <span className="inline-flex items-center gap-1">Conectada <InfoTip text="Fecha en que se agregó esta página al monitoreo." /></span>,
+        ]}>
           {keyword.reviewSources.map((src) => (
             <TableRow key={`${src.platform}:${src.id}`}>
               <TableCell className={td}>

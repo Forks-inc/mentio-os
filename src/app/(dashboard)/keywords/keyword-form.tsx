@@ -5,11 +5,16 @@
 import type { Group, Keyword } from '@mentio-dev/sdk';
 import { Card, Checkbox, Field, Input, PlatformPicker, Segmented, Select, SwitchRow, Textarea, TokenInput } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/ui/client';
+import { InfoTip } from '@/components/info-tip';
 import { date, platformName, REVIEW_PLATFORMS, SEARCH_PLATFORMS } from '@/lib/format';
 import { createKeywordAction, updateKeywordAction } from './actions';
 import { KIND_LABELS, KINDS, sourceKey, takesCountries, takesLanguage } from './shared';
 
-const KIND_HINTS: Record<string, string> = { brand: 'Nombres de tus candidatos.', competitor: 'Un adversario para comparar la participación de voz.', topic: 'Un tema de agenda que sigue la campaña.' };
+const KIND_HINTS: Record<string, string> = {
+  brand: 'La persona que representa a tu campaña. Ejemplo: María López.',
+  competitor: 'Una persona de otra campaña para comparar la conversación. Ejemplo: José Pérez.',
+  topic: 'Un asunto de agenda que no se refiere a una persona. Ejemplo: seguridad o movilidad.',
+};
 
 export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Group[] }) {
   const editing = Boolean(keyword);
@@ -24,7 +29,7 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
     <ActionForm action={editing ? updateKeywordAction : createKeywordAction} className="space-y-6">
       {keyword ? <input type="hidden" name="id" value={keyword.id} /> : null}
 
-      <Card title="Candidato o tema">
+      <Card title={<span className="inline-flex items-center gap-1">Candidato o tema <InfoTip text="Elige si vas a monitorear a la persona de tu campaña, a un adversario o un tema de agenda." /></span>}>
         <div className="grid gap-4 @lg:grid-cols-2">
           {keyword ? (
             <Field label="Término" hint="No puedes cambiar un término después de crearlo.">
@@ -35,21 +40,27 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
               <Input name="term" required minLength={2} maxLength={80} placeholder="Nombre del candidato, apodo, adversario o tema de agenda" />
             </Field>
           )}
-          <Field group label="Tipo">
+          <Field group label={<span className="inline-flex items-center gap-1">Tipo <InfoTip text="Candidato: persona de tu campaña. Adversario: persona de otra campaña. Tema: asunto de agenda, como seguridad." /></span>}>
             <Segmented
               name="kind"
               defaultValue={keyword?.kind ?? 'brand'}
               options={KINDS.map((k) => ({ value: k, label: KIND_LABELS[k], description: KIND_HINTS[k] }))}
             />
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span>Ver ejemplo y definición:</span>
+              <span className="inline-flex items-center gap-1">Candidato <InfoTip term="candidato" /></span>
+              <span className="inline-flex items-center gap-1">Adversario <InfoTip term="adversario" /></span>
+              <span className="inline-flex items-center gap-1">Tema <InfoTip term="tema" /></span>
+            </div>
           </Field>
-          <Field label="Campaña" hint="Puedes monitorear un término una vez por campaña.">
+          <Field label={<span className="inline-flex items-center gap-1">Campaña <InfoTip term="campaña" /></span>} hint="Puedes monitorear un término una vez por campaña.">
             <Select name="groupId" defaultValue={keyword?.group.id ?? defaultGroup} options={groupOptions} />
           </Field>
           <Field label="Límite mensual de menciones" hint="Por mes calendario. Déjalo vacío para no fijar un límite.">
             <Input name="cap" type="number" min={1} max={1000000} defaultValue={cap ?? ''} placeholder="Sin límite" />
           </Field>
         </div>
-        <Field className="mt-4" label="Contexto para clasificar menciones" hint="Aclara a quién o qué se refiere el término y qué conversación debe ignorarse.">
+        <Field className="mt-4" label="Contexto para clasificar menciones" hint="Aclara a quién o qué se refiere el término y qué conversación debe ignorarse. Para un apodo, escribe “Variante de: <término principal>” y conserva el mismo tipo y campaña.">
           <Textarea name="context" rows={2} maxLength={300} defaultValue={keyword?.context ?? ''} placeholder="María López es nuestra candidata; ignora menciones a otras personas con el mismo nombre." />
         </Field>
       </Card>

@@ -4,6 +4,7 @@ import { CornerUpLeft, Send } from 'lucide-react';
 import { MentionRowMenu } from '@/components/mention-row-menu';
 import { MentionSelection, SelectAll, SelectRow } from '@/components/mention-selection';
 import { MentionStatus } from '@/components/mention-status';
+import { InfoTip } from '@/components/info-tip';
 import { PlatformIcon } from '@/components/platform-icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -30,15 +31,15 @@ export function MentionTable({ mentions }: { mentions: Mention[] }) {
             <TableHead className="h-9 w-10 pr-0">
               <SelectAll />
             </TableHead>
-            <TableHead className="h-9 w-14 text-[11px]">Plataforma</TableHead>
-            <TableHead className="text-[11px]">Mención</TableHead>
-            <TableHead className="text-[11px]">Candidato o tema</TableHead>
-            <TableHead className="text-[11px]">Autor</TableHead>
-            <TableHead className="text-[11px]">Sentimiento</TableHead>
-            <TableHead className="text-right text-[11px]">Prioridad</TableHead>
-            <TableHead className="text-right text-[11px]">Relevancia</TableHead>
-            <TableHead className="text-[11px]">Estado</TableHead>
-            <TableHead className="text-[11px]">Fecha</TableHead>
+            <TableHead className="h-9 w-14 text-[11px]"><span className="inline-flex items-center gap-1">Plataforma <InfoTip text="Canal donde se publicó esta mención." /></span></TableHead>
+            <TableHead className="text-[11px]"><span className="inline-flex items-center gap-1">Mención <InfoTip term="menciones" /></span></TableHead>
+            <TableHead className="text-[11px]"><span className="inline-flex items-center gap-1">Candidato o tema <InfoTip text="Término de campaña con el que coincidió esta publicación." /></span></TableHead>
+            <TableHead className="text-[11px]"><span className="inline-flex items-center gap-1">Autor <InfoTip term="autor" /></span></TableHead>
+            <TableHead className="text-[11px]"><span className="inline-flex items-center gap-1">Sentimiento <InfoTip term="sentimiento o tono" /></span></TableHead>
+            <TableHead className="text-right text-[11px]"><span className="inline-flex items-center justify-end gap-1">Prioridad <InfoTip text="Puntaje que ayuda a ordenar las menciones que conviene revisar primero." /></span></TableHead>
+            <TableHead className="text-right text-[11px]"><span className="inline-flex items-center justify-end gap-1">Relevancia <InfoTip term="relevancia" /></span></TableHead>
+            <TableHead className="text-[11px]"><span className="inline-flex items-center gap-1">Estado <InfoTip text="Indica si el equipo aún debe revisar la mención o ya la atendió." /></span></TableHead>
+            <TableHead className="text-[11px]"><span className="inline-flex items-center gap-1">Fecha <InfoTip text="Momento en que se publicó la mención." /></span></TableHead>
             <TableHead className="w-10" />
           </TableRow>
         </TableHeader>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Bell, Plus } from 'lucide-react';
+import { Bell, Plus, Sparkles } from 'lucide-react';
 import { Badge, Conditions, EmptyState, LinkButton, PageHeader, Table, td, TableCell, TableRow, rowLink } from '@/components/ui';
 import { ActionForm, SubmitButton } from '@/components/ui/client';
 import { compact, date, timeAgo } from '@/lib/format';
@@ -20,7 +20,7 @@ export default async function Alerts() {
       <PageHeader
         title="Alertas"
         description="Configura reglas para enviar menciones de candidatos y temas a tus canales, al momento o en un resumen periódico."
-        actions={<LinkButton href="/alerts/new" variant="primary" create><Plus /> Crear alerta</LinkButton>}
+        actions={<><LinkButton href="/alerts/plantillas" variant="secondary"><Sparkles /> Usar una plantilla</LinkButton><LinkButton href="/alerts/new" variant="primary" create><Plus /> Crear alerta</LinkButton></>}
       />
 
       {alerts.data.length === 0 ? (

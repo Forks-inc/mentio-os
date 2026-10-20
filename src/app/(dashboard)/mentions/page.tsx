@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { MentionTable } from '@/components/mention-table';
 import { Download, Radio } from 'lucide-react';
 import { EmptyState, Field, Input, LinkButton, PageHeader, buttonClass } from '@/components/ui';
+import { InfoTip } from '@/components/info-tip';
 import { ActionForm, SubmitButton } from '@/components/ui/client';
 import { mentio, unwrap } from '@/lib/mentio';
 import type { SearchParams } from '@/lib/params';
@@ -43,7 +43,7 @@ export default async function MentionsPage({ searchParams }: { searchParams: Pro
   return (
     <div>
       <PageHeader
-        title={view ? view.name : 'Menciones'}
+        title={view ? view.name : <span className="inline-flex items-center gap-1">Menciones <InfoTip term="menciones" /></span>}
         description={view ? view.description || 'Vista guardada. Los filtros siguientes acotan los resultados.' : 'Conversación pública que coincide con los términos monitoreados, de la más reciente a la más antigua.'}
         actions={
           <>
@@ -88,8 +88,13 @@ export default async function MentionsPage({ searchParams }: { searchParams: Pro
       ) : null}
 
       {page.data.length === 0 ? (
-        <EmptyState icon={Radio} title={cursor ? 'No hay menciones anteriores.' : 'Ninguna mención coincide con estos filtros.'}>
-          {cursor ? <Link href={firstHref} className="text-primary hover:underline">Volver a las más recientes</Link> : 'Prueba con menos filtros o amplía el periodo.'}
+        <EmptyState
+          icon={Radio}
+          title={cursor ? 'No hay menciones anteriores.' : 'Ninguna mención coincide con estos filtros.'}
+          example="Si monitoreas a “María López” y el tema “seguridad”, las publicaciones que coincidan aparecerán aquí."
+          action={cursor ? <LinkButton href={firstHref} variant="primary">Volver a las más recientes</LinkButton> : <div className="flex flex-wrap justify-center gap-2"><LinkButton href="/mentions">Quitar filtros</LinkButton><LinkButton href="/keywords/new" variant="primary">Agregar término a la campaña</LinkButton></div>}
+        >
+          {cursor ? 'Ya llegaste a la mención más antigua de esta búsqueda.' : 'Prueba con menos filtros o amplía el periodo para encontrar conversación.'}
         </EmptyState>
       ) : (
         <MentionTable mentions={page.data} />
