@@ -3,10 +3,10 @@
 /**
  * The navigation, drawn on shadcn's Sidebar: the
  * brand at the top, one flat list (an item with children opens a sub-list
- * under a line), the balance and the docs in a tinted block at the foot and
+ * under a line), the docs in a tinted block at the foot and
  * the workspace under them. On a phone it becomes a drawer.
  */
-import { ChevronDown, ChevronsUpDown, CreditCard, KeyRound, LogOut, Search, Settings, SunMoon, Users, Wallet } from 'lucide-react';
+import { ChevronDown, ChevronsUpDown, LogOut, Search, Settings, SunMoon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { brand } from '@/brand.config';
@@ -42,11 +42,10 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { signOut } from '@/app/login/actions';
-import { money } from '@/lib/format';
 import { DOCS, NAV } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
-export type Workspace = { name: string | null; balanceCents: number | null; low: boolean };
+export type Workspace = { name: string | null };
 
 export function BrandMark({ className }: { className?: string }) {
   return brand.logo ? (
@@ -123,13 +122,6 @@ export function AppSidebar({ workspace, canSignOut = false }: { workspace: Works
 
       <SidebarFooter className="gap-0 p-0">
         <div className="border-t border-sidebar-border bg-sidebar-accent px-3 py-1.5">
-          {workspace.balanceCents !== null ? (
-            <Link href="/settings/billing" className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-background/70">
-              <Wallet className="size-4" />
-              <span className="flex-1">Saldo</span>
-              <span className={cn('font-semibold tabular-nums', workspace.low ? 'text-destructive' : 'text-foreground')}>{money(workspace.balanceCents)}</span>
-            </Link>
-          ) : null}
           <div className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm font-medium text-foreground">
             <DOCS.icon className="size-4" />
             <span className="flex-1">{DOCS.label}</span>
@@ -150,15 +142,6 @@ export function AppSidebar({ workspace, canSignOut = false }: { workspace: Works
             <DropdownMenuContent side="top" align="start" sideOffset={6} className="w-56">
               <DropdownMenuItem render={<Link href="/settings/company" />}>
                 <Settings /> Ajustes
-              </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href="/settings/billing" />}>
-                <CreditCard /> Facturación
-              </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href="/settings/team" />}>
-                <Users /> Equipo
-              </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href="/settings/api-keys" />}>
-                <KeyRound /> Claves de API
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuSub>

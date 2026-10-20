@@ -3,7 +3,8 @@
  * page (the key stays here) and handed to the browser as a download.
  */
 import type { NextRequest } from 'next/server';
-import { mentio } from '@/lib/mentio';
+import { apiErrorMessage } from '@/lib/action';
+import { mentio, reportApiError } from '@/lib/mentio';
 import { peopleQuery } from '../filters';
 
 export const dynamic = 'force-dynamic';
@@ -14,12 +15,13 @@ export async function GET(request: NextRequest) {
   const query = peopleQuery(params);
   const result = await mentio().exportPeopleCsv({ query, parseAs: 'text' });
   if (result.error !== undefined || typeof result.data !== 'string') {
-    const body = result.error as { error?: { message?: string } } | undefined;
-    const status = result.response?.status && result.response.status >= 400 ? result.response.status : 502;
+    const apiStatus = result.response?.status;
+    reportApiError(apiStatus, result.error ?? 'Respuesta vacía del servicio');
+    const status = apiStatus && apiStatus >= 400 ? apiStatus : 502;
     const headers: Record<string, string> = { 'content-type': 'text/plain; charset=utf-8' };
     const retry = result.response?.headers.get('retry-after');
     if (retry) headers['retry-after'] = retry;
-    return new Response(body?.error?.message ?? 'No se pudo exportar el archivo.', { status, headers });
+    return new Response(apiErrorMessage(apiStatus), { status, headers });
   }
   const day = new Date().toISOString().slice(0, 10);
   return new Response(result.data, {

@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 
-const EVENT = 'mentio-os:mention-status';
+const EVENT = 'agora:mention-status';
 
 /** `null` puts the badges back to what the server last said (a failed save). */
 export function announceStatus(ids: string[], status: string | null) {

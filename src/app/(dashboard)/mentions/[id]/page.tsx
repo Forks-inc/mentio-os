@@ -169,7 +169,7 @@ export default async function MentionPage({ params }: { params: Promise<{ id: st
             {!verdict ? (
               <p className="text-sm text-muted-foreground">Aún no se ha clasificado.</p>
             ) : verdict.failed ? (
-              <p className="text-sm text-muted-foreground">No se pudo clasificar esta mención. No genera cargos.</p>
+              <p className="text-sm text-muted-foreground">No se pudo clasificar esta mención.</p>
             ) : (
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-1.5 text-xs">

@@ -1,13 +1,11 @@
 /** The sidebar, in one place: add a page here to put it in the navigation. */
 import {
-  AtSign,
   Bell,
   BookOpen,
   Building2,
   Eye,
   Filter,
   FolderTree,
-  KeyRound,
   Layers,
   LayoutDashboard,
   LayoutGrid,
@@ -17,7 +15,6 @@ import {
   Tag,
   TrendingUp,
   UsersRound,
-  Wallet,
   Webhook,
 } from 'lucide-react';
 
@@ -48,8 +45,6 @@ export const NAV: NavItem[] = [
       { href: '/channels', label: 'Canales', icon: Webhook },
     ],
   },
-  { href: '/settings/api-keys', label: 'Claves de API', icon: KeyRound },
-  { href: '/settings/team', label: 'Equipo', icon: AtSign },
   { href: '/settings/company', label: 'Ajustes', icon: Settings },
 ];
 
@@ -58,9 +53,6 @@ export const SETTINGS: NavItem[] = [
   { href: '/settings/company', label: 'Perfil de la organización', icon: Building2 },
   { href: '/settings/groups', label: 'Campañas', icon: FolderTree },
   { href: '/settings/filters', label: 'Filtros de ruido', icon: Filter },
-  { href: '/settings/team', label: 'Equipo', icon: AtSign },
-  { href: '/settings/api-keys', label: 'Claves de API', icon: KeyRound },
-  { href: '/settings/billing', label: 'Facturación', icon: Wallet },
 ];
 
 export const DOCS = { href: '#', label: 'Inteligencia política', icon: BookOpen };

@@ -11,11 +11,7 @@ export const KIND_LABELS: Record<ChannelKind, string> = { slack: 'Slack', email:
 
 export const ACCOUNT_EVENTS: ReadonlyArray<readonly [AccountEvent, string]> = [
   ['keyword.capped', 'Un término monitoreado alcanzó su límite mensual de menciones'],
-  ['keyword.paused_for_balance', 'Un término se pausó por falta de saldo'],
   ['keyword.resumed', 'Se reanudó el monitoreo de un término pausado o al límite'],
-  ['wallet.low', 'El saldo está por agotarse'],
-  ['wallet.paused', 'El saldo pausó el monitoreo'],
-  ['wallet.resumed', 'El monitoreo se reanudó después de una recarga'],
 ];
 const EVENT_IDS = ACCOUNT_EVENTS.map(([id]) => id);
 

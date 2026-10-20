@@ -49,11 +49,6 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
             <Input name="cap" type="number" min={1} max={1000000} defaultValue={cap ?? ''} placeholder="Sin límite" />
           </Field>
         </div>
-        {keyword?.cap?.welcome ? (
-          <p className="mt-3 text-xs text-amber-700">
-            Tu espacio de trabajo tiene saldo de bienvenida. Este término se detendrá al llegar a {keyword.cap.mentions} menciones al mes, hasta la primera recarga. Después se aplicará el límite indicado arriba.
-          </p>
-        ) : null}
         <Field className="mt-4" label="Contexto para clasificar menciones" hint="Aclara a quién o qué se refiere el término y qué conversación debe ignorarse.">
           <Textarea name="context" rows={2} maxLength={300} defaultValue={keyword?.context ?? ''} placeholder="María López es nuestra candidata; ignora menciones a otras personas con el mismo nombre." />
         </Field>
@@ -64,7 +59,7 @@ export function KeywordForm({ keyword, groups }: { keyword?: Keyword; groups: Gr
         <SwitchRow name="reviewsOnly" defaultChecked={keyword?.platforms?.length === 0} label="Solo reseñas" hint="No busques el término en plataformas; recopila únicamente las páginas de reseñas indicadas abajo." />
       </Card>
 
-      <Card title="Reglas de coincidencia" description="Se revisan antes de guardar una mención. Las publicaciones descartadas no generan cargos.">
+      <Card title="Reglas de coincidencia" description="Se revisan antes de guardar una mención. Las publicaciones descartadas no se guardan.">
         <div className="grid gap-4 @lg:grid-cols-2">
           <Field label="Términos requeridos" hint="La publicación también debe incluir estos términos.">
             <TokenInput name="requiredTerms" defaultValue={matching?.requiredTerms} placeholder="candidatura, propuesta… presiona Enter" />

@@ -170,7 +170,7 @@ export function EmptyState({ title, children, icon: Icon = Inbox, action }: { ti
   );
 }
 
-/** A message in the page (a paused wallet, a failed read, a secret shown once): shadcn's Alert. */
+/** A message in the page: shadcn's Alert. */
 export function Notice({ tone = 'info', title, children, action, className }: { tone?: 'info' | 'warn' | 'bad'; title?: ReactNode; children?: ReactNode; action?: ReactNode; className?: string }) {
   const Icon = tone === 'bad' ? CircleAlert : tone === 'warn' ? TriangleAlert : Info;
   return (
@@ -254,8 +254,6 @@ export function Table({ head, children, empty }: { head: ReactNode[]; children: 
   );
 }
 export const td = 'px-4 py-2.5 align-middle whitespace-normal first:pl-5 last:pr-5';
-/** A numeric cell: right-aligned, monospaced digits. */
-export const tdNum = 'px-4 py-2.5 text-right align-middle font-mono tabular-nums whitespace-nowrap first:pl-5 last:pr-5';
 
 /** Previous/next links for offset lists ({ data, total }). */
 export function OffsetPager({ total, limit, offset, href }: { total: number; limit: number; offset: number; href: (offset: number) => string }) {

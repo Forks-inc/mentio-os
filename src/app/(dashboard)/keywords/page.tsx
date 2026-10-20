@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { EmptyState, LinkButton, OffsetPager, PageHeader, Table, td, TableCell, TableRow, rowLink } from '@/components/ui';
 import { UrlFilters } from '@/components/url-filters';
 import { isOneOf } from '@/lib/form';
-import { compact, money, PLATFORM_NAMES, platformName, REVIEW_PLATFORMS, SEARCH_PLATFORMS, timeAgo } from '@/lib/format';
+import { compact, PLATFORM_NAMES, platformName, REVIEW_PLATFORMS, SEARCH_PLATFORMS, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
 import { many, one, withParams, type SearchParams } from '@/lib/params';
 import { KeywordActions } from './keyword-actions';
@@ -19,7 +19,7 @@ const ALL_PLATFORMS = [...SEARCH_PLATFORMS, ...REVIEW_PLATFORMS];
 const STATUS_IDS = STATUSES.map(([id]) => id);
 const SORT_IDS = SORTS.map(([id]) => id);
 
-/** Candidates and topics tracked in the campaign, with activity and cost. */
+/** Candidates and topics tracked in the campaign, with recent activity. */
 export default async function Keywords({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const offset = Math.max(0, Number(one(params, 'offset')) || 0);
@@ -69,7 +69,7 @@ export default async function Keywords({ searchParams }: { searchParams: Promise
           {filtered ? null : <Link href="/keywords/new" className="text-primary hover:underline">Agrega tu primer candidato o tema</Link>}
         </EmptyState>
       ) : (
-        <Table head={['Candidato o tema', 'Plataformas', 'Últimos 7 días', 'Este mes', 'Relevantes', 'Costo del mes', '']}>
+        <Table head={['Candidato o tema', 'Plataformas', 'Últimos 7 días', 'Este mes', 'Relevantes', '']}>
           {page.data.map((keyword) => (
             <TableRow key={keyword.id} className={keyword.muted ? 'text-muted-foreground' : ''}>
               <TableCell className={td}>
@@ -95,7 +95,6 @@ export default async function Keywords({ searchParams }: { searchParams: Promise
                 {keyword.cap ? <span className="text-xs text-muted-foreground"> / {compact(keyword.cap.mentions)}</span> : null}
               </TableCell>
               <TableCell className={`${td} tabular-nums`}>{compact(keyword.stats.relevant)}</TableCell>
-              <TableCell className={`${td} tabular-nums`}>{money(keyword.stats.cost.totalCents)}</TableCell>
               <TableCell className={td}><KeywordActions keyword={keyword} /></TableCell>
             </TableRow>
           ))}

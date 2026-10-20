@@ -10,14 +10,10 @@ import { passwordProtected } from '@/lib/session';
 // Every page reads the workspace live, the sidebar included.
 export const dynamic = 'force-dynamic';
 
-/** The workspace and its balance, for the sidebar. A bad key shows up here first. */
+/** The workspace for the sidebar. A bad key shows up here first. */
 async function workspace(): Promise<Workspace> {
-  const [who, usage] = await Promise.allSettled([Promise.resolve().then(() => mentio().whoami()), Promise.resolve().then(() => mentio().getUsage())]);
-  return {
-    name: who.status === 'fulfilled' ? (who.value.data?.workspace?.name ?? null) : null,
-    balanceCents: usage.status === 'fulfilled' ? (usage.value.data?.balance.effectiveCents ?? null) : null,
-    low: usage.status === 'fulfilled' ? Boolean(usage.value.data?.lowBalance || usage.value.data?.stopped) : false,
-  };
+  const who = await Promise.resolve().then(() => mentio().whoami()).catch(() => null);
+  return { name: who?.data?.workspace?.name ?? null };
 }
 
 /** The dashboard: the sidebar, the page, and the drawer a list opened over it (@drawer). */

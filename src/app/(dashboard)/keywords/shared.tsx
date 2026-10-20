@@ -10,7 +10,7 @@ export const KIND_LABELS: Record<(typeof KINDS)[number], string> = { brand: 'Can
 export const STATUSES = [
   ['active', 'Activo'],
   ['muted', 'En pausa por ti'],
-  ['paused', 'En pausa: sin saldo'],
+  ['paused', 'En pausa automáticamente'],
   ['noisy', 'En pausa: demasiado ruido'],
   ['capped', 'Al límite'],
 ] as const;
@@ -44,7 +44,7 @@ export function platformsLabel(keyword: Pick<Keyword, 'platforms' | 'reviewSourc
 /** Every state a keyword can be in, as badges. */
 export function KeywordBadges({ keyword }: { keyword: Keyword }) {
   const badges = [];
-  if (keyword.pausedForBalance) badges.push(<Badge key="balance" tone="warn">En pausa: sin saldo</Badge>);
+  if (keyword.pausedForBalance) badges.push(<Badge key="balance" tone="warn">En pausa</Badge>);
   if (keyword.pausedForNoise) badges.push(<Badge key="noise" tone="warn">En pausa: demasiado ruido</Badge>);
   if (keyword.muted && !keyword.pausedForBalance && !keyword.pausedForNoise) badges.push(<Badge key="muted">En pausa</Badge>);
   if (keyword.pausedForCap) badges.push(<Badge key="cap" tone="warn">Al límite</Badge>);

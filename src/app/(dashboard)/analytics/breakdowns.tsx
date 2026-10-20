@@ -20,7 +20,7 @@ const languageName = (code: string) => {
 
 /** Each dimension: how to name a row and which feed filter it opens. */
 const DIMENSIONS: Array<{ by: Exclude<By, 'hour'>; title: string; description?: string; label: (r: Row) => string; filter: (r: Row) => Record<string, string> | null }> = [
-  { by: 'platform', title: 'Canal', label: (r) => platformName(r.key), filter: (r) => ({ platforms: r.key }) },
+  { by: 'platform', title: 'Plataforma', label: (r) => platformName(r.key), filter: (r) => ({ platforms: r.key }) },
   { by: 'keyword', title: 'Término monitoreado', label: (r) => (r.keyword ? keywordName(r.keyword) : r.label), filter: (r) => (r.keyword ? { keywordIds: r.keyword.id } : null) },
   { by: 'sentiment', title: 'Sentimiento', label: (r) => ({ positive: 'Positivo', neutral: 'Neutral', negative: 'Negativo', unclassified: 'Sin clasificar' }[r.key] ?? tagName(r.key)), filter: (r) => (r.key === 'unclassified' ? null : { sentiments: r.key }) },
   { by: 'intent', title: 'Intención', description: 'Una mención puede tener varias intenciones; los porcentajes se superponen.', label: (r) => ({ buy_intent: 'Intención de apoyo', question: 'Pregunta', complaint: 'Queja', praise: 'Reconocimiento', comparison: 'Comparación', churn_intent: 'Intención de cambio', bug_report: 'Reporte de error', pricing: 'Costo', hiring: 'Contratación', event: 'Evento', promotional: 'Promoción' } as Record<string, string>)[r.key] ?? tagName(r.key), filter: (r) => ({ intents: r.key }) },

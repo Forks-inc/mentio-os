@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { Badge, Card, LinkButton, Notice, PageHeader, Stat, Table, td, TableCell, TableRow } from '@/components/ui';
-import { compact, date, money, platformName, timeAgo } from '@/lib/format';
+import { compact, date, platformName, timeAgo } from '@/lib/format';
 import { mentio, unwrap } from '@/lib/mentio';
 import { KeywordActions } from '../keyword-actions';
 import { KeywordForm } from '../keyword-form';
@@ -38,15 +38,12 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
         }
       />
 
-      {keyword.pausedForBalance ? (
-        <Notice tone="warn">En pausa porque se agotó el saldo. Una recarga reanuda el monitoreo.</Notice>
-      ) : null}
       {keyword.pausedForNoise ? (
         <Notice tone="warn">En pausa por exceso de ruido: la mayoría de las coincidencias fueron irrelevantes. Ajusta los términos requeridos o excluidos, las plataformas o el contexto; también puedes reanudarlo manualmente.</Notice>
       ) : null}
       {stats.noise.noisy ? (
         <Notice tone="bad">
-          Hay demasiado ruido: solo {stats.noise.relevant} de {stats.noise.scored} menciones de los últimos 14 días fueron relevantes. Cada coincidencia genera un cargo; ajusta los términos requeridos o excluidos, o el contexto.
+          Hay demasiado ruido: solo {stats.noise.relevant} de {stats.noise.scored} menciones de los últimos 14 días fueron relevantes. Ajusta los términos requeridos o excluidos, o el contexto.
         </Notice>
       ) : null}
 
@@ -55,7 +52,6 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
         <Stat label="Relevantes" value={compact(stats.relevant)} hint={`${stats.feedback.relevant} marcadas relevantes, ${stats.feedback.notRelevant} no relevantes`} />
         <Stat label="Últimos 7 días" value={compact(stats.last7d)} hint={stats.lastMentionAt ? `última ${timeAgo(stats.lastMentionAt)}` : 'sin menciones'} />
         <Stat label="Este mes" value={compact(stats.thisMonth)} hint={keyword.cap ? `límite ${compact(keyword.cap.mentions)}` : 'sin límite'} />
-        <Stat label="Costo del mes" value={money(stats.cost.totalCents)} hint={`${stats.cost.keywordDays} días ${money(stats.cost.keywordCents)}, ${compact(stats.cost.billableMentions)} menciones ${money(stats.cost.mentionCents)}`} />
       </div>
 
       <div className="grid gap-6 @4xl:grid-cols-2">
@@ -71,14 +67,9 @@ export default async function KeywordDetail({ params }: { params: Promise<{ id: 
               {keyword.pausedForCap ? (
                 <p className="text-amber-700">Alcanzó el límite: no registrará coincidencias hasta el primer día del próximo mes o hasta que aumentes el límite. Aun así, cuenta como día de monitoreo.</p>
               ) : null}
-              {keyword.cap.welcome ? (
-                <p className="text-xs text-muted-foreground">
-                  Límite por saldo de bienvenida: se recopilan hasta {keyword.cap.mentions} menciones al mes por término. La primera recarga {keyword.cap.own ? `lo cambia a ${compact(keyword.cap.own)}` : 'lo elimina'}.
-                </p>
-              ) : null}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Sin límite: se recopilan y cobran todas las coincidencias.</p>
+            <p className="text-sm text-muted-foreground">Sin límite de menciones.</p>
           )}
         </Card>
 

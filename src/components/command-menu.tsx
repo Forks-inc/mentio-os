@@ -14,7 +14,7 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { NAV, type NavItem } from '@/lib/nav';
 
 /** Opens the palette from anywhere (the sidebar's search button). */
-export const openCommandMenu = () => window.dispatchEvent(new Event('mentio-os:command'));
+export const openCommandMenu = () => window.dispatchEvent(new Event('agora:command'));
 
 const typing = (target: EventTarget | null) => target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 
@@ -54,10 +54,10 @@ export function CommandMenu() {
     };
     const onOpen = () => setOpen(true);
     window.addEventListener('keydown', onKey);
-    window.addEventListener('mentio-os:command', onOpen);
+    window.addEventListener('agora:command', onOpen);
     return () => {
       window.removeEventListener('keydown', onKey);
-      window.removeEventListener('mentio-os:command', onOpen);
+      window.removeEventListener('agora:command', onOpen);
     };
   }, []);
 

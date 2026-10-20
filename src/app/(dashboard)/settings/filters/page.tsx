@@ -15,7 +15,7 @@ export default async function Filters() {
     <div className="space-y-6">
       <PageHeader
         title="Filtros de ruido"
-        description="Reglas para todos los candidatos y temas del espacio de trabajo, además de sus reglas individuales. Las publicaciones descartadas no se guardan ni generan cargos."
+        description="Reglas para todos los candidatos y temas del espacio de trabajo, además de sus reglas individuales. Las publicaciones descartadas no se guardan."
       />
 
       <ActionForm action={updateFiltersAction} className="space-y-6">

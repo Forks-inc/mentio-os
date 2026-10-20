@@ -3,7 +3,8 @@
  * download. The API call happens here, on the server, so the key never
  * reaches the browser; the file is passed through as it arrives.
  */
-import { mentio } from '@/lib/mentio';
+import { apiErrorMessage } from '@/lib/action';
+import { mentio, reportApiError } from '@/lib/mentio';
 import { getterFromParams, parseFilters, toSearchQuery } from '../filters';
 
 export const dynamic = 'force-dynamic';
@@ -20,8 +21,8 @@ export async function GET(request: Request) {
   const status = result.response?.status ?? 502;
   const file = result.response?.body;
   if (result.error !== undefined || !file) {
-    const body = result.error as { error?: { message?: string } } | undefined;
-    const message = body?.error?.message ?? 'No se pudo exportar el archivo.';
+    reportApiError(status, result.error ?? 'Respuesta vacía del servicio');
+    const message = apiErrorMessage(status);
     return new Response(message, { status: status >= 400 ? status : 502, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
 

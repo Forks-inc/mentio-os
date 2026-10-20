@@ -62,10 +62,6 @@ export function compact(n: number | null | undefined) {
   return new Intl.NumberFormat('es-MX', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 }
 
-export function money(cents: number) {
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD' }).format(cents / 100);
-}
-
 export function timeAgo(iso: string | null | undefined) {
   if (!iso || Number.isNaN(new Date(iso).getTime())) return '';
   return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: es });

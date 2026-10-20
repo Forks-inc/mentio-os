@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Mentio OS
+# Ágora
 
 A dashboard over the public Mentio API (https://docs.mentio.dev). There is no database: every read and write is a call through `@mentio-dev/sdk`.
 

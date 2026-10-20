@@ -76,7 +76,7 @@ export default async function ChannelDetail({ params }: { params: Promise<{ id: 
               </Field>
               <div>
                 <p className="text-sm font-medium text-foreground">Eventos de la cuenta</p>
-                <p className="mb-2 text-xs text-muted-foreground">Los cambios de términos monitoreados y saldo se envían directamente, sin una alerta. Desmarca todos para no recibirlos.</p>
+                <p className="mb-2 text-xs text-muted-foreground">Algunos cambios del espacio se envían directamente, sin una alerta. Desmarca todos para no recibirlos.</p>
                 <CheckboxGroup name="events" options={ACCOUNT_EVENTS.map(([eid, label]) => [eid, `${label} (${eid})`] as const)} selected={channel.config.events} />
               </div>
             </>

@@ -71,7 +71,7 @@ export default async function GroupDetail({ params }: { params: Promise<{ id: st
           <ActionForm action={deleteGroupAction} className="space-y-3">
             <input type="hidden" name="id" value={group.id} />
             <p className="text-sm text-muted-foreground">
-              Se eliminará la campaña y {n === 1 ? 'su término monitoreado' : `sus ${n} términos monitoreados`}, junto con sus menciones. Los cargos ya realizados permanecerán en tus movimientos.
+              Se eliminará la campaña y {n === 1 ? 'su término monitoreado' : `sus ${n} términos monitoreados`}, junto con sus menciones.
             </p>
             <SubmitButton variant="danger" confirm={`¿Eliminar "${group.name}" y sus ${n} ${n === 1 ? 'término monitoreado' : 'términos monitoreados'}? También se eliminarán sus menciones. Esta acción no se puede deshacer.`}>
               Eliminar campaña y términos

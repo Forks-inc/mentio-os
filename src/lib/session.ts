@@ -6,7 +6,7 @@
  * an HMAC of the password, never the password, so changing the password
  * signs everyone out. Runs in proxy.ts and in server code alike (WebCrypto).
  */
-export const SESSION_COOKIE = 'mentio_os_session';
+export const SESSION_COOKIE = 'agora_session';
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 const password = () => process.env.DASHBOARD_PASSWORD ?? '';
