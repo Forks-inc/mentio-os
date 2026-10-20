@@ -10,8 +10,6 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Mapa de temas' };
 
 const RANGE = '30d';
-const MAX_TOPICS = 30;
-
 function toneLabel(score: number | null) {
   if (score === null) return 'Sin datos aún';
   if (score >= 0.15) return 'Se habla mejor de este tema';
@@ -91,8 +89,7 @@ export default async function TemasPage() {
       matched: topic.keywordIds.reduce((total, id) => total + (mentionCounts.get(id) ?? 0), 0),
     }))
     .sort((a, b) => b.matched - a.matched || a.name.localeCompare(b.name, 'es'));
-  const visibleTopics = rankedTopics
-    .slice(0, MAX_TOPICS);
+  const visibleTopics = rankedTopics;
   const summaries = await Promise.all(visibleTopics.map((topic) =>
     api.getAnalyticsSummary({ query: { range: RANGE, keywordIds: topic.keywordIds } }).then(unwrap),
   ));
@@ -120,19 +117,17 @@ export default async function TemasPage() {
     <div className="space-y-4">
       <PageHeader
         title="Mapa de temas"
-        description="Cada burbuja es un tema de agenda. Más grande significa más menciones; el color muestra si el tono ayuda o preocupa."
+        description="Cada burbuja representa un tema. Su tamaño indica cuánto se habla y su altura muestra el tono de la conversación."
       />
 
       <Card
         title="Conversación por tema"
-        description="Últimos 30 días. El eje horizontal muestra menciones y el vertical, el tono de la conversación. Selecciona una burbuja para abrir esas menciones."
+        description="Últimos 30 días. Compara cuánto se habla de cada tema con el tono de la conversación. Selecciona una burbuja para abrir esas menciones."
       >
         <ThemeBubbleChart topics={bubbles} />
-        {topics.length > MAX_TOPICS ? (
-          <p className="mt-2 text-xs text-muted-foreground">
-            Se muestran los {MAX_TOPICS} temas con más menciones de este periodo.
-          </p>
-        ) : null}
+        <p className="mt-2 text-xs text-muted-foreground">
+          Los temas con valores muy parecidos se separan un poco para que puedas distinguirlos; el detalle muestra el número real de menciones.
+        </p>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label="Colores de tono">
           <span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full bg-red-500" /> Se habla mal</span>
           <span className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full bg-zinc-400" /> Tono parejo o sin datos</span>

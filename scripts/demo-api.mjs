@@ -26,15 +26,15 @@ const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
 const pickOne = (list) => list[Math.floor(rand() * list.length)];
 
 const TEXTS = [
-  "We're evaluating acme vs the incumbent for our team, anyone switched recently? Mainly care about Slack alerts and price.",
-  'the tool I use to answer every comment on my reels without a VA: acme, set up in ten minutes',
-  'Does acme have an API for exporting mentions to CSV? The docs mention webhooks but I need a nightly dump.',
-  'acme vs the incumbents: I tested brand monitoring 3 ways',
-  'Webhook signature check fails with acme when the body has unicode. Repro attached.',
-  'Switched our alerts to acme last month, the relevance scoring alone saved us an hour a day.',
+  'Estamos comparando las propuestas de Ana Torres y Luis Méndez antes de decidir el voto.',
+  'La campaña publicó su plan de movilidad; falta explicar cómo se medirá el avance.',
+  '¿Dónde puedo consultar el presupuesto y el calendario completo de la propuesta?',
+  'Hoy hubo foro vecinal y participaron las tres candidaturas de la contienda.',
+  'La respuesta sobre seguridad no aclaró quién dará seguimiento a los compromisos.',
+  'Me gustó que presentara metas y fechas; así la ciudadanía puede pedir cuentas.',
 ];
-const NAMES = ['ops_lead', 'Maya Chen', 'throwaway_dev', 'DevOps Weekly', 'octo-dev', 'Priya Builds', 'Jordan Lee', 'Sam Rivera'];
-const TERMS = ['acme', 'rivalhq', 'social listening api', 'acme cloud'];
+const NAMES = ['Ana Torres', 'María Fernanda Soto', 'Jorge Ramírez', 'Elena Cruz', 'Sofía Mercado', 'Diego Luna', 'Lucía Montes', 'Rafael Ortega'];
+const TERMS = ['Ana Torres', 'Luis Méndez', 'Seguridad', 'Transporte'];
 const hoursAgo = (h) => new Date(Date.now() - h * 3600e3).toISOString();
 const ID_PREFIX = { mention: 'mm', keyword: 'kw', person: 'per', alert: 'feed', channel: 'dst', group: 'grp', view: 'vw', segment: 'seg', key: 'key', member: 'mem', invitation: 'inv', activity: 'act', invoice: 'inv' };
 
@@ -54,7 +54,7 @@ function stringFor(name, schema, path) {
   }
   if (schema.format === 'date-time' || /At$/.test(name) || name === 'from' || name === 'to') return hoursAgo(Math.floor(rand() * 200));
   if (schema.format === 'uri' || /url$|^website$/i.test(name)) return name === 'avatarUrl' ? null : 'https://example.com';
-  if (schema.format === 'email' || /email/i.test(name)) return pickOne(['maya@acme.dev', 'jordan@acme.dev', 'sam@acme.dev']);
+  if (schema.format === 'email' || /email/i.test(name)) return pickOne(['ana@campanatorres.mx', 'fernanda@campanatorres.mx', 'jorge@campanatorres.mx']);
   if (name === 'id') {
     // The nearest owner in the path: `.keyword.id` is a keyword's, `/v1/groups` a group's.
     const tokens = path.toLowerCase().split(/[./]/).reverse();
@@ -69,8 +69,8 @@ function stringFor(name, schema, path) {
   const NAMED = [
     [/segments/, ['Unhappy power users', 'Buyers this month', 'Competitor fans', 'Developers on GitHub']],
     [/views/, ['Buying intent', 'Negative on X', 'Bug reports', 'Questions to answer']],
-    [/alerts/, ['Negative mentions', 'Buying intent to Slack', 'Daily digest', 'Competitor switchers']],
-    [/groups/, ['Acme', 'Globex', 'Initech']],
+    [/alerts/, ['Críticas sobre transporte', 'Preguntas de seguridad', 'Resumen de prensa', 'Menciones de candidaturas']],
+    [/groups/, ['Campaña Ana Torres', 'Equipo de comunicación', 'Contienda local']],
   ];
   const named = NAMED.find(([re]) => re.test(path.split('.')[0]))?.[1];
   if (name === 'name' && named && !/\.(author|person|member|owner|keyword|group)\./.test(path)) return pickOne(named);
@@ -78,8 +78,8 @@ function stringFor(name, schema, path) {
   if (/^(not)?[iI]ntents$/.test(name)) return pickOne(['buy_intent', 'question', 'complaint', 'bug_report', 'comparison', 'praise']);
   if (name === 'name' || name === 'author') return pickOne(NAMES);
   if (name === 'handle') return `@${pickOne(NAMES).toLowerCase().replace(/[^a-z]/g, '')}`;
-  if (name === 'title') return pickOne(['Great tool', 'acme vs the incumbents', 'Weekly digest']);
-  if (name === 'context') return 'acme is a brand monitoring API for developer tools.';
+  if (name === 'title') return pickOne(['Propuesta de transporte', 'Debate entre candidaturas', 'Resumen de prensa']);
+  if (name === 'context') return 'Conversación pública sobre la campaña política de Ana Torres.';
   if (name === 'currency') return 'USD';
   if (name === 'label') return pickOne(['#brand-alerts', 'Ops webhook', 'Team inbox']);
   if (name === 'secret') return 'whsec_demo_xxxxxxxxxxxxxxxx';
@@ -89,7 +89,7 @@ function stringFor(name, schema, path) {
   if (name === 'country') return 'us';
   if (name === 'timezone') return 'UTC';
   if (/day|date/i.test(name)) return new Date(Date.now() - Math.floor(rand() * 30) * 864e5).toISOString().slice(0, 10);
-  return pickOne(['acme', 'demo', 'example']);
+  return pickOne(['Ana Torres', 'Campaña Ana Torres', 'Contienda local']);
 }
 
 function numberFor(name, schema) {
@@ -190,30 +190,32 @@ const TOPIC_FOR_CANDIDATE = {
   kw_carla_ruiz: 'kw_economia',
 };
 const AUTHORS = [
-  { id: 'aut_elena_cruz', name: 'Elena Cruz', handle: '@elenacruzmx', platform: 'x', followers: 18200, tags: ['periodista'] },
-  { id: 'aut_javier_ortega', name: 'Javier Ortega', handle: '@jortegamx', platform: 'x', followers: 8400, tags: ['analista'] },
-  { id: 'aut_paola_navarro', name: 'Paola Navarro', handle: '@paolanavarro', platform: 'x', followers: 3200, tags: [] },
-  { id: 'aut_mateo_solis', name: 'Mateo Solís', handle: '@mateosolis', platform: 'x', followers: 15600, tags: ['periodista'] },
-  { id: 'aut_renata_vargas', name: 'Renata Vargas', handle: '@renatavargas', platform: 'tiktok', followers: 94500, tags: ['creadora'] },
-  { id: 'aut_michelle_rios', name: 'Michelle Ríos', handle: '@michelle.rios', platform: 'tiktok', followers: 48200, tags: ['creadora'] },
-  { id: 'aut_raul_cervantes', name: 'Raúl Cervantes', handle: '@raulcervantes', platform: 'tiktok', followers: 22100, tags: [] },
-  { id: 'aut_karla_vega', name: 'Karla Vega', handle: '@karlavegamx', platform: 'tiktok', followers: 70500, tags: ['creadora'] },
-  { id: 'aut_punto_civico', name: 'Punto Cívico', handle: '@puntocivico', platform: 'youtube', followers: 136000, tags: ['medio'] },
-  { id: 'aut_mariana_leon', name: 'Mariana León', handle: '@marianaleon', platform: 'youtube', followers: 27200, tags: ['analista'] },
-  { id: 'aut_diego_ortiz', name: 'Diego Ortiz', handle: '@diegoortizmx', platform: 'youtube', followers: 11800, tags: [] },
-  { id: 'aut_mesa_publica', name: 'Mesa Pública', handle: '@mesapublica', platform: 'youtube', followers: 86400, tags: ['medio'] },
-  { id: 'aut_diario_centro', name: 'Diario del Centro', handle: '@diariodelcentro', platform: 'news', followers: 214000, tags: ['medio'] },
-  { id: 'aut_lucia_montes', name: 'Lucía Montes', handle: '@luciamontes', platform: 'news', followers: 7900, tags: ['periodista'] },
-  { id: 'aut_agenda_hoy', name: 'Agenda Hoy', handle: '@agendahoy', platform: 'news', followers: 66800, tags: ['medio'] },
-  { id: 'aut_pablo_nieto', name: 'Pablo Nieto', handle: '@pablonieto', platform: 'news', followers: 4200, tags: [] },
-  { id: 'aut_observa_mx', name: 'Observa MX', handle: '@observa.mx', platform: 'instagram', followers: 53600, tags: ['medio'] },
-  { id: 'aut_fernanda_rios', name: 'Fernanda Ríos', handle: '@fer.rios', platform: 'instagram', followers: 9300, tags: [] },
-  { id: 'aut_carlos_arias', name: 'Carlos Arias', handle: '@carlosarias', platform: 'instagram', followers: 17100, tags: [] },
-  { id: 'aut_voz_vecinal', name: 'Voz Vecinal', handle: '@vozvecinal', platform: 'instagram', followers: 28400, tags: ['comunidad'] },
-  { id: 'aut_ruta_publica', name: 'ruta_publica', handle: 'u/ruta_publica', platform: 'reddit', followers: null, tags: [] },
-  { id: 'aut_girasol_88', name: 'girasol_88', handle: 'u/girasol_88', platform: 'reddit', followers: null, tags: [] },
-  { id: 'aut_cdmx_llector', name: 'llector_del_barrio', handle: 'u/llector_del_barrio', platform: 'reddit', followers: null, tags: [] },
-  { id: 'aut_civica_azul', name: 'civica_azul', handle: 'u/civica_azul', platform: 'reddit', followers: null, tags: [] },
+  { id: 'aut_diario_centro', name: 'Diario del Centro', handle: '@diariodelcentro', platform: 'news', followers: 214000, stance: 'neutral', tags: ['medio', 'neutral'] },
+  { id: 'aut_punto_civico', name: 'Punto Cívico', handle: '@puntocivico', platform: 'youtube', followers: 136000, stance: 'neutral', tags: ['medio', 'neutral'] },
+  { id: 'aut_mesa_publica', name: 'Mesa Pública', handle: '@mesapublica', platform: 'youtube', followers: 86400, stance: 'neutral', tags: ['medio', 'neutral'] },
+  { id: 'aut_noticias_ahora', name: 'Noticias Ahora', handle: '@noticiasahora', platform: 'news', followers: 308000, stance: 'neutral', tags: ['medio', 'neutral'] },
+  { id: 'aut_elena_cruz', name: 'Elena Cruz', handle: '@elenacruzmx', platform: 'x', followers: 18200, stance: 'neutral', tags: ['periodista', 'neutral'] },
+  { id: 'aut_javier_ortega', name: 'Javier Ortega', handle: '@jortegamx', platform: 'x', followers: 8400, stance: 'neutral', tags: ['periodista', 'neutral'] },
+  { id: 'aut_mateo_solis', name: 'Mateo Solís', handle: '@mateosolis', platform: 'x', followers: 15600, stance: 'neutral', tags: ['periodista', 'neutral'] },
+  { id: 'aut_lucia_montes', name: 'Lucía Montes', handle: '@luciamontes', platform: 'news', followers: 7900, stance: 'neutral', tags: ['periodista', 'neutral'] },
+  { id: 'aut_renata_vargas', name: 'Renata Vargas', handle: '@renatavargas', platform: 'tiktok', followers: 94500, stance: 'defensor', tags: ['lider_de_opinion', 'defensor'] },
+  { id: 'aut_michelle_rios', name: 'Michelle Ríos', handle: '@michelle.rios', platform: 'tiktok', followers: 48200, stance: 'critico', tags: ['lider_de_opinion', 'critico'] },
+  { id: 'aut_mariana_leon', name: 'Mariana León', handle: '@marianaleon', platform: 'youtube', followers: 27200, stance: 'defensor', tags: ['analista', 'defensor'] },
+  { id: 'aut_diego_ortiz', name: 'Diego Ortiz', handle: '@diegoortizmx', platform: 'youtube', followers: 11800, stance: 'critico', tags: ['analista', 'critico'] },
+  { id: 'aut_campana_ana_x', name: 'Campaña Ana Torres', handle: '@AnaTorresMX', platform: 'x', followers: 421000, stance: 'defensor', tags: ['campaña', 'defensor'] },
+  { id: 'aut_equipo_ana_ig', name: 'Equipo Ana Torres', handle: '@equipoanatorres', platform: 'instagram', followers: 67200, stance: 'defensor', tags: ['campaña', 'defensor'] },
+  { id: 'aut_campana_luis_x', name: 'Campaña Luis Méndez', handle: '@LuisMendezMX', platform: 'x', followers: 289000, stance: 'critico', tags: ['campaña', 'critico'] },
+  { id: 'aut_equipo_carla_tt', name: 'Equipo Carla Ruiz', handle: '@carlaruizoficial', platform: 'tiktok', followers: 113000, stance: 'critico', tags: ['campaña', 'critico'] },
+  { id: 'aut_paola_navarro', name: 'Paola Navarro', handle: '@paolanavarro', platform: 'x', followers: 3200, stance: 'neutral', tags: ['ciudadania', 'neutral'] },
+  { id: 'aut_raul_cervantes', name: 'Raúl Cervantes', handle: '@raulcervantes', platform: 'tiktok', followers: 22100, stance: 'critico', tags: ['ciudadania', 'critico'] },
+  { id: 'aut_karla_vega', name: 'Karla Vega', handle: '@karlavegamx', platform: 'tiktok', followers: 70500, stance: 'defensor', tags: ['ciudadania', 'defensor'] },
+  { id: 'aut_fernanda_rios', name: 'Fernanda Ríos', handle: '@fer.rios', platform: 'instagram', followers: 9300, stance: 'defensor', tags: ['ciudadania', 'defensor'] },
+  { id: 'aut_carlos_arias', name: 'Carlos Arias', handle: '@carlosarias', platform: 'instagram', followers: 17100, stance: 'critico', tags: ['ciudadania', 'critico'] },
+  { id: 'aut_voz_vecinal', name: 'Voz Vecinal', handle: '@vozvecinal', platform: 'instagram', followers: 28400, stance: 'neutral', tags: ['comunidad', 'neutral'] },
+  { id: 'aut_ruta_publica', name: 'Ruta Pública', handle: 'u/ruta_publica', platform: 'reddit', followers: null, stance: 'neutral', tags: ['ciudadania', 'neutral'] },
+  { id: 'aut_girasol_88', name: 'Girasol del Barrio', handle: 'u/girasol_88', platform: 'reddit', followers: null, stance: 'defensor', tags: ['ciudadania', 'defensor'] },
+  { id: 'aut_cdmx_llector', name: 'Lector del Barrio', handle: 'u/llector_del_barrio', platform: 'reddit', followers: null, stance: 'critico', tags: ['ciudadania', 'critico'] },
+  { id: 'aut_civica_azul', name: 'Cívica Azul', handle: 'u/civica_azul', platform: 'reddit', followers: null, stance: 'neutral', tags: ['ciudadania', 'neutral'] },
 ];
 
 const MESSAGES = {
@@ -241,7 +243,11 @@ const INTENTS = {
   neutral: [['question'], ['comparison'], ['question', 'buy_intent'], ['industry_insight']],
   negative: [['complaint'], ['complaint', 'question'], ['churn_intent'], ['feedback', 'complaint']],
 };
-const SENTIMENTS = ['positive', 'neutral', 'negative'];
+const STANCE_SENTIMENT = { defensor: 'positive', critico: 'negative', neutral: 'neutral' };
+
+function sentimentForAuthor(author) {
+  return STANCE_SENTIMENT[author.stance] ?? 'neutral';
+}
 
 function hash(value) {
   let result = 2166136261;
@@ -381,10 +387,8 @@ function makeCampaignMentions() {
       const keyHash = hash(`${keyword.id}|${day}`);
       const count = 1 + (keyHash % 3);
       for (let index = 0; index < count; index++) {
-        const choice = hash(`${keyword.id}|${day}|${index}|tone`) % 100;
-        const sentiment = choice < 25 ? 'negative' : choice < 58 ? 'neutral' : 'positive';
         const author = AUTHORS[(age * 5 + keywordIndex * 3 + index) % AUTHORS.length];
-        rows.push(makeMention({ keyword, day, index, sentiment, author }));
+        rows.push(makeMention({ keyword, day, index, sentiment: sentimentForAuthor(author), author }));
       }
     }
   }
@@ -394,12 +398,13 @@ function makeCampaignMentions() {
   const crisisDay = dayString(-3, today);
   const ana = KEYWORDS.find((keyword) => keyword.id === 'kw_ana_torres');
   const transport = KEYWORDS.find((keyword) => keyword.id === 'kw_transporte');
+  const criticalAuthors = AUTHORS.filter((author) => author.stance === 'critico');
   for (let index = 0; index < 20; index++) {
-    const author = AUTHORS[index % AUTHORS.length];
+    const author = criticalAuthors[index % criticalAuthors.length];
     const sharedPostId = `crisis_transporte_${crisisDay.replaceAll('-', '')}_${index}`;
     const text = `Otra vez hay retrasos en el transporte público. Ana Torres prometió revisar la ruta, pero hoy varias personas reportan largas esperas y falta una explicación clara.`;
     for (const keyword of [ana, transport]) {
-      rows.push(makeMention({ keyword, day: crisisDay, index: index + 40, sentiment: 'negative', author, text, sharedPostId }));
+      rows.push(makeMention({ keyword, day: crisisDay, index: index + 40, sentiment: sentimentForAuthor(author), author, text, sharedPostId }));
     }
   }
   return rows.sort((a, b) => a.post.publishedAt.localeCompare(b.post.publishedAt));
@@ -760,6 +765,49 @@ function keywordsResponse(url) {
   return matching.slice(offset, offset + requestedLimit).map(campaignKeywordResponse);
 }
 
+function personResponse(personMatches) {
+  const first = personMatches[0];
+  const author = first.author;
+  const sentiment = sentimentTotals(personMatches);
+  const timestamps = personMatches.map((row) => row.post.publishedAt).sort();
+  return {
+    id: author.id,
+    platform: first.post.platform,
+    name: author.name,
+    handle: author.handle,
+    url: author.url,
+    avatarUrl: null,
+    accounts: [{ id: author.id, platform: first.post.platform, name: author.name, handle: author.handle, url: author.url }],
+    reach: { followers: author.followers, following: null, posts: null },
+    profile: null,
+    stats: {
+      mentions: personMatches.length,
+      relevant: personMatches.filter((row) => row.relevant).length,
+      sentiment: { positive: sentiment.positive, neutral: sentiment.neutral, negative: sentiment.negative },
+      firstSeenAt: timestamps[0],
+      lastSeenAt: timestamps.at(-1),
+    },
+    annotations: { tags: author.tags, notes: '', muted: false },
+    outreach: { owner: null, stage: 'not_contacted', lastContactedAt: null },
+  };
+}
+
+function getPersonResponse(url) {
+  const id = decodeURIComponent(url.pathname.split('/').at(-1) ?? '');
+  const matches = CAMPAIGN_MENTIONS.filter((row) => row.author.id === id);
+  return matches.length ? personResponse(matches) : null;
+}
+
+function membersResponse() {
+  return {
+    data: [
+      { id: 'mem_ana_torres', userId: 'usr_ana_torres', email: 'ana@campanatorres.mx', name: 'Ana Torres', role: 'owner', joinedAt: new Date(Date.now() - 180 * DAY_MS).toISOString() },
+      { id: 'mem_fernanda_soto', userId: 'usr_fernanda_soto', email: 'fernanda@campanatorres.mx', name: 'María Fernanda Soto', role: 'admin', joinedAt: new Date(Date.now() - 120 * DAY_MS).toISOString() },
+      { id: 'mem_jorge_ramirez', userId: 'usr_jorge_ramirez', email: 'jorge@campanatorres.mx', name: 'Jorge Ramírez', role: 'member', joinedAt: new Date(Date.now() - 80 * DAY_MS).toISOString() },
+    ],
+  };
+}
+
 function personRowsResponse(url) {
   const rows = selectedMentions(url);
   const byPerson = new Map();
@@ -778,34 +826,11 @@ function personRowsResponse(url) {
   const maxFollowers = Number(url.searchParams.get('maxFollowers')) || Number.POSITIVE_INFINITY;
   const minMentions = Number(url.searchParams.get('minMentions')) || 0;
   const minNegative = Number(url.searchParams.get('minNegative')) || 0;
-  let people = [...byPerson.values()].map((personMatches) => {
-    const first = personMatches[0];
-    const author = first.author;
-    const sentiment = sentimentTotals(personMatches);
-    const timestamps = personMatches.map((row) => row.post.publishedAt).sort();
-    return {
-      id: author.id,
-      platform: first.post.platform,
-      name: author.name,
-      handle: author.handle,
-      url: author.url,
-      avatarUrl: null,
-      accounts: [{ id: author.id, platform: first.post.platform, name: author.name, handle: author.handle, url: author.url }],
-      reach: { followers: author.followers, following: null, posts: null },
-      profile: null,
-      stats: {
-        mentions: personMatches.length,
-        relevant: personMatches.filter((row) => row.relevant).length,
-        sentiment: { positive: sentiment.positive, neutral: sentiment.neutral, negative: sentiment.negative },
-        firstSeenAt: timestamps[0],
-        lastSeenAt: timestamps.at(-1),
-      },
-      annotations: { tags: author.tags, notes: '', muted: false },
-      outreach: { owner: null, stage: 'not_contacted', lastContactedAt: null },
-      _authors: author,
-      _matches: personMatches,
-    };
-  }).filter((person) => {
+  let people = [...byPerson.values()].map((personMatches) => ({
+    ...personResponse(personMatches),
+    _authors: personMatches[0].author,
+    _matches: personMatches,
+  })).filter((person) => {
     const personMatches = person._matches;
     if (platforms.size && !platforms.has(person.platform)) return false;
     if (keywordKinds.size && !personMatches.some((row) => keywordKinds.has(row.keyword.kind))) return false;
@@ -882,7 +907,7 @@ http
     const status = Object.keys(responses).find((code) => code.startsWith('2')) ?? '200';
     if (status === '204') return respond(res, 204);
     const content = responses[status]?.content ?? {};
-    if (content['text/csv']) return respond(res, 200, 'id,platform,text\nmm_1,reddit,"acme vs the incumbent"\n', 'text/csv');
+    if (content['text/csv']) return respond(res, 200, 'id,platform,text\nmm_1,reddit,"Ana Torres propone mejorar el transporte público"\n', 'text/csv');
     let body = sample(content['application/json']?.schema, '', route.path);
     if (req.method === 'GET') {
       switch (route.op.operationId) {
@@ -897,6 +922,13 @@ http
           break;
         case 'listPeople':
           body = personRowsResponse(url);
+          break;
+        case 'getPerson':
+          body = getPersonResponse(url);
+          if (!body) return respond(res, 404, { error: { code: 'not_found', message: 'No mention by this person for your workspace' } });
+          break;
+        case 'listMembers':
+          body = membersResponse();
           break;
         case 'getShareOfVoice':
           body = shareOfVoiceResponse(url);

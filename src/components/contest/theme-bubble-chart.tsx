@@ -1,20 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { ChartContainer } from '@/components/ui/chart';
-import { compact } from '@/lib/format';
-import type { KeyboardEvent } from 'react';
-import {
-  CartesianGrid,
-  Scatter,
-  ScatterChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-  ZAxis,
-  type ScatterShapeProps,
-} from 'recharts';
-
 export type ThemeBubble = {
   id: string;
   name: string;
@@ -22,6 +7,12 @@ export type ThemeBubble = {
   sentimentScore: number | null;
   href: string;
 };
+
+const WIDTH = 1000;
+const LEFT = 116;
+const RIGHT = 28;
+const TOP = 40;
+const BOTTOM_GAP = 82;
 
 function mixColor(from: string, to: string, amount: number) {
   const start = from.match(/[a-f\d]{2}/gi)?.map((part) => Number.parseInt(part, 16)) ?? [128, 128, 128];
@@ -45,91 +36,137 @@ function toneText(score: number | null) {
   return 'El tono está equilibrado entre positivo y negativo.';
 }
 
-export function ThemeBubbleChart({ topics }: { topics: ThemeBubble[] }) {
-  const router = useRouter();
-  const maxVolume = Math.max(1, ...topics.map((topic) => topic.matched));
-  const chartPoints = topics.map((topic) => ({ ...topic, plotScore: topic.sentimentScore ?? 0 }));
+function scoreForPlot(score: number | null) {
+  return score === null || !Number.isFinite(score) ? 0 : Math.max(-1, Math.min(1, score));
+}
 
-  const renderBubble = (props: ScatterShapeProps) => {
-    const topic = props.payload as ThemeBubble | undefined;
-    if (!topic || props.cx === undefined || props.cy === undefined) return <g />;
-    const radius = Math.max(5, Math.sqrt(props.size) / 2);
-    const openTopic = () => router.push(topic.href);
-    const handleKeyDown = (event: KeyboardEvent<SVGGElement>) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        openTopic();
-      }
-    };
-    return (
-      <g
-        role="link"
-        tabIndex={0}
-        aria-label={`Ver menciones del tema ${topic.name}`}
-        className="cursor-pointer outline-none focus-visible:opacity-70"
-        onClick={openTopic}
-        onKeyDown={handleKeyDown}
-      >
-        <circle
-          cx={props.cx}
-          cy={props.cy}
-          r={radius}
-          fill={toneColor(topic.sentimentScore)}
-          fillOpacity={0.84}
-          stroke="var(--background)"
-          strokeWidth={2}
-        />
-      </g>
-    );
-  };
+export function ThemeBubbleChart({ topics }: { topics: ThemeBubble[] }) {
+  const height = Math.max(440, Math.min(1200, topics.length * 28 + 180));
+  const plotBottom = height - BOTTOM_GAP;
+  const plotRight = WIDTH - RIGHT;
+  const plotWidth = plotRight - LEFT;
+  const plotHeight = plotBottom - TOP;
+
+  // Keep nearly identical volumes from landing on the exact same pixel. The
+  // displayed mention count remains the source value shown in each tooltip.
+  const sortedTopics = [...topics].sort((a, b) => a.matched - b.matched || a.name.localeCompare(b.name, 'es'));
+  const plottedVolume = new Map<string, number>();
+  for (let start = 0; start < sortedTopics.length;) {
+    const anchor = sortedTopics[start];
+    const anchorScore = scoreForPlot(anchor.sentimentScore);
+    let end = start + 1;
+    while (end < sortedTopics.length) {
+      const next = sortedTopics[end];
+      if (next.matched - anchor.matched > 10 || Math.abs(scoreForPlot(next.sentimentScore) - anchorScore) > 0.35) break;
+      end += 1;
+    }
+    const cluster = sortedTopics.slice(start, end);
+    const pitch = cluster.length > 1 ? Math.min(2.5, 8 / (cluster.length - 1)) : 0;
+    cluster.forEach((topic, index) => {
+      const offset = (index - (cluster.length - 1) / 2) * pitch;
+      plottedVolume.set(topic.id, Math.max(0, topic.matched + offset));
+    });
+    start = end;
+  }
+
+  const maxVolume = Math.max(1, ...topics.map((topic) => plottedVolume.get(topic.id) ?? topic.matched));
+  const xFor = (volume: number) => LEFT + (Math.max(0, volume) / maxVolume) * plotWidth;
+  const yFor = (score: number) => TOP + ((1 - score) / 2) * plotHeight;
+  const xTicks = maxVolume <= 4
+    ? [0, maxVolume / 2, maxVolume]
+    : [0, maxVolume * 0.25, maxVolume * 0.5, maxVolume * 0.75, maxVolume];
+  const formatTick = (value: number) => Math.round(value).toLocaleString('es-MX');
+
+  if (topics.length === 0) {
+    return <p className="text-sm text-muted-foreground">No hay temas en este periodo.</p>;
+  }
 
   return (
-    <ChartContainer
-      config={{ volume: { label: 'Menciones', color: 'var(--chart-1)' } }}
-      className="aspect-auto w-full"
-      style={{ height: 390 }}
+    <svg
+      viewBox={`0 0 ${WIDTH} ${height}`}
+      role="group"
+      aria-label="Mapa de temas por volumen de menciones y tono"
+      className="block h-auto w-full"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      <ScatterChart margin={{ top: 12, right: 14, bottom: 28, left: 8 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          type="number"
-          dataKey="matched"
-          domain={[0, maxVolume]}
-          tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
-          tickLine={false}
-          axisLine={false}
-          name="Menciones"
-          label={{ value: 'Menciones en los últimos 30 días', position: 'insideBottom', offset: -18, fill: 'var(--muted-foreground)', fontSize: 11 }}
-        />
-        <YAxis
-          type="number"
-          dataKey="plotScore"
-          domain={[-1, 1]}
-          tickFormatter={(value) => Number(value) <= -0.15 ? 'Negativo' : Number(value) >= 0.15 ? 'Positivo' : 'Parejo'}
-          tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
-          tickLine={false}
-          axisLine={false}
-          width={62}
-          name="Tono"
-        />
-        <ZAxis type="number" dataKey="matched" domain={[0, maxVolume]} range={[90, 900]} name="Menciones" />
-        <Tooltip
-          cursor={{ strokeDasharray: '3 3' }}
-          content={({ active, payload }) => {
-            const topic = payload?.[0]?.payload as ThemeBubble | undefined;
-            if (!active || !topic) return null;
-            return (
-              <div className="rounded-lg border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
-                <p className="font-medium">{topic.name}</p>
-                <p>{compact(topic.matched)} menciones en 30 días</p>
-                <p>{toneText(topic.sentimentScore)}</p>
-                <p className="mt-1 text-muted-foreground">Selecciona la burbuja para leerlas.</p>
-              </div>
-            );
-          }}
-        />
-        <Scatter data={chartPoints} dataKey="matched" shape={renderBubble} isAnimationActive={false} />
-      </ScatterChart>
-    </ChartContainer>
+      <title>Conversación por tema</title>
+
+      {[-1, 0, 1].map((score) => {
+        const y = yFor(score);
+        const label = score < 0 ? 'Negativo' : score > 0 ? 'Positivo' : 'Parejo';
+        return (
+          <g key={score}>
+            <line x1={LEFT} y1={y} x2={plotRight} y2={y} stroke="var(--border)" strokeDasharray={score === 0 ? undefined : '3 5'} />
+            <text x={LEFT - 10} y={y + 4} textAnchor="end" fill="var(--muted-foreground)" fontSize={12}>{label}</text>
+          </g>
+        );
+      })}
+
+      {xTicks.map((tick, index) => {
+        const x = xFor(tick);
+        return (
+          <g key={`${tick}-${index}`}>
+            <line x1={x} y1={TOP} x2={x} y2={plotBottom} stroke="var(--border)" strokeDasharray="3 5" />
+            <text x={x} y={plotBottom + 20} textAnchor="middle" fill="var(--muted-foreground)" fontSize={12}>{formatTick(tick)}</text>
+          </g>
+        );
+      })}
+
+      <line x1={LEFT} y1={plotBottom} x2={plotRight} y2={plotBottom} stroke="var(--muted-foreground)" />
+      <line x1={LEFT} y1={TOP} x2={LEFT} y2={plotBottom} stroke="var(--muted-foreground)" />
+      <text x={(LEFT + plotRight) / 2} y={height - 18} textAnchor="middle" fill="var(--muted-foreground)" fontSize={13}>
+        Cuánto se habla
+      </text>
+      <text
+        x={20}
+        y={(TOP + plotBottom) / 2}
+        textAnchor="middle"
+        fill="var(--muted-foreground)"
+        fontSize={13}
+        transform={`rotate(-90 20 ${(TOP + plotBottom) / 2})`}
+      >
+        Tono
+      </text>
+
+      {topics.map((topic) => {
+        const matched = Number.isFinite(topic.matched) ? Math.max(0, topic.matched) : 0;
+        const plotted = plottedVolume.get(topic.id) ?? matched;
+        const ratio = Math.max(0, Math.min(1, matched / maxVolume));
+        const radius = 8 + Math.sqrt(ratio) * 16;
+        const cx = xFor(plotted);
+        const cy = yFor(scoreForPlot(topic.sentimentScore));
+        const labelInside = radius >= 25 && topic.name.length <= 12;
+        const labelOnLeft = cx > plotRight - 110;
+        const labelX = cx + (labelInside ? 0 : (labelOnLeft ? -1 : 1) * (radius + 7));
+        const labelAnchor = labelInside ? 'middle' : labelOnLeft ? 'end' : 'start';
+        const tooltip = `${topic.name}: ${matched.toLocaleString('es-MX')} menciones. ${toneText(topic.sentimentScore)}`;
+
+        return (
+          <a
+            key={topic.id}
+            href={topic.href}
+            aria-label={`Ver menciones de ${topic.name}, ${matched.toLocaleString('es-MX')} menciones. ${toneText(topic.sentimentScore)}`}
+            className="cursor-pointer outline-none focus-visible:opacity-70"
+          >
+            <title>{tooltip}</title>
+            <circle cx={cx} cy={cy} r={radius} fill={toneColor(topic.sentimentScore)} fillOpacity={0.88} stroke="var(--background)" strokeWidth={2} />
+            <text
+              x={labelX}
+              y={cy + 4}
+              textAnchor={labelAnchor}
+              fill={labelInside ? '#fff' : 'var(--foreground)'}
+              stroke={labelInside ? 'rgba(15,23,42,0.65)' : 'var(--background)'}
+              strokeWidth={2.5}
+              paintOrder="stroke"
+              fontSize={labelInside ? 9 : 11}
+              fontWeight={600}
+              pointerEvents="none"
+            >
+              {topic.name}
+            </text>
+          </a>
+        );
+      })}
+    </svg>
   );
 }

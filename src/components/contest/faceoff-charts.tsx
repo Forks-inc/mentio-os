@@ -7,11 +7,13 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  ResponsiveContainer,
+  LabelList,
   Tooltip,
   XAxis,
   YAxis,
+  type LabelProps,
 } from 'recharts';
+import { CHART_COLORS } from '@/lib/chart-colors';
 
 export type FaceoffKeyword = {
   id: string;
@@ -26,13 +28,58 @@ export type FaceoffKeyword = {
   };
 };
 
-type SentimentRow = FaceoffKeyword['tone'] & { label: string; matched: number };
+type SentimentRow = FaceoffKeyword['tone'] & {
+  label: string;
+  matched: number;
+  positiveShare: number;
+  neutralShare: number;
+  negativeShare: number;
+};
 
 const SENTIMENT_NAMES = {
   positive: 'Positivo',
   neutral: 'Neutral',
   negative: 'Negativo',
 } as const;
+
+const SENTIMENT_COLORS = {
+  positive: '#16a34a',
+  neutral: '#a1a1aa',
+  negative: '#ef4444',
+} as const;
+
+type SegmentLabelProps = LabelProps & {
+  viewBox?: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  };
+  index?: number;
+};
+
+function segmentLabels(shares: number[]) {
+  return (props: SegmentLabelProps) => {
+    const share = shares[props.index ?? -1] ?? 0;
+    const { x: left, y: top, width, height } = props.viewBox ?? {};
+    if (share < 0.1 || left == null || top == null || width == null || height == null || width < 34) return null;
+    const x = left + width / 2;
+    const y = top + height / 2;
+    return (
+      <text
+        x={x}
+        y={y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="#fff"
+        fontSize={11}
+        fontWeight={600}
+      >
+        {`${Math.round(share * 100)}%`}
+      </text>
+    );
+  };
+}
 
 function VoiceTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload?: FaceoffKeyword }> }) {
   const row = payload?.[0]?.payload;
@@ -78,9 +125,19 @@ function ComparePanel({ title, description, rows, color }: {
   rows: FaceoffKeyword[];
   color: string;
 }) {
-  const toneRows: SentimentRow[] = rows.map((row) => ({ ...row.tone, label: row.label, matched: row.matched }));
-  const voiceHeight = Math.max(88, rows.length * 36 + 16);
-  const toneHeight = Math.max(104, rows.length * 37 + 40);
+  const toneRows: SentimentRow[] = rows.map((row) => {
+    const total = row.tone.positive + row.tone.neutral + row.tone.negative;
+    return {
+      ...row.tone,
+      label: row.label,
+      matched: row.matched,
+      positiveShare: total ? row.tone.positive / total : 0,
+      neutralShare: total ? row.tone.neutral / total : 0,
+      negativeShare: total ? row.tone.negative / total : 0,
+    };
+  });
+  const voiceHeight = Math.max(96, rows.length * 42 + 16);
+  const toneHeight = Math.max(112, rows.length * 42 + 40);
   const shareTotal = rows.reduce((sum, row) => sum + row.share, 0);
   const mentionTotal = rows.reduce((sum, row) => sum + row.matched, 0);
 
@@ -104,7 +161,7 @@ function ComparePanel({ title, description, rows, color }: {
           <h3 className="mb-2 text-xs font-medium text-muted-foreground">Participación de voz por término</h3>
           {rows.length ? (
             <ChartContainer config={{ share: { label: 'Participación', color } }} className="w-full" style={{ height: voiceHeight }}>
-              <BarChart data={rows} layout="vertical" margin={{ top: 2, right: 14, bottom: 2, left: 2 }}>
+              <BarChart data={rows} layout="vertical" margin={{ top: 2, right: 48, bottom: 2, left: 2 }}>
                 <CartesianGrid horizontal={false} strokeDasharray="3 3" />
                 <XAxis type="number" domain={[0, 100]} hide />
                 <YAxis
@@ -116,7 +173,16 @@ function ComparePanel({ title, description, rows, color }: {
                   axisLine={false}
                 />
                 <Tooltip cursor={{ fill: 'var(--muted)', opacity: 0.5 }} content={<VoiceTooltip />} />
-                <Bar dataKey="share" fill="var(--color-share)" radius={[0, 5, 5, 0]} barSize={18} />
+                <Bar dataKey="share" fill={color} radius={[0, 5, 5, 0]} barSize={24}>
+                  <LabelList
+                    dataKey="share"
+                    position="right"
+                    fill="#e5e7eb"
+                    fontSize={11}
+                    fontWeight={600}
+                    formatter={(value) => `${Number(value).toFixed(1)}%`}
+                  />
+                </Bar>
               </BarChart>
             </ChartContainer>
           ) : (
@@ -131,9 +197,9 @@ function ComparePanel({ title, description, rows, color }: {
           {toneRows.length ? (
             <ChartContainer
               config={{
-                positive: { label: SENTIMENT_NAMES.positive, color: '#16a34a' },
-                neutral: { label: SENTIMENT_NAMES.neutral, color: '#a1a1aa' },
-                negative: { label: SENTIMENT_NAMES.negative, color: '#ef4444' },
+                positive: { label: SENTIMENT_NAMES.positive, color: SENTIMENT_COLORS.positive },
+                neutral: { label: SENTIMENT_NAMES.neutral, color: SENTIMENT_COLORS.neutral },
+                negative: { label: SENTIMENT_NAMES.negative, color: SENTIMENT_COLORS.negative },
               }}
               className="w-full"
               style={{ height: toneHeight }}
@@ -157,9 +223,15 @@ function ComparePanel({ title, description, rows, color }: {
                   axisLine={false}
                 />
                 <Tooltip cursor={{ fill: 'var(--muted)', opacity: 0.5 }} content={<ToneTooltip />} />
-                <Bar dataKey="positive" stackId="tone" fill="var(--color-positive)" barSize={18} />
-                <Bar dataKey="neutral" stackId="tone" fill="var(--color-neutral)" />
-                <Bar dataKey="negative" stackId="tone" fill="var(--color-negative)" radius={[0, 5, 5, 0]} />
+                <Bar dataKey="positiveShare" stackId="tone" fill={SENTIMENT_COLORS.positive} barSize={24}>
+                  <LabelList position="center" content={segmentLabels(toneRows.map((row) => row.positiveShare))} />
+                </Bar>
+                <Bar dataKey="neutralShare" stackId="tone" fill={SENTIMENT_COLORS.neutral} barSize={24}>
+                  <LabelList position="center" content={segmentLabels(toneRows.map((row) => row.neutralShare))} />
+                </Bar>
+                <Bar dataKey="negativeShare" stackId="tone" fill={SENTIMENT_COLORS.negative} radius={[0, 5, 5, 0]} barSize={24}>
+                  <LabelList position="center" content={segmentLabels(toneRows.map((row) => row.negativeShare))} />
+                </Bar>
               </BarChart>
             </ChartContainer>
           ) : (
@@ -181,7 +253,7 @@ export function FaceoffCharts({ brand, competitors }: { brand: FaceoffKeyword[];
         title="Tu candidato"
         description="Menciones al candidato y sus apodos reunidas en una sola comparación."
         rows={brand}
-        color="var(--primary)"
+        color={CHART_COLORS[0]}
       />
       <ComparePanel
         title="Adversarios"

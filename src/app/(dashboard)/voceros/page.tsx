@@ -3,7 +3,7 @@ import { ArrowUpRight, Heart, MessageCircle, Users } from 'lucide-react';
 import type { AnalyticsBreakdown, Person } from '@mentio-dev/sdk';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge, Card, EmptyState, LinkButton, PageHeader, buttonClass } from '@/components/ui';
-import { compact } from '@/lib/format';
+import { compact, platformName } from '@/lib/format';
 import { groupCandidates } from '@/lib/insights';
 import { mentio, unwrap } from '@/lib/mentio';
 import type { SearchParams } from '@/lib/params';
@@ -49,6 +49,7 @@ function PersonCard({
 }) {
   const name = detail?.name ?? row.person.name ?? row.label;
   const handle = detail?.handle;
+  const platform = platformName(detail?.platform ?? row.person.platform);
   const followers = detail?.reach.followers ?? row.person.followers;
   const avatar = detail?.avatarUrl ?? null;
   const Icon = sentiment === 'positive' ? Heart : sentiment === 'negative' ? MessageCircle : Users;
@@ -66,13 +67,12 @@ function PersonCard({
           <p className="truncate text-sm font-semibold" title={name}>{name}</p>
           {handle ? <p className="truncate text-xs text-muted-foreground">{handle}</p> : null}
           <div className="mt-2 flex flex-wrap gap-1.5">
+            <Badge tone="neutral">{platform}</Badge>
             <Badge tone={sentiment === 'positive' ? 'good' : sentiment === 'negative' ? 'bad' : 'accent'}>
               <Icon className="mr-1 size-3" aria-hidden="true" />
               {compact(count)} {countLabel}
             </Badge>
-            {followers !== null && followers !== undefined ? (
-              <Badge tone="neutral">{compact(followers)} seguidores</Badge>
-            ) : null}
+            <Badge tone="neutral">{followers !== null && followers !== undefined ? `${compact(followers)} seguidores` : 'Seguidores sin dato'}</Badge>
           </div>
         </div>
       </div>
@@ -155,9 +155,17 @@ export default async function VocerosPage({ searchParams }: { searchParams: Prom
     } : row);
   }
   const allPeople = personRows([...byPerson.values()]);
-  const defenders = orderBySentiment(allPeople, 'positive').filter((row) => row.sentiment.positive > 0).slice(0, 3);
-  const critics = orderBySentiment(allPeople, 'negative').filter((row) => row.sentiment.negative > 0).slice(0, 3);
+  const defenders = orderBySentiment(allPeople, 'positive')
+    .filter((row) => row.sentiment.positive > row.sentiment.negative)
+    .slice(0, 3);
+  const critics = orderBySentiment(allPeople, 'negative')
+    .filter((row) => row.sentiment.negative > row.sentiment.positive)
+    .slice(0, 3);
+  const peopleWithClearSentiment = new Set(allPeople
+    .filter((row) => row.sentiment.positive !== row.sentiment.negative)
+    .map((row) => row.person.id));
   const influencers = [...allPeople]
+    .filter((row) => !peopleWithClearSentiment.has(row.person.id))
     .sort((a, b) => (b.person.followers ?? -1) - (a.person.followers ?? -1) || b.matched - a.matched)
     .slice(0, 3);
   const visiblePeople = [...new Set([...defenders, ...critics, ...influencers].map((row) => row.person.id))];
